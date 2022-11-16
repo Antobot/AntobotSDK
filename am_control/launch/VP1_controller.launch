@@ -1,0 +1,46 @@
+<!--
+# Copyright (c) 2021, ANTOBOT LTD.
+# All rights reserved.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Launches all the necessary files and nodes for operating the small robot.
+# Contact: daniel.freer@antobot.ai
+#          mert.turanli@antobot.co.uk
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+  
+  <!-- Defines the robot in ROS -->
+  <rosparam file="$(find am_control)/config/small_robot/hardware.yaml" command="load"/>
+  <rosparam file="$(find am_control)/config/small_robot/controllers.yaml" command="load"/>
+  <rosparam file="$(find am_control)/config/small_robot/joint_limits.yaml" command="load"/>
+
+
+  <!-- Launches the robot controller node -->
+  <node if="true" name="am_control" pkg="am_control" type="am_control_node" output="log" />
+  <node if="true" name="anto_bridge" pkg="anto_bridge" type="anto_bridge_node" output="log" />
+  <node if="false" name="am_bridge" pkg="am_bridge" type="am_bridge_node" output="screen" />
+
+
+  <!-- Spawns the controllers for the robot -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
+		args="
+			/antobot_joint_state_publisher
+			/am_robot
+		"/>
+
+  <!-- Starts the teleoperation script -->
+  <node if="false" name="am_teleop" pkg="am_tel" type="am_teleop.py" output="screen" />
+
+</launch>

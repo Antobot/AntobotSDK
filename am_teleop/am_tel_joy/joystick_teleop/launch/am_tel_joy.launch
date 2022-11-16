@@ -1,0 +1,45 @@
+<!--
+# Copyright (c) 2021, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# # # Code Description:     Launches the nodes to allow joystick control of the robot.
+
+# Contact: mert.turanli@antobot.co.uk
+
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+
+  <node name="joy_node" pkg="joy" type="joy_node">
+    <param name="dev" value="/dev/input/js0" />
+    <remap from="joy" to="joy_orig"/>
+  </node>
+  <!-- remap joy to emulate ps3joy mappings -->
+  <node name="joy_remap" pkg="joy" type="joy_remap.py">
+    <remap from="joy_in" to="joy_orig"/>
+    <remap from="joy_out" to="joy"/>
+    <rosparam command="load" file="$(find joy)/config/gamepad.yaml"/>
+  </node>
+
+  <node name="am_tel_joy" pkg="joystick_teleop" type="am_tel_joy.py" output="screen">
+  	<rosparam param="home_position">[0, 0, 0]</rosparam>
+  </node>
+
+</launch>
+
