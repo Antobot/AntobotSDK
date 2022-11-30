@@ -32,7 +32,7 @@ Contacts: 	daniel.freer@antobot.ai
 #include "std_msgs/Bool.h"
 #include <sstream>
 
-#include <am_control/am_control.h>
+#include <antobot_base/am_control.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
