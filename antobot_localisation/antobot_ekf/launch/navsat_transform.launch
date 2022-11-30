@@ -1,0 +1,40 @@
+<!-- Copyright (c) 2019, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+Description: 	The primary purpose of this launch file is to launch the navsat_transform parameters for sensor fusion localiastion.
+		
+Contacts: 	aswathi.muralidharan@antobot.ai
+		mert.turanli@antobot.co.uk  -->
+<launch>
+     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" respawn="false">
+     <rosparam command="load" file="$(find am_ekf)/params/navsat_transform.yaml" />
+
+     <!-- remap the ros topics from ROS conventions to topic published by the scripts-->
+        <!-- sensors used are GNSS: F9P and IMU: Xsens -->
+	<remap from="/odometry/filtered" to="/odometry/filtered"/>
+
+        <!--<remap from="/gps/fix" to="/ant_rtk"/>-->
+        <remap from="/gps/fix" to="/am_gps_urcu"/>
+	<!--<remap from="/gps/fix" to="/am_m8p_rtkgnss/fix"/>--> <!--Use this GNSS: M8P is used for localisation -->
+	<remap from="/imu/data" to="/imu/data_corrected"/>  
+
+	<!--<remap from="/imu/data" to= "/zed2/zed_node/imu/data" --> <!-- Use this if ZED IMU is used for localisation -->
+	<!--<remap from="/imu/data" to="/imu/data"/> -->  <!-- Use this if Bosch IMU is used for localisation -->
+
+   </node>
+
+</launch>

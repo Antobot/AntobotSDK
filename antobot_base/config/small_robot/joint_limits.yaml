@@ -1,0 +1,73 @@
+# Copyright (c) 2021, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# # # Code Description:     Defines the joint limits for the small robot.
+
+# Contact: daniel.freer@antobot.ai
+
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+#antobot_robot:
+  joint_limits:
+    wheel_left_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 12.5663
+      has_jerk_limits: false
+      max_jerk: 100.0
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_left_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 12.5663
+      has_jerk_limits: false
+      max_jerk: 100.0
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_right_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 12.5663
+      has_jerk_limits: false
+      max_jerk: 100.0
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_right_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 12.5663
+      has_jerk_limits: false
+      max_jerk: 100.0
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415

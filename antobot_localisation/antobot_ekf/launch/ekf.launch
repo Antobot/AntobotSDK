@@ -1,0 +1,52 @@
+<!-- Copyright (c) 2019, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+Description: 	The primary purpose of this launch file is to launch the ekf_map and ekf_odom parameters for sensor fusion localiastion.
+		The ekf_odom is for the local parameters like odometry and IMU, ekf_map is the for the global parameters like RTK GNSS, wheel odometry and IMU.
+
+Contacts: 	aswathi.muralidharan@antobot.ai
+		mert.turanli@antobot.co.uk  -->
+
+<launch>
+
+   <arg name="yaw_offset" default="0.0" />
+
+   <node if="true" pkg="robot_localization" type="ekf_localization_node" name="ekfOdom_node" respawn="false" output="screen" launch-prefix="taskset -c 0,1,2,3,4,5">
+		<rosparam command="load" file="$(find am_ekf)/params/ekf_odom.yaml" />
+		<remap from="odometry/filtered"   to="odometry/ekfOdom"/> 
+
+   </node> 
+
+<!-- Launch navsat transform-->
+<include file="$(find am_ekf)/launch/navsat_transform.launch"></include>
+	
+<!-- Defines the ekf_map parameters -->
+   <node pkg="robot_localization" type="ekf_localization_node" name="ekfMap_node" respawn="false" output="screen" launch-prefix="taskset -c 0,1,2,3,4,5">
+         <rosparam command="load" file="$(find am_ekf)/params/ekf_map.yaml" />
+     
+   </node> 
+
+<!-- Runs the node to convert the quaternion to euler from Bosch topic /imu/data-->
+   <node if="false" pkg="data_visualisation" type="conversion.py" name="conversion" respawn="false" output="screen" />
+  
+<!-- Runs the node to convert the quaternion to euler from zed topic zed2/zed_node/imu/data-->
+   <node if="false" pkg="data_visualisation" type="zed_imu.py" name="zed_imu_yaw" respawn="false" output="screen" />
+   
+<!-- Runs the node to service call to check if the /odometry/filtered is getting published-->
+   <node if="false" name="initFilter1" pkg="data_visualisation" type="initFilter.py" output="screen" />
+
+</launch> 

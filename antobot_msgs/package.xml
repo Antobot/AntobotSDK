@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- based on slaterobotics' implementation https://medium.com/@slaterobotics/how-to-implement-ros-control-on-a-custom-robot-748b52751f2e -->
+<package>
+  <name>antobot_msgs</name>
+  <version>0.0.1</version>
+  <description>Provides the hardware definition and interfaces for antobot</description>
+
+  <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website"></url>
+  <url type="bugtracker"></url>
+  <url type="repository">/</url>
+
+  <author email="daniel.freer@antobot.ai">Daniel Freer</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>serial</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>serial</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>
