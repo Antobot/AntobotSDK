@@ -50,9 +50,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE)
 
-add_library(am_control src/am_control.cpp)
-target_link_libraries(am_control
-	${am_control_LIBRARIES}
+add_library(antobot_base src/antobot_control.cpp)
+target_link_libraries(antobot_base
+	${antobot_base_LIBRARIES}
 	${catkin_LIBRARIES})
 add_executable(antobot_control_node src/antobot_control_node.cpp)
 add_dependencies(antobot_control_node antobot_base antobot_msgs)

@@ -32,7 +32,7 @@ Contacts: 	daniel.freer@antobot.ai
 #include "std_msgs/Bool.h"
 #include <sstream>
 
-#include <antobot_base/am_control.h>
+#include <antobot_base/antobot_control.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
@@ -205,8 +205,8 @@ namespace antobot_hardware_interface
 
 	void antobotHardwareInterface::init_publishers()
 	{
-		wheel_vel_cmd_pub = nh_.advertise<anto_bridge_msgs::Float32_Array>("/antobridge/wheel_vel_cmd", 1);
-		steer_pos_cmd_pub = nh_.advertise<anto_bridge_msgs::Float32_Array>("/antobridge/steer_pos_cmd", 1);
+		wheel_vel_cmd_pub = nh_.advertise<antobot_msgs::Float32_Array>("/antobridge/wheel_vel_cmd", 1);
+		steer_pos_cmd_pub = nh_.advertise<antobot_msgs::Float32_Array>("/antobridge/steer_pos_cmd", 1);
 	}
 
 	void antobotHardwareInterface::update(const ros::TimerEvent& e)
@@ -293,7 +293,7 @@ namespace antobot_hardware_interface
 		/* Writes robot commands from am_control to AntoBridge via ROS publishers */
 
 		std::vector<float> motor_commands;
-		anto_bridge_msgs::Float32_Array wheel_vels_cmd;
+		antobot_msgs::Float32_Array wheel_vels_cmd;
 
 		// If the commands are only for the 4 wheel motor commands
 		if (num_joints_ < 5)
@@ -306,7 +306,7 @@ namespace antobot_hardware_interface
 		}
 		else		// If steering of each wheel is also considered
 		{
-			anto_bridge_msgs::Float32_Array steer_pos_cmd;
+			antobot_msgs::Float32_Array steer_pos_cmd;
 			std::vector<float> steer_commands;
 			for (int i = 0; i < num_joints_; i++)
 			{
@@ -328,7 +328,7 @@ namespace antobot_hardware_interface
 		wheel_vel_cmd_pub.publish(wheel_vels_cmd);
 	}
 	
-	void antobotHardwareInterface::wheel_vel_Callback(const anto_bridge_msgs::Float32_Array::ConstPtr& msg)
+	void antobotHardwareInterface::wheel_vel_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
 	{
 		//ROS_INFO("Wheel vel callback entered!");
 		wheel_vels[0] = msg->data[0];
@@ -337,7 +337,7 @@ namespace antobot_hardware_interface
 		wheel_vels[3] = msg->data[3];
 	}
 	
-	void antobotHardwareInterface::steer_pos_Callback(const anto_bridge_msgs::Float32_Array::ConstPtr& msg)
+	void antobotHardwareInterface::steer_pos_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
 	{
 		//ROS_INFO("Steer pos callback entered!");
 		steer_pos[0] = msg->data[0];

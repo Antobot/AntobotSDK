@@ -80,8 +80,8 @@ namespace antobot_hardware_interface
 			void write(ros::Duration elapsed_time);
 			void motor_cmd(cmd *cmd_m);
 			void tw_Callback(const std_msgs::Float32::ConstPtr& msg);
-			void wheel_vel_Callback(const anto_bridge_msgs::Float32_Array::ConstPtr& msg);
-			void steer_pos_Callback(const anto_bridge_msgs::Float32_Array::ConstPtr& msg);
+			void wheel_vel_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg);
+			void steer_pos_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg);
 			
 
 		protected:
