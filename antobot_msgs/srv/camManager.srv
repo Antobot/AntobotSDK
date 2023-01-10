@@ -1,0 +1,5 @@
+int8 camera_num		    # 0 - front, 1 - back, 2 - left, 3 - right
+int8 command			# 0 - close/turn off, 1 - launch ROS code, 2 - start recording video
+---
+int8 responseCode		# 0 - success, -1 - failure
+string responseString   # Additional info
