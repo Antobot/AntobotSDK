@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/daniel-freer/catkin_ws_sdk/devel/lib/python3/dist-packages",
+        "/home/daniel-freer/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}
