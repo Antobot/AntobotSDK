@@ -6,3 +6,6 @@ It includes all software needed to run the robot, and to connect to any sensors 
   - Original repository for the IMU chip is here: https://github.com/dheera/ros-imu-bno055
 - GPS driver software (chip built into uRCU)
 - Robot description and robot control scripts to control the robot using a ROS Twist command
+
+Dependencies:
+- geonav_transform: Please clone/download the scripts from [here](https://github.com/bsb808/geonav_transform) and place them into your catkin_ws/src
