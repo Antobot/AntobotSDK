@@ -1,0 +1,4 @@
+bool softshutdownreq
+---
+bool responseBool
+string responseString

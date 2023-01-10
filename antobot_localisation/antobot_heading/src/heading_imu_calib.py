@@ -33,7 +33,7 @@ import sys
 from sensor_msgs.msg import NavSatFix, Imu, Range, LaserScan
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32, UInt8
+from std_msgs.msg import Float32, UInt8, Int8
 
 #importing custom messages
 from am_msgs.msg import navigatorWGSpath as navGPSpath
@@ -74,6 +74,7 @@ imu_received = 0
 imu_ang_vel_z = 0
 
 imu_offset = 0
+
 
 # odometry
 odometry_v = 0
@@ -321,7 +322,7 @@ if __name__ == '__main__':
 
 
         # publish calibration flag
-        pubCalib = rospy.Publisher('/imu_calibration_status', UInt8, queue_size=1) # 0: calibration not required, 1: initial calibration, 2:auto calibration
+        pubCalib = rospy.Publisher('/imu_calibration_status', UInt8, queue_size=10) # -1: inital value, 0: calibration not required, 1: initial calibration, 2:auto calibration
         
         # publish velocity commands
         #pubCmdVel = rospy.Publisher('/antobot_robot/antobot_velocity_controller/cmd_vel', Twist, queue_size=10)
@@ -346,9 +347,15 @@ if __name__ == '__main__':
         odometry_received = True    #only for simulation
         direction = 0 #default value
         prev_direction = -2 # -1: backward, 1: forward, 0: default value of direction.
+
+        imu_calibration_status = 4
+        recalib_status = 4
     
         while not rospy.is_shutdown():
-        
+
+            pubCalib.publish(imu_calibration_status)
+            pubreCalib.publish(recalib_status)
+
             if (state == 0):
                 # if the topics are received proceed to next state
                 if (gps_received == 1 and imu_received == 1 and laser_received == 1): # and uss_received == 1
@@ -448,7 +455,8 @@ if __name__ == '__main__':
                     imu_offset = gps_yaw - imu_angles[0]   # difference between orientations from imu and gps
             
                     rospy.loginfo('calibration successful (offset = %f degs)', imu_offset / 3.1415 * 180.0)
-                    pubCalib.publish(1)
+                    imu_calibration_status = 1
+                    #pubCalib.publish(imu_calibration_status)
 
                     # save last calibration time
                     time_1_calib = rospy.get_time()
@@ -570,12 +578,13 @@ if __name__ == '__main__':
                         driving_straight = False
                         time_1_odom = rospy.get_time()
                         #time_1_calib = rospy.get_time()
-                        #gps_set = 0 #TO TEST
+                        gps_set = 0 #TO TEST
                     
                         if (straight_calibration_state == 1):
                             # cancel calibration if started
                             straight_calibration_state = 0
                             #print("Auto calibration stopped due to turning of the robot")
+                            imu_calibration_status = 3 #autocalibration cancelled due to turning of robot
                             rospy.loginfo('auto-calibration canceled (odometry_w = %f)', odometry_w)
         
                     # straight calibration states
@@ -592,7 +601,8 @@ if __name__ == '__main__':
                                     print("gps_start 1 set",odometry_w)
                                     time_1_odom = rospy.get_time()
                                     rospy.loginfo('auto-calibration started 1')
-                                    pubreCalib.publish(1)
+                                    #pubreCalib.publish(1)
+                                    recalib_status = 1
                                     gps_set = 0
                                 #print("HERE")
                                 if odometry_v > lin_tol: #was -0.01
@@ -603,7 +613,8 @@ if __name__ == '__main__':
                                         gps_start = [utm_x, utm_y, utm_zone]
                                         print("gps_start 2 set", odometry_w)
                                         rospy.loginfo('auto-calibration started 2')
-                                        pubreCalib.publish(1)
+                                        #pubreCalib.publish(1)
+                                        recalib_status = 1
 
                                 #elif odometry_v < 0:
                                 else:
@@ -614,7 +625,8 @@ if __name__ == '__main__':
                                         gps_start = [utm_x, utm_y, utm_zone]
                                         print("gps_start 3 set",odometry_w)
                                         rospy.loginfo('auto-calibration started 3')
-                                        pubreCalib.publish(1)
+                                        #pubreCalib.publish(1)
+                                        recalib_status = 1
 
                                 
                                 
@@ -643,13 +655,16 @@ if __name__ == '__main__':
                                         straight_calibration_state = 1
                                     else:
                                         print("Auto calib cancelled")
+                                        imu_calibration_status = 3
                                         straight_calibration_state = 0
                                         time_1_odom = rospy.get_time()
-                                        pubreCalib.publish(0)
+                                        #pubreCalib.publish(0)
+                                        recalib_status = 0
                         
                     elif(straight_calibration_state == 0 and abs(odometry_w) > odom_zero_tol):
                             time_1_odom = rospy.get_time()
                             driving_straight == False
+                            imu_calibration_status = 3
                             #gps_set = 0 #TO TEST
                             #print("Robot rotating")
                             
@@ -694,18 +709,24 @@ if __name__ == '__main__':
                                     imu_offset = gps_yaw - imu_angles[0]   # difference between orientations from imu and gps
                                     
                                     rospy.loginfo('auto-calibration successful (offset = %f degs)', imu_offset / 3.1415 * 180.0)
-                                    pubCalib.publish(2)
-                                    pubreCalib.publish(2)
+                                    imu_calibration_status = 2
+                                    #pubCalib.publish(imu_calibration_status)
+                                    #pubreCalib.publish(2)
+                                    recalib_status = 2
                                 elif abs(gps_yaw - odom_angles[0]) > (360*3.14)/180:
                                     
                                     imu_offset = 6.28319 - (gps_yaw - imu_angles[0])
-                                    pubCalib.publish(2)
-                                    pubreCalib.publish(2)
+                                    imu_calibration_status = 2
+                                    #pubCalib.publish(imu_calibration_status)
+                                    #pubreCalib.publish(2)
+                                    recalib_status = 2
 
                                 else:
                                     rospy.loginfo('auto-calibration not required (offset = %f degs)', (gps_yaw - odom_angles[0]) / 3.1415 * 180.0)
-                                    pubCalib.publish(0)
-                                    pubreCalib.publish(0)
+                                    imu_calibration_status = 0
+                                    #pubCalib.publish(imu_calibration_status)
+                                    #pubreCalib.publish(0)
+                                    recalib_status = 0
 
                                 
                                 # save calibration time to check if 5 minutes has passed
@@ -721,7 +742,7 @@ if __name__ == '__main__':
                 else:
                     time_1_odom = rospy.get_time() 
                     driving_straight == False 
-                    #gps_set = 0    #TO TEST
+                    gps_set = 0    #TO TEST
                
                 # end of auto-calibration routine
                 #################################
