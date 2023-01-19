@@ -37,12 +37,12 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   // Defines an antobot_hardware_interface class object using the defined ROS node
-  antobot_hardware_interface::antobotHardwareInterface antobot1(nh);
+  antobot_hardware_interface::antobotControl antobot1(nh);
 
   // Defines subscribers for calibration and track width adjustment, and links them to the specific class instance of antobot_hardware_interface
-  // ros::Subscriber sub_calib = nh.subscribe("calibration", 10, &antobot_hardware_interface::antobotHardwareInterface::calibration_Callback, &antobot1);
-  // ros::Subscriber sub_tw = nh.subscribe("cmd_TW", 10, &antobot_hardware_interface::antobotHardwareInterface::tw_Callback, &antobot1);
-  ros::Subscriber sub_vWheel = nh.subscribe("/antobridge/wheel_vel", 10, &antobot_hardware_interface::antobotHardwareInterface::wheel_vel_Callback, &antobot1);
+  // ros::Subscriber sub_calib = nh.subscribe("calibration", 10, &antobot_hardware_interface::antobotControl::calibration_Callback, &antobot1);
+  // ros::Subscriber sub_tw = nh.subscribe("cmd_TW", 10, &antobot_hardware_interface::antobotControl::tw_Callback, &antobot1);
+  ros::Subscriber sub_vWheel = nh.subscribe("/antobridge/wheel_vel", 10, &antobot_hardware_interface::antobotControl::wheel_vel_Callback, &antobot1);
   
   // NOTE: We run the ROS loop in a separate thread as external calls such
   // as service callbacks to load controllers can block the (main) control loop

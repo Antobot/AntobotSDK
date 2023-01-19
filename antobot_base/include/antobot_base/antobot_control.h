@@ -36,7 +36,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <ros/ros.h>
 
-#include <antobot_base/antobot_hardware.h>
+#include <antobot_base/ant_hardware.h>
 
 #include <serial/serial.h>
 
@@ -56,7 +56,7 @@ using joint_limits_interface::VelocityJointSoftLimitsInterface;
 namespace antobot_hardware_interface
 {
 
-	class antobotHardwareInterface: public antobot_hardware_interface::antobotHardware
+	class antobotControl: public antobot_hardware_interface::antobotHardware
 	{
 		public:
 			union cmd
@@ -65,8 +65,8 @@ namespace antobot_hardware_interface
 				uint8_t cmd_uint[36];
 			};
 
-			antobotHardwareInterface(ros::NodeHandle& nh);
-			~antobotHardwareInterface();
+			antobotControl(ros::NodeHandle& nh);
+			~antobotControl();
 			void init();
 			void init_publishers();
 			void update(const ros::TimerEvent& e);

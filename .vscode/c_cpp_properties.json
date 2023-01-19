@@ -1,0 +1,39 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/daniel-freer/catkin_ws/devel/include/**",
+        "/home/daniel-freer/catkin_ws_sdk/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_perception/am_bno055_imu/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_control/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_navigation/am_costmap_2d/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_perception/am_gps_ext_m8p/am_gps_ext/include/**",
+        "/home/daniel-freer/catkin_ws_sdk/src/AntobotSDK/antobot_localisation/antobot_heading_cpp/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_safety/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoBridge/anto_bridge/include/**",
+        "/home/daniel-freer/catkin_ws_sdk/src/AntobotSDK/antobot_base/include/**",
+        "/home/daniel-freer/catkin_ws/src/libs/jsk_common/audio_video_recorder/include/**",
+        "/home/daniel-freer/catkin_ws_sdk/src/libs/geonav_transform/include/**",
+        "/home/daniel-freer/catkin_ws/src/libs/jsk_common/jsk_topic_tools/include/**",
+        "/home/daniel-freer/catkin_ws/src/libs/ros_opcua_communication/ros_opcua_impl_freeopcua/include/**",
+        "/home/daniel-freer/catkin_ws/src/serial/include/**",
+        "/home/daniel-freer/catkin_ws/src/libs/audio_common/sound_play/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_perception/am_gps_ext_m8p/ublox_msgs/include/**",
+        "/home/daniel-freer/catkin_ws/src/AntoMove/am_perception/am_gps_ext_m8p/ublox_serialization/include/**",
+        "/home/daniel-freer/catkin_ws/src/libs/zed-ros-wrapper/zed-ros-interfaces/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

@@ -22,9 +22,9 @@
 <launch>
   
   <!-- Defines the robot in ROS -->
-  <rosparam file="$(find antobot_base)/config/small_robot/hardware.yaml" command="load"/>
-  <rosparam file="$(find antobot_base)/config/small_robot/controllers.yaml" command="load"/>
-  <rosparam file="$(find antobot_base)/config/small_robot/joint_limits.yaml" command="load"/>
+  <rosparam file="$(find antobot_base)/config/ant/hardware.yaml" command="load"/>
+  <rosparam file="$(find antobot_base)/config/ant/controllers.yaml" command="load"/>
+  <rosparam file="$(find antobot_base)/config/ant/joint_limits.yaml" command="load"/>
 
 
   <!-- Launches the robot controller node -->
