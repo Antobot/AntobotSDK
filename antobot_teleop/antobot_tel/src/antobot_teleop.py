@@ -25,10 +25,10 @@
 # # #                       Publishes control data to a ROS topic, which is subscribed to by antobot_hardware_interface.cpp
 
 # # # Interface:
-# # # Inputs: Robot operation mode [Int8 msg] - received from /switch_mode topic from am_teleop/am_tel_joy/bin/am_tel_joy.py and AntoCom/ac_mqtt/src/mqtt_interface_node.py
+# # # Inputs: Robot operation mode [Int8 msg] - received from /switch_mode topic from am_teleop/antobot_tel_joy/bin/antobot_tel_joy.py and AntoCom/ac_mqtt/src/mqtt_interface_node.py
 # # #                                         - 0: keyboard teleoperation, 1: app teleoperation, 2: joystick teleoperation, 3: follow waypoints (autonomous), 4: go home (autonomous)
 # # #         Velocity commands from app [Twist msg] - received from /mqtt/cmd_vel topic from AntoCom/ac_mqtt/src/mqtt_interface_node.py
-# # #         Velocity commands from joystick [Twist msg] - received from /joy/cmd_vel topic from am_teleop/am_tel_joy/bin/am_tel_joy.py
+# # #         Velocity commands from joystick [Twist msg] - received from /joy/cmd_vel topic from am_teleop/antobot_tel_joy/bin/antobot_tel_joy.py
 # # #         Waypoint filename [String msg] - received from /wp_fname topic from am_teleop/keyboard_teleop/src/save_waypoints.py
 # # # Outputs: Robot operation mode [Int8 msg] - sent over /switch_mode topic to am_navigation/src/waypoint.py
 # # #                                          - 0: keyboard teleoperation, 1: app teleoperation, 2: joystick teleoperation, 3: follow waypoints (autonomous), 4: go home (autonomous)
@@ -45,7 +45,6 @@
 
 # from mqtt_interface_node import MQTT_Interface
 import rospy
-# import paho.mqtt.client as mqtt
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, Path
 from sensor_msgs.msg import NavSatFix
@@ -55,17 +54,11 @@ import sys, os
 from pathlib import Path
 
 # Including path for keyboard teleoperation
-tel_key_path = Path(__file__).resolve().parent.parent.parent / 'am_tel_key' / 'src'
+tel_key_path = Path(__file__).resolve().parent.parent.parent / 'antobot_tel_key' / 'src'
 sys.path.append(str(tel_key_path))
 
-# Including path for waypoints
-# move_path = Path(__file__).resolve().parent.parent.parent.parent
-# waypoint_path = move_path / 'am_navigation' / 'am_waypoint' / 'src'
-# sys.path.append(str(waypoint_path))
-
 from keyboard_teleop import Keyboard_Teleop
-# from save_waypoints import waypoint_saver
-# from follow_waypoints import waypoint_follower
+
 import roslaunch
 import rospkg
 
@@ -103,8 +96,6 @@ class MasterTeleop:
         
         # Initialises different class instances which may be used in the code (but may not be)
         self.kt = Keyboard_Teleop()
-        # self.ws = waypoint_saver()
-        # self.wf = waypoint_follower(self.ws)
         
         # Selects most recently saved waypoint file
         self.path = "/tmp/waypoint_files/"
@@ -128,10 +119,7 @@ class MasterTeleop:
         if self.mode == 3 and hasattr(self, 'fname'):
             print("Entering autonomous mode")
             wayPoints = self.wf.UTMtoXY(path=self.path, fname=self.fname)
-            # path = self.wf.publish_path(wayPoints)
-            # self.wf.wpPublisher.publish(path)
         if self.mode == 4:
-            # print("Robot navigating to home location")
             if self.wf.timer is not None:
                 self.wf.timer.shutdown()
             

@@ -160,7 +160,7 @@ class Monitor():
         #self.sub_odom = rospy.Subscriber('/odometry/filtered', Odometry, self.odom_callback)                     #we are not using this for mileage tracker
         self.sub_mode = rospy.Subscriber('/switch_mode', UInt8, self.mode_callback)                                #mode 0:keyboard, 1: app, 2: joystick 3:autonomous 4:go home
         #self.sub_gps_status = rospy.Subscriber('am_gps_urcu_status',UInt8,self.GPS_status_callback)
-        self.sub_mileage_tracker = rospy.Subscriber('/am_nav/distanceTravelled',Float32,self.mileage_callback)
+        # self.sub_mileage_tracker = rospy.Subscriber('/am_nav/distanceTravelled',Float32,self.mileage_callback)
         self.sub_soft_shutdown_button = rospy.Subscriber('/antobridge/soft_shutdown_button',Bool,self.soft_shutdown_callback)
         self.sub_slope_dir = rospy.Subscriber('/imu/data', Imu, self.slope_dir)
         self.imu_calib_status = rospy.Subscriber('/imu_calibration_status',UInt8, self.imu_calib)

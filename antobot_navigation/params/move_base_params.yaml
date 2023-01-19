@@ -1,4 +1,4 @@
-<!--
+###########################################################################################################################
 # Copyright (c) 2021, ANTOBOT LTD.
 # All rights reserved.
 
@@ -14,32 +14,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# # # Code Description:     Launches the nodes to allow joystick control of the robot.
+#Description: 	This is a .yaml file will store configuration options specific to move_base
+#Contacts: 	mert.turanli@antobot.co.uk 
+#		 
+##################################################################################################################
 
-# Contact: mert.turanli@antobot.co.uk
+shutdown_costmaps: false
 
-# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
--->
+controller_frequency: 5.0
+controller_patience: 15.0
 
-<launch>
+planner_frequency: 1.0
+planner_patience: 5.0
 
-  <node name="joy_node" pkg="joy" type="joy_node">
-    <param name="dev" value="/dev/input/js0" />
-    <remap from="joy" to="joy_orig"/>
-  </node>
-  <!-- remap joy to emulate ps3joy mappings -->
-  <node name="joy_remap" pkg="joy" type="joy_remap.py">
-    <remap from="joy_in" to="joy_orig"/>
-    <remap from="joy_out" to="joy"/>
-    <rosparam command="load" file="$(find joy)/config/gamepad.yaml"/>
-  </node>
+oscillation_timeout: 0.0
+oscillation_distance: 0.5
 
-  <node name="am_tel_joy" pkg="joystick_teleop" type="am_tel_joy.py" output="screen">
-  	<rosparam param="home_position">[0, 0, 0]</rosparam>
-  </node>
-
-</launch>
-
+recovery_behaviors:
+  - name: clear_costmap_recovery
+    type: clear_costmap_recovery/ClearCostmapRecovery

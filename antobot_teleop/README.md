@@ -15,7 +15,7 @@ Keyboard control (needs to be updated):
 * Press the '3' key to enter autonomous waypoint following mode. If new waypoints haven't been saved prior to this, it will follow the most recently saved waypoints.
 
 Joystick control:
-* Clone the [joystick_drivers](http://wiki.ros.org/joystick_drivers) ROS package into /antobot_teleop/am_tel_joy
+* Clone the [joystick_drivers](http://wiki.ros.org/joystick_drivers) ROS package into /antobot_teleop/antobot_tel_joy
 * Configure your joystick as appropriate, using the topic "/joy"
 * Joystick controls image (to be updated and added):
 

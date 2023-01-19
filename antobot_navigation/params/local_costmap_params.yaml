@@ -1,0 +1,52 @@
+###########################################################################################################################
+# Copyright (c) 2021, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+#Description: 	This is a .yaml file will store configuration options specific to the local costmap
+#Contacts: 	mert.turanli@antobot.co.uk 
+#		 
+##################################################################################################################
+
+local_costmap:
+#global_frame parameter defines what coordinate frame the costmap should run in
+  global_frame: map
+#robot_base_frame parameter defines the coordinate frame the costmap should reference for the base of the robot. 
+  robot_base_frame: base_link
+  
+#update_frequency parameter determines the frequency, in Hz, at which the costmap will run its update loop
+  update_frequency: 3.0
+#publish_frequency parameter determines the rate, in Hz, at which the costmap will publish visualization information.
+  publish_frequency: 3.0
+
+#static_map parameter determines whether or not the costmap should initialize itself based on a map served by the map_server
+  #static_map: false
+#rolling_window parameter to true means that the costmap will remain centered around the robot as the robot moves through the world
+  rolling_window: true
+  always_send_full_costmap: true
+
+
+#The width, height,and resolution parameters set the width (meters), height (meters), and resolution (meters/cell) of the costmap
+ 
+  width: 7.0
+  height: 7.0
+
+  
+  resolution: 0.1
+
+  plugins: 
+    - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

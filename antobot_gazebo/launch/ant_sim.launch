@@ -1,0 +1,90 @@
+<!--
+# Copyright (c) 2021, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# # # Code Description:     Launches the simulation for the small robot.
+
+# Contact: mert.turanli@antobot.co.uk
+
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+
+  <!-- Set a simulation parameter -->
+  <rosparam>
+    simulation: true
+  </rosparam>
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="physics" value="ode" />
+
+    <arg name="use_sim_time" value="true"/>
+    <arg name="paused" value="false"/>
+
+    <arg name="debug" value="false"/>
+    <arg name="verbose" value="false"/>
+
+    <arg name="gui" value="true" />
+    <arg name="world_name" value="$(find am_sim)/worlds/lathcoats.world"/>
+  </include>
+
+  <!-- robot -->
+  <arg name="zed2_orientation" default="left" />, 
+  <arg name="referenceLatitude"  default="51.70970430075098" />        
+  <arg name="referenceLongitude"  default=".4754183515379187" />
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ant_description)/urdf/ant.urdf.xacro' zed2_orientation:=$(arg zed2_orientation) referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
+
+  <rosparam command="load" file="$(find ant_description)/config/control.yaml" />
+
+
+  <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+        args="antobot_joint_publisher am_robot" output="screen" />
+
+  <!-- Gazebo model spawner -->
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+        args="-x 2.0 -y 0.5 -z 0.1 -Y 1.5707 -urdf -param robot_description -model mobile_base"/>
+
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+  </node>
+
+  <!--<node pkg="tf" type="static_transform_publisher" name="odom_to_world"
+    args="0.0 0.0 0.0 0.0 0.0 0.0 /odom /world 40" />-->
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_gazebo)/rviz/ant/sensors.rviz"/>
+  
+  <include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
+
+  <!-- IMU auto-calibration and EKF -->
+  <node if="true" pkg="antobot_heading_cpp" type="heading_launcher.py" name="calibration_launcher" output="screen" />
+  
+  <!-- Joystick control -->
+  <include if="true" file="$(find joystick_teleop)/launch/antobot_tel_joy.launch" /> 
+  
+  <node pkg="tf" type="static_transform_publisher" name="laser_to_front_laser_frame"
+    args="0.0 0.0 0.0 0.0 0.0 0.0 /front_laser_frame /laser 40" />
+    
+  <!-- Teleop -->
+  <node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" output="screen" />
+  
+  <!--<include if="true" file="$(find am_safety)/launch/standalone.launch" /> -->
+  
+</launch>

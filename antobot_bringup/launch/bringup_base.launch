@@ -42,7 +42,7 @@
 	<include if="true" file="$(find antobot_description)/launch/vp1_param.launch"></include>
 	
 	<!-- move base nodes -->
-	<include if="true" file="$(find am_nav)/launch/move_base.launch"></include>
+	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch"></include>
 
 	<!-- MQTT Interface node -->
 	<node if="false" pkg="ac_mqtt" type="mqtt_interface_node.py" name="mqtt_interface_node" />
@@ -51,7 +51,7 @@
 	<node if="true" pkg="am_tel" type="am_teleop.py" name="master_teleop" />	
 	
 	<!-- Joystick Teleop -->
-	<include if="true" file="$(find joystick_teleop)/launch/am_tel_joy.launch"></include>
+	<include if="true" file="$(find joystick_teleop)/launch/antobot_tel_joy.launch"></include>
 
 	
 	<!-- am_safety -->
@@ -65,9 +65,9 @@
 	<node if="true" pkg="anto_supervisor" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
 	
 	<!-- Mileage tracker -->
-	<node if="false" pkg="am_nav_analysis" type="am_mileage_tracker.py" name="am_mileage_tracker" />
+	<node if="false" pkg="antobot_navigation_analysis" type="am_mileage_tracker.py" name="am_mileage_tracker" />
 	
     <!-- pointcloud to laser nodes (robot)-->
-    <include if="true" file="$(find am_nav)/launch/pointcloud_to_laser.launch"></include>
+    <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
 
 </launch>

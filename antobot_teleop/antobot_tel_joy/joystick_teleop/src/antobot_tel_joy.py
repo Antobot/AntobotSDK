@@ -52,7 +52,7 @@ import actionlib
 import time
 from actionlib_msgs.msg import *
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from anto_manager.managerUserInputClient import directUserInputClient
+# from anto_manager.managerUserInputClient import directUserInputClient
 
 class JoystickTeleop:
     def __init__(self):
@@ -138,7 +138,7 @@ class JoystickTeleop:
         self.wp_status = None
         
         # initialise manager client
-        self.userClient = directUserInputClient(userInput=0, sourceID='Joystick')
+        # self.userClient = directUserInputClient(userInput=0, sourceID='Joystick')
 
         # initialise the move base client
         self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -321,24 +321,24 @@ class JoystickTeleop:
         self.buttons_previous = msg.buttons
         
         # Send request to manager server if input is made by user
-        if userInput is not None:
-            if self.userClient.checkForService():
-                self.userClient.userInput = userInput
-                managerResponse = self.userClient.sendDirectUserInput()
-                print("User input was " + str(userInput))
-                print("Server response was " + str(managerResponse.responseBool))
-                print(managerResponse.responseString)
-                
-                # rumble once if user input is accepted, rumble twice if not accepted
-                #if managerResponse.responseBool:
-                #    self.switch_mode_pub.publish(6)
-                #    self.rumble(repeat_count=1)
-                #else:
-                #    self.rumble(repeat_count=2)
-                    
-            else:
-                print("Unable to make request")
-                print("ROS service " + self.userClient.serviceName + " is not available")
+        # if userInput is not None:
+        #     if self.userClient.checkForService():
+        #         self.userClient.userInput = userInput
+        #         managerResponse = self.userClient.sendDirectUserInput()
+        #         print("User input was " + str(userInput))
+        #         print("Server response was " + str(managerResponse.responseBool))
+        #         print(managerResponse.responseString)
+        #         
+        #         # rumble once if user input is accepted, rumble twice if not accepted
+        #         #if managerResponse.responseBool:
+        #         #    self.switch_mode_pub.publish(6)
+        #         #    self.rumble(repeat_count=1)
+        #         #else:
+        #         #    self.rumble(repeat_count=2)
+        #             
+        #     else:
+        #         print("Unable to make request")
+        #         print("ROS service " + self.userClient.serviceName + " is not available")
         
     def update(self, timer):
         # # # Update function - called iteratively at a rate defined by self.rctrl_loop_hz. The main purpose is to check
@@ -385,7 +385,7 @@ class JoystickTeleop:
 
 # Begins main function
 if __name__ == '__main__':
-    rospy.init_node("am_tel_joy")
+    rospy.init_node("antobot_tel_joy")
     jt = JoystickTeleop()
     
     rospy.spin()
