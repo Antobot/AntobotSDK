@@ -85,6 +85,6 @@
   <!-- Teleop -->
   <node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" output="screen" />
   
-  <!--<include if="true" file="$(find am_safety)/launch/standalone.launch" /> -->
+  <!--<include if="true" file="$(find antobot_safety)/launch/standalone.launch" /> -->
   
 </launch>
