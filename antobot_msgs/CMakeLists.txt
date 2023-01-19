@@ -14,7 +14,6 @@ add_message_files(
     FILES
     Float32_Array.msg
     UInt8_Array.msg
-    Bool.msg
     UInt16_Array.msg
 )
 

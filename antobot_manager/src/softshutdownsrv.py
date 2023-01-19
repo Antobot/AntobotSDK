@@ -1,8 +1,10 @@
 # -*- coding:utf-8 -*- 
 import paramiko 
-from anto_msgs.srv import softshutdown, softshutdownResponse
+from anto_msgs.srv import softShutdown, softShutdownResponse
 import os
 
+# We definitely cannot put our passwords on the SDK!
+# However, I suppose if we are installing the system, we will have to tell them their hostname, username, and password.
 host = 'antobot-desktop'
 user = 'antobot'
 password = 'Antobot2021-'
@@ -27,7 +29,7 @@ def ssh_exec_command(command):
         print("error: " + str(e)) 
 
 def softshutdownprocess(req):
-    return_msg = softshutdownResponse()
+    return_msg = softShutdownResponse()
     print("soft shutdown service callback entered!")
 
     #main function: send topic to antobridge, repeat 60 times, kill all the other nodes, shutdown 
@@ -52,7 +54,7 @@ def softshutdownprocess(req):
 
 def soft_shutdown_server():
     rospy.init_node('soft_shutdown_server')
-    s = rospy.Service('soft_shutdown_req', softshutdown,softshutdownprocess)
+    s = rospy.Service('soft_shutdown_req', softShutdown,softshutdownprocess)
     
     rospy.spin()
 
