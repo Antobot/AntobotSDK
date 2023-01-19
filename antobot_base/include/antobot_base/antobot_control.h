@@ -65,8 +65,8 @@ namespace antobot_hardware_interface
 				uint8_t cmd_uint[36];
 			};
 
-			antobotHardwareInterface(ros::NodeHandle& nh);
-			~antobotHardwareInterface();
+			antobotControl(ros::NodeHandle& nh);
+			~antobotControl();
 			void init();
 			void init_publishers();
 			void update(const ros::TimerEvent& e);
@@ -85,7 +85,6 @@ namespace antobot_hardware_interface
 			
 
 		protected:
-			//antobot_driver::Robot antobot1;
 			ros::NodeHandle nh_;
 			ros::Timer non_realtime_loop_;
 			ros::Duration control_period_;
