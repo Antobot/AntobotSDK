@@ -20,7 +20,7 @@
 # # # Code Description:     The purpose of this code is to process the GPS data received via SPI from the Ublox F9P chip
 # # #                       and publish a GPS message as a rostopic using this data.
 
-# Contact: mert.turanli@antobot.co.uk
+# Contact: aswathi.muralidharan@antobot.co.uk
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -33,7 +33,7 @@ import time
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import TwistWithCovarianceStamped
 from std_msgs.msg import UInt8
-from am_gps_urcu.ublox_gps import UbloxGps
+from drivers.ublox_gps import UbloxGps
 
 if __name__ == '__main__':
     try:

@@ -1,4 +1,4 @@
-#include <am_heading_cpp/am_heading.h>
+#include <antobot_heading_cpp/antobot_heading.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "am_heading_node");
