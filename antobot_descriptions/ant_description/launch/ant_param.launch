@@ -31,16 +31,11 @@
 		<arg name="zed2_orientation" default="front" />
 
 	    <param name="/use_sim_time" value="false"/> <!-- true for offline -->
-	    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find antobot_vp1)/urdf/antobot_vp1.urdf.xacro' zed2_orientation:=$(arg zed2_orientation)" />
+	    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ant_description)/urdf/ant.urdf.xacro' zed2_orientation:=$(arg zed2_orientation)" />
         
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
             <param name="publish_frequency" type="double" value="5.0"/>
 	    </node>
-
-	    <!--<node if="true" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"> 
-	    	<param name="publish_frequency" type="double" value="5.0"/>
-	    	<param name="rate" value="50" />
-	    </node>-->
 
 	    <node pkg="tf" type="static_transform_publisher" name="laser_frame_to_laser" args="0.0 0.0 0.0 0.0 0.0 0.0 /front_laser_frame /laser 100" /> 
         <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /imu 100" /> 
