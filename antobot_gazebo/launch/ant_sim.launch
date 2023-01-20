@@ -49,9 +49,9 @@
   <arg name="zed2_orientation" default="left" />, 
   <arg name="referenceLatitude"  default="51.70970430075098" />        
   <arg name="referenceLongitude"  default=".4754183515379187" />
-  <param name="robot_description" command="$(find xacro)/xacro '$(find ant_description)/urdf/ant.urdf.xacro' zed2_orientation:=$(arg zed2_orientation) referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
+  <param name="robot_description" command="$(find xacro)/xacro '$(find antobot_ant_description)/urdf/ant.urdf.xacro' zed2_orientation:=$(arg zed2_orientation) referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
 
-  <rosparam command="load" file="$(find ant_description)/config/control.yaml" />
+  <rosparam command="load" file="$(find antobot_ant_description)/config/control.yaml" />
 
 
   <node name="base_controller_spawner" pkg="controller_manager" type="spawner"

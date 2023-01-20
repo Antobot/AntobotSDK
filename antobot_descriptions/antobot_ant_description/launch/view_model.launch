@@ -34,7 +34,7 @@
 
   <param name="/use_sim_time" value="false"/>
   
-  <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find ant_description)/urdf/ant.urdf.xacro'"/>
+  <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find antobot_ant_description)/urdf/ant.urdf.xacro'"/>
   <param name="robot_description" command="$(arg urdf_file) zed2_orientation:=$(arg zed2_orientation)" />
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
@@ -43,6 +43,6 @@
   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui">
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ant_description)/rviz/model.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_ant_description)/rviz/model.rviz"/>
 </launch>
 

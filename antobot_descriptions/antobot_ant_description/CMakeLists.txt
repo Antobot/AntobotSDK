@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(ant_description)
+project(antobot_ant_description)
 
 find_package(catkin REQUIRED COMPONENTS
   urdf

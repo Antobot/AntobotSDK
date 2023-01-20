@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ant_description</name>
+  <name>antobot_ant_description</name>
   <version>0.0.0</version>
   <description>The description package for the ant robot platform</description>
 
