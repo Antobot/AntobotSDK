@@ -28,10 +28,10 @@
 	<arg name="use_rtk_yaw_launcher" default="true" />
 
 	<!-- controllers -->
-	<include if="true" file="$(find antobot_base)/launch/VP1_controller.launch"></include>
+	<include if="true" file="$(find antobot_base)/launch/ant_controller.launch"></include>
 
 	<!-- navigation sensors -->
-	<include if="true" file="$(find am_sensors)/launch/am_sensors.launch"></include>
+	<include if="false" file="$(find am_sensors)/launch/am_sensors.launch"></include>
 	
 	<!-- ekf -->
 
@@ -39,7 +39,7 @@
 	<node if="$(arg use_rtk_yaw_launcher)" pkg="am_heading" type="heading_launcher.py" name="rtk_yaw_launcher_node" output="log" />
 
 	<!-- robot description -->
-	<include if="true" file="$(find antobot_description)/launch/vp1_param.launch"></include>
+	<include if="true" file="$(find antobot_description)/launch/ant_param.launch"></include>
 	
 	<!-- move base nodes -->
 	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch"></include>

@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
   joint_limits_interface
   antobot_msgs
-  serial
   std_msgs
   message_generation
 )
@@ -35,7 +34,6 @@ catkin_package(
     urdf
     control_toolbox
     joint_limits_interface
-    serial
     std_msgs
 )
 

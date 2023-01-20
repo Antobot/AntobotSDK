@@ -28,7 +28,7 @@ import rospy
 from std_msgs.msg import String, Bool,UInt8,Float64,Float32
 from sensor_msgs.msg import NavSatFix, Imu
 from nav_msgs.msg import Odometry
-from anto_bridge_msgs.msg import UInt8_Array,Float32_Array,UInt16_Array ##check syntax
+from antobot_msgs.msg import UInt8_Array,Float32_Array,UInt16_Array ##check syntax
 from anto_msgs.srv import softshutdown
 #3rd party
 import socket

@@ -38,8 +38,6 @@
 
 #include <antobot_base/ant_hardware.h>
 
-#include <serial/serial.h>
-
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int16.h>
 #include <antobot_msgs/Float32_Array.h>

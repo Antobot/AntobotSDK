@@ -38,7 +38,6 @@ Contacts: 	daniel.freer@antobot.ai
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <joint_limits_interface/joint_limits_rosparam.h>
 
-#include <serial/serial.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt8.h>
 #include <antobot_msgs/UInt8_Array.h>

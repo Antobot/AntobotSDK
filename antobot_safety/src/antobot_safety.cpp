@@ -38,7 +38,7 @@ AmSafety::AmSafety(ros::NodeHandle& nh) : nh_(nh)
     double loop_hz_ = 25.0;
 
     AmSafety::output_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("/am_robot/cmd_vel", 10);
-    AmSafety::output_uss_dist_filt_pub = nh_.advertise<anto_bridge_msgs::UInt16_Array>("/antobot_safety/uss_dist", 10);
+    AmSafety::output_uss_dist_filt_pub = nh_.advertise<antobot_msgs::UInt16_Array>("/antobot_safety/uss_dist", 10);
 	lights_f_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_f", 1);
     lights_b_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_b", 1);
 
@@ -267,11 +267,11 @@ void AmSafety::activeCmdVelCallback(const std_msgs::String::ConstPtr& msg)
         active_cmd_vel = 3;
 }
 
-void AmSafety::ussDistCallback(const anto_bridge_msgs::UInt16_Array::ConstPtr& msg)
+void AmSafety::ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& msg)
 {
     /*  Reads in the data from the ultrasonic sensors and, based on the current movement of the robot, makes a recommendation 
         for whether the robot should slow down or whether its current speed/movement is acceptable. */
-    //  Inputs: msg <anto_bridge_msgs::UInt16_Array> - currently an 8-element array which provides the distances sensed by each ultrasonic sensor. 
+    //  Inputs: msg <antobot_msgs::UInt16_Array> - currently an 8-element array which provides the distances sensed by each ultrasonic sensor. 
     //                                                The order starting from msg->data[0] is: 0 - front left; 1 - front; 2 - front right; 3 - right;
     //                                                4 - back right; 5 - back; 6 - back left; 7 - left
     //  Outputs: Speed recommendation for the robot based on USS data only
@@ -286,14 +286,14 @@ void AmSafety::ussDistCallback(const anto_bridge_msgs::UInt16_Array::ConstPtr& m
     AmSafety::output_uss_dist_filt_pub.publish(uss_dist_filt);
 }
 
-anto_bridge_msgs::UInt16_Array AmSafety::ussDistFilt(uint16_t uss_dist_ar[8])
+antobot_msgs::UInt16_Array AmSafety::ussDistFilt(uint16_t uss_dist_ar[8])
 {
     /*  Gets filtered ultrasonic sensor data for each individual sensor, creates the structure
         for the data to be sent, and returns this to the main USS callback function. */
     //  Inputs: uss_dist_ar <uint8_t[8]> - the most recent USS data pulled in for each of the 8 sensors
-    //  Returns: uss_dist_filt_all <anto_bridge_msgs::UInt16_Array> - the filtered data to publish
+    //  Returns: uss_dist_filt_all <antobot_msgs::UInt16_Array> - the filtered data to publish
 
-    anto_bridge_msgs::UInt16_Array uss_dist_filt_all;
+    antobot_msgs::UInt16_Array uss_dist_filt_all;
     uint16_t uss_dist_filt_i;
 
     for (int i=0; i<8; i++)

@@ -19,7 +19,7 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# # # Code Description:     URDF for AntoBot VP1
+# # # Code Description:     URDF for AntoBot Ant
 
 # Contact: william.eaton@antobot.ai
 
@@ -28,7 +28,7 @@
 
 
 
-<robot name="antobot_vp1" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="antobot_ant" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Arguments -->
   <xacro:arg name="zed2_orientation"   default="left" />
@@ -41,7 +41,7 @@
   <xacro:property name="referenceLongitude"    value="$(arg referenceLongitude)" />   
 
   <!-- antobot -->
-  <xacro:macro name="antobot_vp1">
+  <xacro:macro name="antobot_ant_description">
     <xacro:property name="M_PI" value="3.1415926535897931" /> 
     
    
@@ -50,13 +50,13 @@
     <link name="robot_base_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/chassis.dae" scale="1 1 1"/>
+          <mesh filename="package://antobot_ant_description/meshes/chassis.dae" scale="1 1 1"/>
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
       <collision>
        <geometry>
-          <mesh filename="package://antobot_vp1/meshes/chassis.dae" scale="1 1 1"/>
+          <mesh filename="package://antobot_ant_description/meshes/chassis.dae" scale="1 1 1"/>
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </collision>
@@ -90,7 +90,7 @@
     <link name="wheel_left_front_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/wheel.dae" scale="1 1 1" />          
+          <mesh filename="package://antobot_ant_description/meshes/wheel.dae" scale="1 1 1" />          
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 ${M_PI}"/>
       </visual>
@@ -124,7 +124,7 @@
     <link name="wheel_left_rear_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/wheel.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/wheel.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 ${M_PI}"/>
       </visual>
@@ -157,7 +157,7 @@
     <link name="wheel_right_rear_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/wheel.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/wheel.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
@@ -191,7 +191,7 @@
     <link name="wheel_right_front_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/wheel.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/wheel.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
@@ -318,12 +318,12 @@
 	<collision>
 	  <origin xyz="0 0 0" rpy="0 0 0" />
 	  <geometry>
-      <mesh filename="package://antobot_vp1/meshes/rpLidar.dae" scale="1 1 1" />      
+      <mesh filename="package://antobot_ant_description/meshes/rpLidar.dae" scale="1 1 1" />      
 	  </geometry>
 	</collision>
   <visual>
     <geometry>
-      <mesh filename="package://antobot_vp1/meshes/rpLidar.dae" scale="1 1 1" />      
+      <mesh filename="package://antobot_ant_description/meshes/rpLidar.dae" scale="1 1 1" />      
     </geometry>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </visual>
@@ -490,28 +490,28 @@
 
   <!-- Actual sensors output on combined topic /antobridge/uss_dist -->
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="1" xyz="0.5355 0.317 0.282" rpy="0 0 0.785398" />
   
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="2" xyz="0.66 0 0.2935" rpy="0 0 0" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="3" xyz="0.5535 -0.317 0.282" rpy="0 0 -0.785398" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="4" xyz="-0.0165 -0.3385 0.282" rpy="0 0 -1.5708" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="5" xyz="-0.5685 -0.317 0.282" rpy="0 0 -2.35619" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="6" xyz="-0.5899 0 0.2878" rpy="0 0 3.14159" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="7" xyz="-0.5685 0.317 0.282" rpy="0 0 2.35619" />
 
-  <xacro:include filename="$(find antobot_vp1)/urdf/ultrasonic.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/ultrasonic.urdf.xacro"/>
   <xacro:ultrasonic id="8" xyz="-0.0165 0.3385 0.282" rpy="0 0 1.5708" />
 
 
@@ -537,13 +537,13 @@
     <link name="zed2_mount_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountLeft.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountLeft.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountLeft.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountLeft.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </collision>
@@ -574,13 +574,13 @@
     <link name="zed2_mount_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountLeft.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountLeft.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountLeft.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountLeft.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </collision>
@@ -610,13 +610,13 @@
     <link name="zed2_mount_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountRight.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountRight.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="package://antobot_vp1/meshes/zedMountRight.dae" scale="1 1 1" />      
+          <mesh filename="package://antobot_ant_description/meshes/zedMountRight.dae" scale="1 1 1" />      
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </collision>
@@ -656,7 +656,7 @@
 
   <link name="scouting_frame_right"/>
   
-  <xacro:include filename="$(find antobot_vp1)/urdf/zed2.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/zed2.urdf.xacro"/>
   <xacro:zed2_front link_prefix='' 
               joint_prefix=''/>
 
@@ -671,7 +671,7 @@
       <origin xyz="-0.676 -0.078 0.381" rpy="0 0 ${M_PI}"/>
   </joint>
   
-  <xacro:include filename="$(find antobot_vp1)/urdf/zed2_back.urdf.xacro"/>
+  <xacro:include filename="$(find antobot_ant_description)/urdf/zed2_back.urdf.xacro"/>
   <xacro:zed2_back link_prefix='' 
                    joint_prefix=''/>
 
@@ -679,5 +679,5 @@
   
 
   </xacro:macro>
-  <xacro:antobot_vp1/>
+  <xacro:antobot_ant_description/>
 </robot>

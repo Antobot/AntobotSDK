@@ -5,7 +5,6 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  serial
   std_msgs
   message_generation
 )
@@ -24,7 +23,6 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS 
-    serial
     std_msgs
 )
 

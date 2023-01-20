@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(antobot_safety)
-find_package(catkin REQUIRED COMPONENTS roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs anto_bridge_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs antobot_msgs)
 
 # pkg-config support
 find_package(PkgConfig)
@@ -18,7 +18,7 @@ generate_dynamic_reconfigure_options(cfg/reload.cfg)
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}_nodelet
-   CATKIN_DEPENDS roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs anto_bridge_msgs
+   CATKIN_DEPENDS roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs antobot_msgs
    DEPENDS yaml-cpp
 )
 

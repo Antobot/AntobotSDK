@@ -9,8 +9,8 @@ To use the simulation requires:
  
 To minimise the ammount of github storage space used, please use sharepoint for any models other than robots.
 
-To launch a simulation (e.g. VP1 robot at Lathcoats Farm):
+To launch a simulation (e.g. Ant robot at Farm):
 
-**roslaunch am_sim vp1_lathcoats.launch**
+**roslaunch antobot_gazebo ant_sim.launch**
 
 
