@@ -41,7 +41,7 @@ add_library(antobot_heading
   src/antobot_heading.cpp
 )
 
-# add_dependencies(antobot_heading ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(antobot_heading ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(antobot_heading_node src/antobot_heading_node.cpp)
 
@@ -51,6 +51,4 @@ add_dependencies(antobot_heading_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(antobot_heading_node
   antobot_heading
   ${catkin_LIBRARIES}
-  geonav_transform
-
 )
