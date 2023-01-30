@@ -16,11 +16,11 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-#Description: 	The primary purpose of this code is to launch different imu-gps configurations.
-#               Rewritten
-#             	  
+#Description: 	The primary purpose of this code is to launch calibration node (C++ version or Python version) and to launch
+#               ekf nodes when the initial calibration is done.
+#
 #Contacts:     soyoung.kim@antobot.ai
-
+#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 import sys, signal
 import rospy
@@ -29,9 +29,30 @@ import roslaunch
 import rospkg
 
 
+heading_launch = None
+ekf_launch = None
+#exit_node = False
+class RoslaunchWrapperObject(roslaunch.parent.ROSLaunchParent):
+
+    def start(self):
+        super(RoslaunchWrapperObject, self).start()
+        print(self.server)
+
+    def stop(self):
+        print("Stopping...")
+        print(self.server)
+        server = self.server.server if self.server is not None and self.server.server is not None else None
+        super(RoslaunchWrapperObject, self).shutdown()
+        if server:
+           server.shutdown()
+
+
 def signal_handler(signal, frame):
     print("\nheading_launcher killed")
-    sys.exit(0)
+    if (heading_launch is not None):
+        heading_launch.stop()
+    if (ekf_launch is not None):
+        ekf_launch.stop()
 
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -42,6 +63,8 @@ def calib_finished_callback(data):
     if data.data == 1:
         calib_flag = True
 
+
+
 # main 
 if __name__ == '__main__':
     try:
@@ -50,12 +73,12 @@ if __name__ == '__main__':
       
         rospack = rospkg.RosPack()
 
-        ekf_package_path = rospack.get_path('am_ekf') + "/launch/ekf.launch"
+        ekf_package_path = rospack.get_path('antobot_ekf') + "/launch/ekf.launch"
 
         # Auto calibration python version uses 10% of CPU, cpp version uses 0.4%
         # Uncomment the version you want to use
-        #auto_cali_path = rospack.get_path('am_heading_cpp') + "/launch/auto_calibration_python.launch"
-        auto_cali_path = rospack.get_path('am_heading_cpp') + "/launch/auto_calibration_cpp.launch"
+        auto_cali_path = rospack.get_path('antobot_heading_cpp') + "/launch/auto_calibration_python.launch"
+        #auto_cali_path = rospack.get_path('antobot_heading_cpp') + "/launch/auto_calibration_cpp.launch"
 
         rospy.loginfo('launching %s',auto_cali_path)
         
@@ -80,12 +103,13 @@ if __name__ == '__main__':
                 roslaunch_args = cli_args[1:]
                 roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
 
-                parent = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
-                parent.start()
+                #parent = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
+                heading_launch = RoslaunchWrapperObject(run_id = uuid, roslaunch_files = roslaunch_file)
+                heading_launch.start()
                 rospy.loginfo('[New] single gps yaw node started')
                 
                 
-                while (not calib_flag):
+                while (not calib_flag and not rospy.is_shutdown()):
                     rospy.loginfo('[New] waiting for calibration to finish ... new')
                     rospy.sleep(1.0)
                     
@@ -96,8 +120,9 @@ if __name__ == '__main__':
                     roslaunch_args = cli_args[1:]
                     roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], roslaunch_args)]
 
-                    parent = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
-                    parent.start()
+                    #parent = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
+                    ekf_launch = RoslaunchWrapperObject(run_id = uuid, roslaunch_files = roslaunch_file)
+                    ekf_launch.start()
                     rospy.loginfo('[New] robot_localization started')
                     launched = True
 

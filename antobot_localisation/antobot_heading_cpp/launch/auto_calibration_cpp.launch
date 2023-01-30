@@ -1,12 +1,9 @@
 <launch>
-
-   <node pkg="am_heading_cpp" type="am_heading_node" name="am_heading_node" output="screen"> 
+   <node pkg="antobot_heading_cpp" type="antobot_heading_node" name="heading_node" output="screen"> 
     <param name="new" type="bool" value="True" />
     <param name="gps_topic" type="string" value="/am_gps_urcu" />
   	<param name="imu_topic" type="string" value="/imu/data" />
   	<param name="odometry_topic" type="string" value="/odometry/filtered" />
     <param name="wheel_odometry_topic" type="string" value="/am_robot/odom" />
   </node>
-
-  
 </launch> 

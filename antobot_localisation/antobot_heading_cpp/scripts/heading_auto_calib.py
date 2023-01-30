@@ -18,11 +18,9 @@
 
 #Description: 	The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
 #             	This script subscribes to the IMU and RTK GPS topics and publishes Imu messages over 
-#		        imu/data_corrected topic after calibration is successful.
-#               Rewritten version
-#             	  
+#		        imu/data_corrected topic.     
+#               This node performs the same functions as the am_heading.cpp but is written in Python.      	  
 #Contacts:     soyoung.kim@antobot.ai
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import rospy
@@ -347,7 +345,7 @@ class AutoCalibration:
 if __name__ == '__main__':
     
     # init node
-    rosnode = rospy.init_node('am_heading_node_py', anonymous=True)
+    rosnode = rospy.init_node('heading_node_py', anonymous=True)
     
     autoCalib = AutoCalibration()
     autoCalib.InitialCalibration() # First do initial calibration
