@@ -1,6 +1,9 @@
+<!--
+  Launcher for the antobot_heading node written in Python
+-->
 
 <launch>
-   <node pkg="antobot_heading" type="heading_auto_calib.py" name="heading_node_py" output="screen"> 
+   <node pkg="antobot_heading" type="antobot_heading_node.py" name="antobot_heading_node_py" output="screen"> 
     <param name="new" type="bool" value="True" />
     <param name="gps_topic" type="string" value="/am_gps_urcu" />
   	<param name="imu_topic" type="string" value="/imu/data" />

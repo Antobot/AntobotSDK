@@ -1,25 +1,13 @@
 #!/usr/bin/env python3
-# Copyright (c) 2019, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-#Description: 	The primary purpose of this code is to launch calibration node (C++ version or Python version) and to launch
+#
+# Description: 	The primary purpose of this code is to launch calibration node (C++ version or Python version) and to launch
 #               ekf nodes when the initial calibration is done.
 #
-#Contacts:     soyoung.kim@antobot.ai
+# Contacts:     soyoung.kim@antobot.ai
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 import sys, signal
@@ -48,7 +36,7 @@ class RoslaunchWrapperObject(roslaunch.parent.ROSLaunchParent):
 
 
 def signal_handler(signal, frame):
-    print("\nheading_launcher killed")
+    print("\nantobot_heading_launcher killed")
     if (heading_launch is not None):
         heading_launch.stop()
     if (ekf_launch is not None):
@@ -77,8 +65,8 @@ if __name__ == '__main__':
 
         # Auto calibration python version uses 10% of CPU, cpp version uses 0.4%
         # Uncomment the version you want to use
-        auto_cali_path = rospack.get_path('antobot_heading') + "/launch/auto_calibration_python.launch"
-        #auto_cali_path = rospack.get_path('antobot_heading') + "/launch/auto_calibration_cpp.launch"
+        #auto_cali_path = rospack.get_path('antobot_heading') + "/launch/auto_calibration_python.launch"
+        auto_cali_path = rospack.get_path('antobot_heading') + "/launch/auto_calibration_cpp.launch"
 
         rospy.loginfo('launching %s',auto_cali_path)
         

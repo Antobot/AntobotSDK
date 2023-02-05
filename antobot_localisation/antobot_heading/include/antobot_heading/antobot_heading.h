@@ -1,3 +1,15 @@
+/*
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+Description:  The primary purpose of this code is to define the functions and variables used in antobot_heading.cpp
+
+Contacts: 	soyoung.kim@antobot.ai
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+*/
 #include <iostream>
 #include <vector>
 #include <string>
@@ -69,7 +81,7 @@ namespace antobot_heading
             ros::Subscriber subRtkStatus, subGps, subImu, subOdometry, subwheelOdom;
 
             // Publisher
-            ros::Publisher pubImu, pubImuOffset, pubCalib; 
+            ros::Publisher pubImu, pubImuOffset, pubCalib, pubImu_z; 
 
             // Timer
             ros::Timer autoCalibrationTimer;

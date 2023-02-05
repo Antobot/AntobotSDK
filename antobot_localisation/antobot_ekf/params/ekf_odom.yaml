@@ -1,31 +1,12 @@
-###########################################################################################################################
-#Copyright (c) 2019, ANTOBOT LTD.
-# All rights reserved.
 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# This is a .yaml file where the ekf_odom parameters are definied. ekf_odom.yaml is considered as 		
+# the local parameter file. This parameter file contains the parameters of Wheel odometry and IMU 	for localisation
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-#Description: 	This is a .yaml file where the ekf_odom parameters are definied. ekf_odom.yaml is considered as 		the local parameter file. This parameter file contains the parameters of Wheel odometry and IMU 		for localisation
-
-#Contacts: 	aswathi.muralidharan@antobot.ai
-#
-
-
+######################################################################################################
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
 # computation until it receives at least one message from one of the inputs. It will then run continuously at the
 # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-frequency: 10 #200 FREQUENCY CHANGED BACK TO 50 ->ASWATHI
+frequency: 10 
 
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
@@ -47,7 +28,7 @@ predict_to_current_time: true
 
 # Use this parameter to provide specify how long the tf listener should wait for a transform to become available. 
 # Defaults to 0.0 if unspecified.
-transform_timeout: 0.0 #1.00 CHANGED TO 0 ->ASWATHI
+transform_timeout: 0.0 
 
 # If you're having trouble, try setting this to true, and then echo the /diagnostics_agg topic to see if the node is
 # unhappy with any settings or data.
@@ -112,10 +93,10 @@ imu0: /imu/data_corrected
 # if unspecified, effectively making this parameter required for each sensor.
 
 imu0_config: [false, false, false,
-              false,  false,  true,    # changed false,false,false to false, false, true by Aswathi
+              false,  false,  true,    
               false, false, false,
-              false, false,  true,     #changed from true,true,true
-              false, false, false]     #changed from true,true,true
+              false, false,  true,     
+              false, false, false]     
 
 # [ADVANCED] Large messages in ROS can exhibit strange behavior when they arrive at a high frequency. This is a result
 # of Nagle's algorithm. This option tells the ROS subscriber to use the tcpNoDelay option, which disables Nagle's
@@ -146,8 +127,6 @@ imu0_queue_size: 5
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 imu0_remove_gravitational_acceleration: true # was false for Bosch IMU
 
-
-#odom0: /antobot_robot/antobot_velocity_controller/odom
 odom0: /am_robot/odom
 
 odom0_config: [false, false,  false,

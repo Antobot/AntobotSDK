@@ -1,3 +1,17 @@
+/*
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+Description: The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
+            This script subscribes to the IMU and GPS topics and publishes Imu messages over 
+		    imu/data_corrected topic. antobot_heading node performs the same functions as the antobot_heading_node.py but is written in C++.
+
+Contacts: 	soyoung.kim@antobot.ai
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+*/
 #include <antobot_heading/antobot_heading.h>
 
 namespace antobot_heading
@@ -78,6 +92,7 @@ namespace antobot_heading
 
         // Publisher
         pubImu = nh_.advertise<sensor_msgs::Imu>("/imu/data_corrected", 1);
+        pubImu_z = nh_.advertise<std_msgs::Float32>("/imu/heading_z", 1);
         pubImuOffset = nh_.advertise<std_msgs::Float32>("/imu/data_offset", 1);
         pubCalib = nh_.advertise<std_msgs::UInt8>("/imu_calibration_status", 1);
 
@@ -288,7 +303,14 @@ namespace antobot_heading
                     ROS_INFO("angle diff = %f",diff_deg);
 
                     if (diff_deg > calib_deg){
-                        imu_offset = gps_yaw - result_imu[2];  // difference between orientations from imu and gps
+                        double imu_offset_tmp = gps_yaw - result_imu[2];  // difference between orientations from imu and gps
+                        if (imu_offset_tmp > M_PI){
+                            imu_offset_tmp -= 2*M_PI;
+                        }
+                        else if (imu_offset_tmp < -M_PI){
+                            imu_offset_tmp += 2*M_PI;
+                        }
+                        imu_offset = imu_offset_tmp;
                         ROS_INFO("auto-calibration successful (imu offset = %f degs)", imu_offset / M_PI * 180.0);
                     }
                     else{
@@ -322,7 +344,11 @@ namespace antobot_heading
             std::vector<double> result = eulerFromQuart(quat_tf);
             // Add imu offset and convert back to Quaternion  
             tf2::Quaternion result_tf =  quartFromEuler(result[0],result[1],result[2]+imu_offset);
-            
+
+            std_msgs::Float32 heading_z_msg;
+            heading_z_msg.data = result[2]+imu_offset;
+            pubImu_z.publish(heading_z_msg);
+
             // Convert tf2 Quaternion to ROS Quaternion
             tf2::convert(result_tf ,quat_msg);
             

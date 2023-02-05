@@ -1,26 +1,15 @@
 #!/usr/bin/env python3
-# Copyright (c) 2019, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-#Description: 	The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
-#             	This script subscribes to the IMU and RTK GPS topics and publishes Imu messages over 
+#
+# Description: 	The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
+#             	This script subscribes to the IMU and GPS topics and publishes Imu messages over 
 #		        imu/data_corrected topic.     
 #               This node performs the same functions as the antobot_heading.cpp but is written in Python.      	  
-#Contacts:     soyoung.kim@antobot.ai
+# Contacts:     soyoung.kim@antobot.ai
+#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import rospy
@@ -35,7 +24,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32, UInt8
 
 def signal_handler(signal, frame):
-    print("\nHeading_auto_calib killed")
+    print("\nantobot_heading_node_python killed")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
@@ -298,7 +287,12 @@ class AutoCalibration:
                     print('angle diff = ',diff_deg)
 
                     if diff_deg > self.calib_deg:
-                        self.imu_offset = self.gps_yaw - imu_angles[0]   # difference between orientations from imu and gps
+                        imu_offset_tmp = self.gps_yaw - imu_angles[0] 
+                        if imu_offset_tmp > math.pi:
+                            imu_offset_tmp -= 2*math.pi
+                        elif imu_offset_tmp < -math.pi:
+                            imu_offset_tmp += 2*math.pi
+                        self.imu_offset = imu_offset_tmp   # difference between orientations from imu and gps
                         rospy.loginfo('auto-calibration successful (imu offset = %f degs)', self.imu_offset / 3.1415 * 180.0)
                     else:
                         rospy.loginfo('auto-calibration not required {} deg'.format(diff_deg))
@@ -345,7 +339,7 @@ class AutoCalibration:
 if __name__ == '__main__':
     
     # init node
-    rosnode = rospy.init_node('heading_node_py', anonymous=True)
+    rosnode = rospy.init_node('antobot_heading_node_py', anonymous=True)
     
     autoCalib = AutoCalibration()
     autoCalib.InitialCalibration() # First do initial calibration

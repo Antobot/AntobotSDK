@@ -1,5 +1,9 @@
+<!--
+  Launcher for the antobot_heading node written in C++
+-->
+
 <launch>
-   <node pkg="antobot_heading" type="antobot_heading_node" name="heading_node" output="screen"> 
+   <node pkg="antobot_heading" type="antobot_heading_node" name="antobot_heading_node" output="screen"> 
     <param name="new" type="bool" value="True" />
     <param name="gps_topic" type="string" value="/am_gps_urcu" />
   	<param name="imu_topic" type="string" value="/imu/data" />

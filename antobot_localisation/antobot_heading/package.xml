@@ -6,7 +6,7 @@
 
   <maintainer email="soyoung.kim@antobot.ai">So-Young Kim</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>
