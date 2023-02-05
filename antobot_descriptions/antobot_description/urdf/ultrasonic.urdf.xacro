@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     URDF for AntoBot Ant ultrasonic sensors
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+  <xacro:macro name="ultrasonic" 
+               params="id:=''
+                      xyz:=''
+                      rpy=''">
+
+
+    <joint name="ultrasonic${id}_joint" type="fixed">
+      <axis xyz="0 1 0" />
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <parent link="robot_base_link"/>
+      <child link="ultrasonic${id}_link"/>
+    </joint>
+
+    <link name="ultrasonic${id}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.02 0.02 0.02"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="ultrasonic${id}_link">        
+      <sensor type="ray" name="ultrasonic${id}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>true</visualize>
+        <update_rate>20</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>10</samples>
+              <resolution>0.02</resolution> 
+              <min_angle>-0.5236</min_angle>
+              <max_angle>0.5236</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>10</samples>
+              <resolution>0.02</resolution> 
+              <min_angle>-0.5236</min_angle>
+              <max_angle>0.5236</max_angle> 
+            </vertical>
+          </scan>
+          <range>
+            <min>0.25</min>
+            <max>4.0</max>
+            <resolution>0.02</resolution>
+          </range>
+        </ray>
+        <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range"> 
+          <topicName>ultrasonic${id}</topicName>
+          <frameName>ultrasonic${id}_link</frameName>
+          <gaussianNoise>0.005</gaussianNoise>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>50</updateRate>
+          <radiation>INFRARED</radiation>
+          <fov>1.0472</fov>
+        </plugin>
+      </sensor>  
+    </gazebo>
+    
+  </xacro:macro>
+
+</robot>

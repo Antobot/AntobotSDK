@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     URDF for AntoBot Ant wheels
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="ant_wheel" 
+               params="name:=''
+                       originX:=''
+                       originY:=''
+                       originZ:=''
+                       rotZ:=''
+                       centreOffset:=''">
+
+
+
+    <joint name="wheel_${name}_joint" type="continuous">
+      <parent link="robot_base_link"/>
+      <child link="wheel_${name}_link"/>
+      <origin xyz="${originX} ${originY} ${originZ}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="300" velocity="100.0" />
+    </joint>
+
+    <link name="wheel_${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://antobot_description/meshes/ant_wheel.dae" scale="1 1 1" />          
+        </geometry>
+          <origin xyz="0 0 0" rpy="0 0 ${rotZ}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="0.08" radius="0.16" />
+        </geometry>
+        <origin xyz="0 ${centreOffset} 0" rpy="${M_PI/2} 0 0" />
+      </collision>
+      <inertial>
+        <mass value="1.5" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.009688532" ixy="0.0" ixz="0.0"
+                  iyy="0.016578154" iyz="0.0"
+                  izz="0.009688532" />
+      </inertial>
+    </link>  
+
+    <gazebo reference="wheel_${name}_link">
+      <mu1>0.4</mu1>
+      <mu2>0.4</mu2>
+      <kp>10000000.0</kp>
+      <kd>100.0</kd>
+    </gazebo>
+
+    <transmission name="wheel_${name}_trans" type="SimpleTransmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="wheel_${name}_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </actuator>
+      <joint name="wheel_${name}_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>  
+
+  </xacro:macro>
+</robot>

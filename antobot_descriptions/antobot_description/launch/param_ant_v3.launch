@@ -1,0 +1,26 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Launches the urdf, state publishers and static transforms for Ant v3 and visualises
+# # # 			    		the robot model in rviz.
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+    
+	    <param name="/use_sim_time" value="false"/> <!-- true for offline -->
+	    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find antobot_description)/urdf/ant_v3.urdf.xacro'" />
+        
+		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+            <param name="publish_frequency" type="double" value="5.0"/>
+	    </node>
+
+	    <node pkg="tf" type="static_transform_publisher" name="laser_frame_to_laser" args="0.0 0.0 0.0 0.0 0.0 0.0 /front_laser_frame /laser 100" /> 
+        <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /imu 100" /> 
+        <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu2" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /gyro_link 100" /> 
+	    <node pkg="tf" type="static_transform_publisher" name="gps_frame" args="0.0 0.0 0.0 0.0 0.0 0.0 /gps_frame /gps 100" />            
+        <node if="false" name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_description)/rviz/model.rviz"/>
+ </launch>

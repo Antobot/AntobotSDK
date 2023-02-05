@@ -1,0 +1,209 @@
+<?xml version="1.0" ?>
+
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     URDF for AntoBot Ant v3
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<robot name="antobot_ant" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Position for gazebo-->
+  <xacro:arg name="referenceLatitude"   default="51.45315122695476" />
+  <xacro:property name="referenceLatitude"    value="$(arg referenceLatitude)" />
+        
+  <xacro:arg name="referenceLongitude"   default="-0.6079828525888944" />
+  <xacro:property name="referenceLongitude"    value="$(arg referenceLongitude)" />   
+
+
+  <!-- Ant Robot -->
+  <xacro:macro name="antobot_ant">
+    <xacro:property name="M_PI" value="3.1415926535897931" /> 
+    
+    <!-- Base link -->
+    <link name="base_link" />
+    <link name="robot_base_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://antobot_description/meshes/ant_v3_body.dae" scale="1 1 1"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </visual>
+      <collision>
+       <geometry>
+          <mesh filename="package://antobot_description/meshes/ant_v3_body.dae" scale="1 1 1"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0"/>
+        <mass value="50"/>
+        <inertia ixx="1.219624785" ixy="0.0" ixz="-0.984790199"
+                 iyy="2.134816831" iyz="0.0"
+                 izz="2.304314375" />
+      </inertial>
+    </link>
+    
+    <joint name="robot_base_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link"/>
+      <child link="robot_base_link" />
+    </joint>
+
+ 
+    <!-- Wheels link -->
+    
+    <xacro:include filename="$(find antobot_description)/urdf/ant_wheel.urdf.xacro"/>
+    <xacro:ant_wheel name='left_front' originX='0.26' originY='0.2324' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='left_rear' originX='-0.26' originY='0.2324' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='right_rear' originX='-0.26' originY='-0.2324' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+    <xacro:ant_wheel name='right_front' originX='0.26' originY='-0.2324' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+
+
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+    </gazebo>
+
+    <!-- Gazebo ground truth-->
+    <gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <frameName>world</frameName>
+      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffset>0 0 0</rpyOffset>
+    </plugin>
+    </gazebo>
+ 
+
+    <!-- Leishen 3D lidar -->
+
+    <xacro:include filename="$(find antobot_description)/urdf/ls_ch128x1.urdf.xacro"/>
+    <xacro:ls_ch128x1 name='front' originX='0.7266' originY='0.0' originZ='0.286' rotZ='${-M_PI/2}'/>
+     <xacro:ls_ch128x1 name='rear' originX='-0.741599' originY='0.0' originZ='0.286' rotZ='${M_PI/2}'/>
+
+
+  
+    <!-- GPS -->
+    <joint name="gps_joint" type="fixed">
+      <parent link="robot_base_link"/>
+      <child link="gps_frame"/>
+      <origin xyz="0.6854 -0.135 0.5518" rpy="0 0 0"/>
+    </joint>
+    <link name="gps_frame">
+      <inertial>
+        <mass value="0.270" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="2.632e-4" ixy="0" ixz="0" iyy="2.632e-4" iyz="0" izz="1.62e-4" />
+      </inertial>	
+    </link>
+
+    <gazebo>
+      <plugin name="gazebo_ros_gps" filename="libhector_gazebo_ros_gps.so" >
+        <updateRate>4.0</updateRate>
+        <bodyName>gps_frame</bodyName>
+        <frameId>gps_frame</frameId>
+        <topicName>/am_gps_urcu</topicName>
+        <velocityTopicName>/am_gps_vel</velocityTopicName>
+        <referenceLatitude>${referenceLatitude}</referenceLatitude>
+        <referenceLongitude>${referenceLongitude}</referenceLongitude>
+        <referenceHeading>90</referenceHeading>
+        <referenceAltitude>10</referenceAltitude>
+        <offset>0 0 0</offset>
+        <drift>0.0 0.0 0.0</drift>
+        <gaussianNoise>0.01 0.01 0.01</gaussianNoise>
+        <velocityDrift>0 0 0</velocityDrift>
+        <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
+      </plugin>
+    </gazebo>
+    
+  
+
+    <!-- imu -->
+    <joint name="imu_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="imu_frame"/>
+      <origin xyz="-0.1146 -0.01941 0.1832" rpy="0 0 0"/>
+    </joint>
+
+    <link name="imu_frame">
+      <inertial>
+        <mass value="0.270" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="2.632e-4" ixy="0" ixz="0" iyy="2.632e-4" iyz="0" izz="1.62e-4" />
+      </inertial>
+    </link> 
+    <gazebo>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+        <alwaysOn>true</alwaysOn>
+        <bodyName>imu_frame</bodyName>
+        <topicName>/imu/data</topicName>
+        <serviceName>imu_service</serviceName>
+        <gaussianNoise>0.0</gaussianNoise>
+        <updateRate>20.0</updateRate>
+      </plugin>
+    </gazebo>
+
+    <!-- Ultrasonics-->
+
+    <!-- Actual sensors output on combined topic /antobridge/uss_dist -->
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="1" xyz="0.6066 0.2866 0.2835" rpy="0 0 0.785398" />
+    
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="2" xyz="0.732599 0.08 0.277043" rpy="0 0 0" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="3" xyz="0.6066 -0.2866 0.2835" rpy="0 0 -0.785398" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="4" xyz="-0.0075 -0.312247 0.284043" rpy="0 0 -1.5708" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="5" xyz="-0.621588 -0.286588 0.283543" rpy="0 0 -2.35619" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="6" xyz="-0.747596 -0.08 0.277043" rpy="0 0 3.14159" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="7" xyz="-0.621588 0.286589 0.283543" rpy="0 0 2.35619" />
+
+    <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
+    <xacro:ultrasonic id="8" xyz="-0.0075 0.312247 0.284043" rpy="0 0 1.5708" />
+
+
+    <!-- Front facing ZED camera -->
+    <joint name="zed2_joint" type="fixed">
+        <parent link="robot_base_link"/>
+        <child link="zed2_front_camera_center"/>
+        <origin xyz="0.711123 0 0.3574" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Back facing ZED -->
+    <joint name="zed2_joint_back" type="fixed">
+        <parent link="robot_base_link"/>
+        <child link="zed2_back_camera_center"/>
+        <origin xyz="-0.725838 0 0.3574" rpy="0 0 ${M_PI}"/>
+    </joint>
+    
+
+    <xacro:include filename="$(find antobot_description)/urdf/zed2.urdf.xacro"/>
+    <xacro:zed2 link_prefix='' joint_prefix='' position='front'/>
+    <xacro:zed2 link_prefix='' joint_prefix='' position='back'/>
+
+    <xacro:zed2_gazebo robot_ns='' position='front'/>
+    <xacro:zed2_gazebo robot_ns='' position='back'/>
+
+  </xacro:macro>
+  <xacro:antobot_ant/>
+</robot>

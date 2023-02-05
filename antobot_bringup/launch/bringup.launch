@@ -36,7 +36,7 @@
 	<!-- ekf -->
 
 	<!-- instead of ekf, we use rtk_yaw_launcher to prompt which imu-gps configuration to use -->
-	<node if="$(arg use_rtk_yaw_launcher)" pkg="am_heading" type="heading_launcher.py" name="rtk_yaw_launcher_node" output="log" />
+	<node if="$(arg use_rtk_yaw_launcher)" pkg="antobot_heading" type="heading_launcher.py" name="rtk_yaw_launcher_node" output="log" />
 
 	<!-- robot description -->
 	<include if="true" file="$(find antobot_description)/launch/ant_param.launch"></include>
@@ -59,7 +59,7 @@
         <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
 
 	<!-- Camera Manager -->
-	<node if="true" pkg="anto_manager" type="av_cam_mgr.py" name="av_cam_mgr" output="log"/>
+	<node if="true" pkg="antobot_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
 
 	<!-- AntoSupervisor -->
 	<node if="true" pkg="anto_supervisor" type="anto_supervisor.py" name="anto_supervisor" output="log"/>

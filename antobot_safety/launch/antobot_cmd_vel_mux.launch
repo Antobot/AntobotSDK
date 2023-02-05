@@ -1,0 +1,16 @@
+<!--
+  Launcher for the velocity multiplexer.
+ -->
+ 
+<launch>
+  <arg name="nodelet_manager_name"  value="nodelet_manager"/>
+  <arg name="config_file"           value="$(find antobot_safety)/param/antobot_cmd_vel_mux.yaml"/>
+  
+  <!-- nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="yocs_cmd_vel_mux"
+        args="load antobot_safety/CmdVelMuxNodelet $(arg nodelet_manager_name)">
+    <param name="yaml_cfg_file" value="$(arg config_file)"/>
+  </node>
+</launch>

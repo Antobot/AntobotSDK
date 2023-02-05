@@ -18,7 +18,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # Code Description:     This code contains the main program for svo file and corresponding json file recording.
-# # # Interfaces:           _serviceCallbackAntoRec - receive request from anto_manager.av_cam_mgr and send response.
+# # # Interfaces:           _serviceCallbackAntoRec - receive request from antobot_manager.antobot_cam_mgr and send response.
 
 # Contacts: Author/Owner:  jinhuan.liu@antobot.ai
 

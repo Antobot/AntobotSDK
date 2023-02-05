@@ -12,7 +12,7 @@ if(NOT ${yaml-cpp_VERSION} VERSION_LESS "0.5")
 add_definitions(-DHAVE_NEW_YAMLCPP)
 endif()
 
-# Dynamic reconfigure support
+#Dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/reload.cfg)
 
 catkin_package(

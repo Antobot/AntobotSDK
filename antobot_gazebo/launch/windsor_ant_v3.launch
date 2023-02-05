@@ -1,0 +1,31 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Launches a simulation of Ant v3 (VP6) at Windsor Park - INTERNAL USE ONLY
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+
+  <env name="GAZEBO_MODEL_PATH" value="$(find antobot_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="physics" value="ode" />
+
+    <arg name="use_sim_time" value="true"/>
+    <arg name="paused" value="false"/>
+
+    <arg name="debug" value="false"/>
+    <arg name="verbose" value="false"/>
+
+    <arg name="gui" value="true" />
+    <arg name="world_name" value="$(find antobot_gazebo)/worlds/windsor.world"/>
+  </include>
+
+  <!-- robot -->
+  <include file="$(find antobot_gazebo)/launch/settings/ant_v3_windsorSettings.launch"/>
+  
+</launch>

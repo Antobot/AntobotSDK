@@ -8,7 +8,7 @@ from anto_msgs.srv import camManager, camManagerRequest,camManagerResponse
 class camManagerClient():
     """A class that handles a client to provide updates to higher level nodes"""
     
-    def __init__(self,camera_num=1,command=0,serviceName = '/anto_manager/camera'):    
+    def __init__(self,camera_num=1,command=0,serviceName = '/antobot_manager/camera'):    
         
         self.serviceName = serviceName
         

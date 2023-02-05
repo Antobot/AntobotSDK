@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>anto_manager</name>
+  <name>antobot_manager</name>
   <version>0.0.0</version>
-  <description>The anto_manager package</description>
+  <description>The antobot_manager package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

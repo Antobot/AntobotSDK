@@ -40,6 +40,6 @@
 		"/>
 
   <!-- Starts the teleoperation script -->
-  <node if="false" name="antobot_teleop" pkg="antobot_teleop" type="am_teleop.py" output="screen" />
+  <node if="false" name="antobot_teleop" pkg="antobot_teleop" type="antobot_teleop.py" output="screen" />
 
 </launch>

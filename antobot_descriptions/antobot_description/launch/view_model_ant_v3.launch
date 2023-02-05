@@ -1,0 +1,30 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Launches the urdf and state publishers for Ant v3 and visualises the robot model in rviz.
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<!--
+  Useful for debugging or just viewing the model/urdf/transform. 
+ -->
+<launch>
+
+	<!-- Set camera position & orientation-->
+  <param name="/use_sim_time" value="false"/>
+  
+  <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find antobot_description)/urdf/ant_v3.urdf.xacro'"/>
+  <param name="robot_description" command="$(arg urdf_file)" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+    <param name="publish_frequency" type="double" value="5.0"/>
+  </node>
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui">
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_description)/rviz/model.rviz"/>
+</launch>
+

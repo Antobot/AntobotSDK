@@ -1,0 +1,132 @@
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Defines parameters for Antobot Ant v2
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+antobot_joint_state_publisher:
+  type: "joint_state_controller/JointStateController"
+  publish_rate: 50
+
+am_robot:
+  type: "diff_drive_controller/DiffDriveController"
+    
+  left_wheel: ["wheel_left_front_joint", "wheel_left_rear_joint"]
+  right_wheel: ["wheel_right_front_joint", "wheel_right_rear_joint"]
+
+  wheel_separation_multiplier: 1.0 # default: 1.0
+  wheel_radius_multiplier    : 0.92 # default: 1.0 - for 32cm
+
+  publish_rate: 50
+  pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
+  twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
+  cmd_vel_timeout: 0.25
+  
+  enable_odom_tf: false
+
+  # Base frame_id
+  base_frame_id: base_link
+
+  # Velocity and acceleration limits
+  # Whenever a min_* is unspecified, default to -max_*
+  linear:
+    x:
+      has_velocity_limits    : true
+      max_velocity           : 3.0   # m/s
+      has_acceleration_limits: true
+      max_acceleration       : 5.0   # m/s^2
+      has_jerk_limits        : true
+      max_jerk               : 10.0
+  angular:
+    z:
+      has_velocity_limits    : true
+      max_velocity           : 3.0   # rad/s
+      has_acceleration_limits: true
+      max_acceleration       : 5.0   # rad/s^2
+      has_jerk_limits        : true
+      max_jerk               : 15.0
+      
+
+# controllers
+antobot_joint_controller:     
+  wheel_left_front_joint_controller:
+    type: effort_controllers/JointVelocityController
+    joint: wheel_left_front_joint
+    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+  wheel_left_rear_joint_controller:
+    type: effort_controllers/JointVelocityController
+    joint: wheel_left_rear_joint
+    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+  wheel_right_front_joint_controller:
+    type: effort_controllers/JointVelocityController
+    joint: wheel_right_front_joint
+    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+  wheel_right_rear_joint_controller:
+    type: effort_controllers/JointVelocityController
+    joint: wheel_right_rear_joint
+    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+
+
+# joint limits
+joint_limits:
+    wheel_left_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 0.15
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_left_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 0.15
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_right_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 0.15
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+    wheel_right_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: false
+      max_acceleration: 0.15
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
+
+
+antobot_robot:
+  hardware_interface:
+     loop_hz: 20 # hz
+     joints:
+       - wheel_left_front_joint
+       - wheel_left_rear_joint
+       - wheel_right_front_joint
+       - wheel_right_rear_joint
+     joints_modes: [1, 1, 1, 1] # 0: steering, 1: velocity
+

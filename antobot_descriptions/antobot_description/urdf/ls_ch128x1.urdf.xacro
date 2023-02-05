@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     URDF for Lieshen CH128X1 Lidar
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+
+
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="baseline" value="0.12"/>
+
+  <xacro:macro name="ls_ch128x1" 
+               params="name:=''
+                       originX:=''
+                       originY:=''
+                       originZ:=''
+                       rotZ:=''">
+
+    <joint name="ls_ch128x1_${name}_joint" type="fixed">
+      <parent link="robot_base_link"/>
+      <child link="ls_ch128x1_${name}_centre"/>
+      <origin xyz="${originX} ${originY} ${originZ}" rpy="0 0 ${rotZ}"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="300" velocity="100.0" />
+    </joint>
+
+
+    <link name="ls_ch128x1_${name}_centre">
+      <inertial>
+        <mass value="0.16140"/>
+        <origin xyz="0 0 0"/>
+        <inertia
+          ixx="0.0003947" ixy="0.0" ixz="3.3365e-8"
+          iyy="2.417e-5" iyz="0.0"
+          izz="0.0003973"/>
+      </inertial>
+      <visual>
+        <geometry>
+            <mesh filename="package://antobot_description/meshes/ls_ch128x1_lowPoly.dae" scale="1 1 1" />      
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+            <mesh filename="package://antobot_description/meshes/ls_ch128x1_lowPoly.dae" scale="1 1 1" />      
+        </geometry>
+      </collision>
+    </link>
+
+
+  </xacro:macro>
+
+</robot>

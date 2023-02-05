@@ -1,18 +1,6 @@
 /*
-# Copyright (c) 2019, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -181,7 +169,7 @@ bool AmSafety::ussDistSafetyCheck()
     if (time_to_collision < time_collision_thresh)
         not_safe = true;
 
-    // // Scale linear movement based on distance to obstacle
+    // // Scale linear movement based on distance to obstacle - untested, so commented out
     // if(x > 100)
     //    x_vel_scale = 1;
     // else
@@ -246,8 +234,6 @@ void AmSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
     cmd_vel_msg.angular.z = angular_vel;
 
     t_lastRcvdCmdVel = clock();
-
-    //AmSafety::output_cmd_vel_pub.publish(cmd_vel_msg);
 }
 
 void AmSafety::activeCmdVelCallback(const std_msgs::String::ConstPtr& msg)
@@ -376,10 +362,9 @@ int main(int argc, char** argv)
     AmSafety AmSafety1(nh);
 
     // Defines subscribers for calibration and track width adjustment, and links them to the specific class instance of AmSafety
-    // ros::Subscriber sub_calib = nh.subscribe("calibration", 10, &antobot_hardware_interface::antobotHardwareInterface::calibration_Callback, &antobot1);
-    // ros::Subscriber sub_tw = nh.subscribe("cmd_TW", 10, &antobot_hardware_interface::antobotHardwareInterface::tw_Callback, &antobot1);
     ros::Subscriber sub_safety_cmd_vel = nh.subscribe("/antobot_safety/cmd_vel", 10, &AmSafety::safetyCmdVelCallback, &AmSafety1);
     ros::Subscriber sub_active_cmd_vel = nh.subscribe("/yocs_cmd_vel_mux/active", 10, &AmSafety::activeCmdVelCallback, &AmSafety1);
+
     // TODO: Add subscriber for costmap
     ros::Subscriber sub_uss_dist = nh.subscribe("/antobridge/uss_dist", 10, &AmSafety::ussDistCallback, &AmSafety1);
     ros::Subscriber sub_force_stop_release = nh.subscribe("/antobridge/force_stop_release", 10, &AmSafety::releaseCallback, &AmSafety1);

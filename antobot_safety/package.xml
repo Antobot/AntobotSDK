@@ -1,15 +1,19 @@
 <package>
   <name>antobot_safety</name>
-  <version>0.12.1</version>
+  <version>0.0.0</version>
   <description>
-     A multiplexer for command velocity inputs. Arbitrates incoming cmd_vel messages from several topics,
+     Includes a multiplexer for command velocity inputs. Arbitrates incoming cmd_vel messages from several topics,
      allowing one topic at a time to command the robot, based on priorities. It also deallocates current
      allowed topic if no messages are received after a configured timeout. All topics, together with their
      priority and timeout are configured through a YAML file, that can be reload at runtime.
+
+     Beyond this, antobot_safety also stops the robot if obstacles are detected based on ultrasonic sensor data, and is able to 
+     flash the lights of the ant platform at a set frequency, and make noise to make users aware of the robot's presence.
   </description>
-  <author>Jorge Santos Simon</author>
-  <maintainer email="jihoonl@yujinrobot.com">Jihoon Lee</maintainer>
+  <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
   <license>BSD</license>
+
+  <!-- Based on... -->
   <url type="website">http://ros.org/wiki/yocs_cmd_vel_mux</url>
   <url type="repository">https://github.com/yujinrobot/yujin_ocs</url>
   <url type="bugtracker">https://github.com/yujinrobot/yujin_ocs/issues</url>

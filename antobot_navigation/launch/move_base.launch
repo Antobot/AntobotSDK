@@ -27,7 +27,7 @@ Contacts: 	mert.turanli@antobot.co.uk -->
    <master auto="start"/>
     
     <!-- assigning the rostopics to appropriate vairables -->
-    <arg name="cmd_vel_topic" default="/am_nav/cmd_vel" />
+    <arg name="cmd_vel_topic" default="/antobot_navigation/cmd_vel" />
     <arg name="odom_topic" default="/odometry/filtered" />
     <arg name="move_forward_only" default="false"/>
     

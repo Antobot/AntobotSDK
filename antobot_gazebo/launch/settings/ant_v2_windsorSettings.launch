@@ -1,0 +1,69 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:     Launches a simulation of Ant v2 at Windsor Great Park - for external release
+# Contact: william.eaton@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+
+  <!-- Set a simulation parameter -->
+  <rosparam>
+    simulation: true
+  </rosparam>
+
+
+  <!-- robot -->
+  <arg name="referenceLatitude"  default="51.45317750949596" />        
+  <arg name="referenceLongitude"  default="-0.6079646901954604" />
+  <param name="robot_description" command="$(find xacro)/xacro '$(find antobot_description)/urdf/ant_v2.urdf.xacro' referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
+
+  <rosparam command="load" file="$(find antobot_description)/config/control_ant_v2.yaml" />
+
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
+		args="
+			/antobot_joint_state_publisher
+			/am_robot
+		"/>
+
+  <!-- Gazebo model spawner -->
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+        args="-x 0 -y 0 -z 0.45 -Y 1.57 -urdf -param robot_description -model mobile_base"/>
+
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="laser_frame_to_laser" args="0.0 0.0 0.0 0.0 0.0 0.0 /front_laser_frame /laser 100" /> 
+  <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /imu 100" />
+  <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu2" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /gyro_link 100" /> 
+  <node pkg="tf" type="static_transform_publisher" name="gps_frame" args="0.0 0.0 0.0 0.0 0.0 0.0 /gps_frame /gps 100" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_gazebo)/rviz/ant_v2_sensors.rviz"/>
+  
+  <!-- Move base -->
+  <include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
+
+  <!-- IMU calibration -->
+  <node if="true" pkg="antobot_heading" type="antobot_heading_launcher.py" name="calibration_launcher" output="screen" />
+  
+  <!-- Teleop -->
+  <include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch" />
+  <node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" output="screen" />
+  
+  <include if="true" file="$(find antobot_safety)/launch/antobot_cmd_vel_mux.launch" />
+  <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_cmd_vel_mod" output="screen"/>
+
+  <!-- Camera manager -->
+	<node if="true" pkg="antobot_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="screen"/>
+  
+
+  <!-- Sensor sim -->
+	<node if="true" pkg="antobot_gazebo" type="simSensors.py" name="simSensors" output="screen"/>
+
+</launch>
