@@ -37,16 +37,12 @@ am_robot:
       max_velocity           : 3.0   # m/s
       has_acceleration_limits: true
       max_acceleration       : 5.0   # m/s^2
-      has_jerk_limits        : true
-      max_jerk               : 10.0
   angular:
     z:
       has_velocity_limits    : true
       max_velocity           : 3.0   # rad/s
       has_acceleration_limits: true
       max_acceleration       : 5.0   # rad/s^2
-      has_jerk_limits        : true
-      max_jerk               : 15.0
       
 
 # controllers
