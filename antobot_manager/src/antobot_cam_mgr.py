@@ -37,8 +37,7 @@ from pathlib import Path
 import roslaunch # Using this until we develop our own camera manager solution
 
 from sensor_msgs.msg import Temperature, CameraInfo
-from anto_msgs.srv import camManager, camManagerResponse
-from AntoVision.srv import antoRec
+from antobot_msgs.srv import camManager, camManagerResponse, antoRec
 from sensor_msgs.msg import LaserScan
 #from diagnostic_msgs.msg import DiagnosticStatus
 

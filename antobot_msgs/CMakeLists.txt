@@ -16,6 +16,13 @@ add_message_files(
     UInt16_Array.msg
 )
 
+add_service_files(
+  FILES
+  camManager.srv
+  softShutdown.srv
+  antoRec.srv
+)
+
 generate_messages(
     DEPENDENCIES
     std_msgs
