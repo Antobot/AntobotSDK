@@ -1,19 +1,7 @@
 <!--
-# Copyright (c) 2022, ANTOBOT LTD.
+
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -25,46 +13,40 @@
 -->
 
 <launch>
-	<arg name="use_rtk_yaw_launcher" default="true" />
 
 	<!-- controllers -->
 	<include if="true" file="$(find antobot_base)/launch/ant_controller.launch"></include>
 
 	<!-- navigation sensors -->
-	<include if="true" file="$(find antobot_localisation)/launch/am_sensors.launch"></include>
+	<include if="true" file="$(find antobot_nav)/launch/antobot_sensors.launch"></include>
 	
-	<!-- ekf -->
-
-	<!-- instead of ekf, we use rtk_yaw_launcher to prompt which imu-gps configuration to use -->
-	<node if="$(arg use_rtk_yaw_launcher)" pkg="antobot_heading" type="heading_launcher.py" name="rtk_yaw_launcher_node" output="log" />
-
+	<!-- IMU calibration -->
+	<include file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
+	
 	<!-- robot description -->
-	<include if="true" file="$(find antobot_description)/launch/ant_param.launch"></include>
-	
-	<!-- move base nodes -->
-	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch"></include>
-
-	<!-- MQTT Interface node -->
-	<node if="false" pkg="ac_mqtt" type="mqtt_interface_node.py" name="mqtt_interface_node" />
+	<include if="true" file="$(find antobot_vp1)/launch/vp1_param.launch"></include>
 
 	<!-- Master Teleop -->
 	<node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" />	
 	
 	<!-- Joystick Teleop -->
-	<include if="true" file="$(find joystick_teleop)/launch/antobot_tel_joy.launch"></include>
+	<include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch"></include>
 
-	
 	<!-- antobot_safety -->
-	<include if="true" file="$(find antobot_safety)/launch/standalone.launch" />
-        <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
+	<include if="true" file="$(find antobot_safety)/launch/antobot_cmd_vel_mux.launch" />
+	<node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
 
 	<!-- Camera Manager -->
-	<node if="true" pkg="antobot_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
+	<node if="true" pkg="anto_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
 
 	<!-- AntoSupervisor -->
 	<node if="true" pkg="anto_supervisor" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
+	<node if="true" pkg="anto_supervisor" type="softshutdownsrv.py" name="soft_shutdown_server" output="screen"/>
 	
-    <!-- pointcloud to laser nodes (robot)-->
-    <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
+    <!-- pointcloud to laser nodes (for zed camera)-->
+    <include if="true" file="$(find antobot_nav)/launch/pointcloud_to_laser.launch"></include>
+
+	<!-- OPC-UA server launch-->
+	<include if="true" file="$(find ac_opcua)/launch/rosopcua_antobot.launch"></include>
 
 </launch>

@@ -9,10 +9,10 @@ Includes antobot_heading node that takes in imu raw data and gps data and output
  * auto_calibration_python.launch : launches antobot_heading node written in python. 
 
 ###### How to:
- * launch antobot_heading_launcher.py. This node launches auto_calibration_cpp.launch and waits for the inital calibration to be finished. After the initial calibration, it launches EKF node.
+ * launch antobot_heading_launcher.launch. This launches auto_calibration_cpp.launch and a antobot_heading_ekf_launcher node that waits for the inital calibration to be finished. After the initial calibration, it launches EKF node.
  
 ```
- <node if="true" pkg="antobot_heading" type="antobot_heading_launcher.py" name="calibration_launcher" output="screen" />
+ <include file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
 ```
 
 ###### Parameters:

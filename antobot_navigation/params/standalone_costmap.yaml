@@ -33,7 +33,7 @@ inflation_layer:
     inflation_radius:   0.2  # max. distance from an obstacle at which costs are incurred for planning paths.
 
 # Note that global frame is set to base_link. this makes the local costmap to rotate when the robot is rotating. 
-# using costmap_2d package with this setting had an issue of 'smearing'. Therefore, am_costmap_2d has been created (with modification)
+# using costmap_2d package with this setting had an issue of 'smearing'. Therefore, antobot_costmap_2d has been created (with modification)
 global_frame: base_link
 robot_base_frame: base_link
 
@@ -55,8 +55,8 @@ height: 20.0
 
 resolution: 0.1
 
-# For local costmap, we use am_costmap_2d. am_costmap_2d clears the costmap every time it updates.
-# am_costmap_2d is only used for local costmap with global_frame set as base_link.
+# For local costmap, we use antobot_costmap_2d. antobot_costmap_2d clears the costmap every time it updates.
+# antobot_costmap_2d is only used for local costmap with global_frame set as base_link.
 plugins: 
-- {name: obstacle_layer,    type: "am_costmap_2d::am_ObstacleLayer"}
-- {name: inflation_layer, type: "am_costmap_2d::InflationLayer"}
+- {name: obstacle_layer,    type: "antobot_costmap_2d::antobot_ObstacleLayer"}
+- {name: inflation_layer, type: "antobot_costmap_2d::InflationLayer"}

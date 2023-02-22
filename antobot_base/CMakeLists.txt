@@ -37,9 +37,6 @@ catkin_package(
     std_msgs
 )
 
-
-
-
 include_directories(
   include
   ${catkin_INCLUDE_DIRS})

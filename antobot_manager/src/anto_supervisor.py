@@ -152,7 +152,7 @@ class Monitor():
 
         # ROS subscriber
         self.sub_As_uBat = rospy.Subscriber("/antobridge/Ab_uBat",UInt8_Array,self.battery_callback)             #pass battery voltage to anto_supervisor, it's an array data type
-        self.sub_GPS_data = rospy.Subscriber("/am_gps_urcu",NavSatFix,self.GPS_callback)                         #pass GPS data to anto_supervisor, it's a data type of NavSatFix, include data.latitude & data.longitude
+        self.sub_GPS_data = rospy.Subscriber("/antobot_gps_urcu",NavSatFix,self.GPS_callback)                         #pass GPS data to anto_supervisor, it's a data type of NavSatFix, include data.latitude & data.longitude
         self.sub_wheel_vel_cmd = rospy.Subscriber("/antobridge/wheel_vel",Float32_Array,self.wheel_vel_callback) #pass wheel_vel speed to anto_supervisor, it's a float array data type 
         self.sub_wheel_cmd = rospy.Subscriber("/antobridge/wheel_vel_cmd",Float32_Array,self.wheel_cmd_callback) #pass teleop wheel_vel_cmd to anto_supervisor, it's a float array data type
         self.sub_force_stop = rospy.Subscriber("/antobridge/force_stop",Bool,self.force_stop_callback)           #pass force stop signal to anto_supervisor, it's a boolean type

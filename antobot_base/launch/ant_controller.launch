@@ -1,34 +1,26 @@
 <!--
-# Copyright (c) 2022, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # Code Description:     Launches all the necessary files and nodes for operating the small robot.
+
+# # # Code Description:     Launches all the necessary files and nodes for basic operation and movement of the ant robot.
+                            This includes everything between the final command velocity (after safety considerations from antobot_safety)
+                            and Aurix (including anto_bridge)
+
 # Contact: daniel.freer@antobot.ai
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 -->
 
 <launch>
   
   <!-- Defines the robot in ROS -->
-  <rosparam file="$(find antobot_base)/config/ant/hardware.yaml" command="load"/>
-  <rosparam file="$(find antobot_base)/config/ant/controllers.yaml" command="load"/>
-  <rosparam file="$(find antobot_base)/config/ant/joint_limits.yaml" command="load"/>
+  <rosparam file="$(find antobot_description)/config/control.yaml" command="load"/>
 
 
   <!-- Launches the robot controller node -->
-  <node if="true" name="antobot_base" pkg="antobot_base" type="antobot_control_node" output="log" />
+  <node if="true" name="antobot_control" pkg="antobot_base" type="antobot_control_node" output="log" />
   <node if="true" name="anto_bridge" pkg="anto_bridge" type="anto_bridge_node" output="log" />
 
 
@@ -36,10 +28,7 @@
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
 		args="
 			/antobot_joint_state_publisher
-			/am_robot
+			/antobot_robot
 		"/>
-
-  <!-- Starts the teleoperation script -->
-  <node if="false" name="antobot_teleop" pkg="antobot_teleop" type="antobot_teleop.py" output="screen" />
 
 </launch>

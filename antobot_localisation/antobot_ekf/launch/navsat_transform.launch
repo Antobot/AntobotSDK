@@ -5,15 +5,9 @@ navsat_transform parameters for sensor fusion localiastion.
 <launch>
      <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" respawn="false">
      <rosparam command="load" file="$(find antobot_ekf)/params/navsat_transform.yaml" />
-
      <!-- remap the ros topics from ROS conventions to topic published by the scripts-->
-
 	<remap from="/odometry/filtered" to="/odometry/filtered"/>
-
-        <remap from="/gps/fix" to="/am_gps_urcu"/>
-
+        <remap from="/gps/fix" to="/antobot_gps_urcu"/>
 	<remap from="/imu/data" to="/imu/data_corrected"/>  
-
    </node>
-
 </launch>

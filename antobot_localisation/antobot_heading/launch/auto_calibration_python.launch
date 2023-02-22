@@ -1,13 +1,18 @@
 <!--
-  Launcher for the antobot_heading node written in Python
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Description:   Launcher for the antobot_heading node written in Python
+# Contact: soyoung.kim@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 -->
 
 <launch>
-   <node pkg="antobot_heading" type="antobot_heading_node.py" name="antobot_heading_node_py" output="screen"> 
-    <param name="new" type="bool" value="True" />
-    <param name="gps_topic" type="string" value="/am_gps_urcu" />
+  <node pkg="antobot_heading" type="antobot_heading_node.py" name="antobot_heading_node_py" output="screen"> 
+    <param name="gps_topic" type="string" value="/antobot_gps_urcu" />
   	<param name="imu_topic" type="string" value="/imu/data" />
   	<param name="odometry_topic" type="string" value="/odometry/filtered" />
-    <param name="wheel_odometry_topic" type="string" value="/am_robot/odom" />
+    <param name="wheel_odometry_topic" type="string" value="/antobot_robot/odom" />
   </node>
 </launch> 

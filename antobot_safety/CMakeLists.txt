@@ -48,6 +48,6 @@ install(DIRECTORY param
 )
 
 add_executable(antobot_safety_node src/antobot_safety.cpp)
-# add_dependencies(antobot_safety_node am_msgs)
+# add_dependencies(antobot_safety_node antobot_msgs)
 
 target_link_libraries(antobot_safety_node ${catkin_LIBRARIES})

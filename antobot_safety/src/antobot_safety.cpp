@@ -5,8 +5,9 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 Description: 	The primary purpose of this code is to take command velocities and information gathered by robotic sensors 
-in order to scale the output robot command velocity to an appropriate level. If obstacles are detected close to the robot in
-the direction it is moving, for example, the robot should scale its desired speed downward well before reaching the obstacles.
+in order to scale the output robot command velocity to an appropriate level. More specifically, this code filters data from
+ultrasonic sensors and forces the robot to stop if a collision is predicted or if a distance threshold is too close.
+If a force stop is commanded, then the lights are made to blink.
 If antobot_safety is properly implemented with working sensors, the AntoSafe code in Aurix should never have to be used.
 
 Contacts: 	daniel.freer@antobot.ai
@@ -20,18 +21,18 @@ Contacts: 	daniel.freer@antobot.ai
 #include "antobot_safety/antobot_safety.hpp"
 #include <string>
 
-AmSafety::AmSafety(ros::NodeHandle& nh) : nh_(nh)
+AntobotSafety::AntobotSafety(ros::NodeHandle& nh) : nh_(nh)
 {
-    /*  Initialises the AmSafety class*/
+    /*  Initialises the AntobotSafety class*/
     double loop_hz_ = 25.0;
 
-    AmSafety::output_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("/am_robot/cmd_vel", 10);
-    AmSafety::output_uss_dist_filt_pub = nh_.advertise<antobot_msgs::UInt16_Array>("/antobot_safety/uss_dist", 10);
+    AntobotSafety::output_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("/antobot_robot/cmd_vel", 10);
+    AntobotSafety::output_uss_dist_filt_pub = nh_.advertise<antobot_msgs::UInt16_Array>("/antobot_safety/uss_dist", 10);
 	lights_f_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_f", 1);
     lights_b_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_b", 1);
 
     ros::Duration update_freq = ros::Duration(1.0/loop_hz_);
-	non_realtime_loop_ = nh_.createTimer(update_freq, &AmSafety::update, this);
+	non_realtime_loop_ = nh_.createTimer(update_freq, &AntobotSafety::update, this);
 
     uss_dist_windows = {{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}};
     uss_dist_filt.data = {204, 204, 204, 204, 204, 204, 204, 204};
@@ -44,12 +45,12 @@ AmSafety::AmSafety(ros::NodeHandle& nh) : nh_(nh)
 
 }
 
-AmSafety::~AmSafety()
+AntobotSafety::~AntobotSafety()
 {
-    /*  Deconstructor for the AmSafety class*/
+    /*  Deconstructor for the AntobotSafety class*/
 }
 
-void AmSafety::update(const ros::TimerEvent& e)
+void AntobotSafety::update(const ros::TimerEvent& e)
 {
     /*  Fixed update rate to check various safety inputs and broadcast the correct outputs
     */
@@ -85,13 +86,16 @@ void AmSafety::update(const ros::TimerEvent& e)
         cmd_vel_msg.angular.z = 0;
     }
 
-    AmSafety::output_cmd_vel_pub.publish(cmd_vel_msg);
+    prev_linear_vel = cmd_vel_msg.linear.x;
+    prev_angular_vel = cmd_vel_msg.angular.z;
+
+    AntobotSafety::output_cmd_vel_pub.publish(cmd_vel_msg);
     
     if (10.0*(clock() - t_release)/(float)CLOCKS_PER_SEC > 0.2)
         force_stop_release = false;  
 }
 
-bool AmSafety::ussDistSafetyCheck()
+bool AntobotSafety::ussDistSafetyCheck()
 {
     /*  Checks whether, based on the ultrasonic sensor (USS) data, the robot should 
         slow down or stop */
@@ -100,56 +104,17 @@ bool AmSafety::ussDistSafetyCheck()
     //          angular_vel <float> - robot commanded angular velocity
     //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
 
-    float time_to_collision = 100;
-    float lin_vel_thresh = 0.2;
-    float ang_vel_thresh = 0.5;
-    float time_collision_thresh = 0.5;      // Threshold could depend on operation type?
-    float hard_dist_thresh = 50.0;
-    bool not_safe = false;
+    not_safe = false;
 
     if (linear_vel > lin_vel_thresh)
     {
         // Robot is moving forward
-        time_to_collision = (float)(uss_dist_filt.data[1])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front
-
-        if (angular_vel > ang_vel_thresh * linear_vel)           // Robot is turning left while moving forward
-        {
-            float time_to_collision_fl = (float)(uss_dist_filt.data[0])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front left
-            if (time_to_collision_fl < time_to_collision)
-                time_to_collision = time_to_collision_fl;
-        }
-        else if (angular_vel < -ang_vel_thresh * linear_vel)     // Robot is turning right while moving forward
-        {
-            float time_to_collision_fr = (float)(uss_dist_filt.data[2])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front right
-            if (time_to_collision_fr < time_to_collision)
-                time_to_collision = time_to_collision_fr;
-        }
-
-        if (uss_dist_filt.data[1] < hard_dist_thresh)
-            not_safe = true;
+        not_safe = ussDistSafetyCheck_f();
+        
     }
     else if (linear_vel < -lin_vel_thresh)
     {
-        // Robot is moving backward
-        time_to_collision = (float)(uss_dist_filt.data[5])/(100.0*-linear_vel);      // Check time to reach nearest obstacle to the robot's back
-
-        if (angular_vel > ang_vel_thresh * linear_vel)
-        {
-            // Robot is moving back right
-            float time_to_collision_br = (float)(uss_dist_filt.data[4])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
-            if (time_to_collision_br < time_to_collision)
-                time_to_collision = time_to_collision_br;
-        }
-        else if (angular_vel < -ang_vel_thresh * linear_vel)
-        {
-            // Robot is moving back left
-            float time_to_collision_bl = (float)(uss_dist_filt.data[6])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
-            if (time_to_collision_bl < time_to_collision)
-                time_to_collision = time_to_collision_bl;
-        }
-
-        if (uss_dist_filt.data[5] < hard_dist_thresh)
-            not_safe = true;
+        not_safe = ussDistSafetyCheck_b();
     }
     else
     {
@@ -157,32 +122,89 @@ bool AmSafety::ussDistSafetyCheck()
         if (angular_vel > ang_vel_thresh)
         {
             // Left turn
-            // Should look at uss_dist_filt[0], uss_dist_filt[7], uss_dist_filt[4], uss_dist_filt[3]
+            if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
+                not_safe = true;
         }
         else if (angular_vel < -ang_vel_thresh)
         {
             // Right turn
-            // Should look at uss_dist_filt[2], uss_dist_filt[3], uss_dist_filt[6], uss_dist_filt[7]
+            if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
+                not_safe = true;
         }
     }
 
     if (time_to_collision < time_collision_thresh)
         not_safe = true;
 
-    // // Scale linear movement based on distance to obstacle - untested, so commented out
-    // if(x > 100)
-    //    x_vel_scale = 1;
-    // else
-    //    x_vel_scale = log((x-50)/5);
-    // if (x_vel_scale < 0)
-    //    x_vel_scale = 0;
+    return not_safe;
+}
+
+bool AntobotSafety::ussDistSafetyCheck_f()
+{
+    /*  Checks whether, based on the forward-facing ultrasonic sensor (USS) data, the robot should 
+        slow down or stop */
+    //  Inputs: uss_dist_filt <msgs::UInt16_Array> - 8-element array of filtered USS distances
+    //          linear_vel <float> - robot commanded linear velocity
+    //          angular_vel <float> - robot commanded angular velocity
+    //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
+
+    time_to_collision = (float)(uss_dist_filt.data[1])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front
+
+    if (angular_vel > ang_vel_thresh * linear_vel)           // Robot is turning left while moving forward
+    {
+        float time_to_collision_fl = (float)(uss_dist_filt.data[0])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front left
+        if (time_to_collision_fl < time_to_collision)
+            time_to_collision = time_to_collision_fl;
+    }
+    else if (angular_vel < -ang_vel_thresh * linear_vel)     // Robot is turning right while moving forward
+    {
+        float time_to_collision_fr = (float)(uss_dist_filt.data[2])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front right
+        if (time_to_collision_fr < time_to_collision)
+            time_to_collision = time_to_collision_fr;
+    }
+
+    if (uss_dist_filt.data[1] < hard_dist_thresh)
+        not_safe = true;
 
     return not_safe;
 }
 
-void AmSafety::lightsSafetyOut()
+bool AntobotSafety::ussDistSafetyCheck_b()
 {
-    /* Sends light commands to AntoBridge based on the set pattern and 
+    /*  Checks whether, based on the backward-facing ultrasonic sensor (USS) data, the robot should 
+        slow down or stop */
+    //  Inputs: uss_dist_filt <msgs::UInt16_Array> - 8-element array of filtered USS distances
+    //          linear_vel <float> - robot commanded linear velocity
+    //          angular_vel <float> - robot commanded angular velocity
+    //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
+    
+    // Robot is moving backward
+    time_to_collision = (float)(uss_dist_filt.data[5])/(100.0*-linear_vel);      // Check time to reach nearest obstacle to the robot's back
+
+    if (angular_vel > ang_vel_thresh * linear_vel)
+    {
+        // Robot is moving back right
+        float time_to_collision_br = (float)(uss_dist_filt.data[4])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
+        if (time_to_collision_br < time_to_collision)
+            time_to_collision = time_to_collision_br;
+    }
+    else if (angular_vel < -ang_vel_thresh * linear_vel)
+    {
+        // Robot is moving back left
+        float time_to_collision_bl = (float)(uss_dist_filt.data[6])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
+        if (time_to_collision_bl < time_to_collision)
+            time_to_collision = time_to_collision_bl;
+    }
+
+    if (uss_dist_filt.data[5] < hard_dist_thresh)
+        not_safe = true;
+
+    return not_safe;
+}
+
+void AntobotSafety::lightsSafetyOut()
+{
+    /* Sends light commands to AntoBridge based on the set pattern
     */
 
     std_msgs::Bool lights_f_cmd;
@@ -198,16 +220,17 @@ void AmSafety::lightsSafetyOut()
     if (safety_light_pattern == 1)
     {
         // Blinking with constant frequency (light_freq)
-        light_cmd_freq();
+        lightCmdFreq();
         lights_f_cmd.data = light_cmd_ar[0];
         lights_b_cmd.data = light_cmd_ar[1];
     }
     
+    // Publishes the data to ROS
     lights_f_pub.publish(lights_f_cmd);
     lights_b_pub.publish(lights_b_cmd);
 }
 
-void AmSafety::light_cmd_freq()
+void AntobotSafety::lightCmdFreq()
 {
     /* Sends light commands at a set frequency, defined in the class initialisation
     */
@@ -225,18 +248,33 @@ void AmSafety::light_cmd_freq()
    }
 }
 
-void AmSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
+void AntobotSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
+    /* Callback function for /antobot_safety/cmd_vel. Assigns the velocity data received from
+    this ROS topic to the robot if appropriate, and ensures reasonable acceleration.
+    */
+
+    // Max acceleration
+    float max_acc = 3.0;  // m/s^2
+    float max_acc_s = max_acc / 25;
+    
+    // Assigns received value to velocity variables
     linear_vel = msg->linear.x;
     angular_vel = msg->angular.z;
 
+    // Checks acceleration
+    if (abs(linear_vel) > abs(prev_linear_vel) + max_acc_s)
+        linear_vel = prev_linear_vel + copysign(max_acc_s, linear_vel); // If acceleration is too high, lowers velocity
+
+    // Assigns values to final output
     cmd_vel_msg.linear.x = linear_vel;
     cmd_vel_msg.angular.z = angular_vel;
 
+    // Provides time that the command was received
     t_lastRcvdCmdVel = clock();
 }
 
-void AmSafety::activeCmdVelCallback(const std_msgs::String::ConstPtr& msg)
+void AntobotSafety::activeCmdVelCallback(const std_msgs::String::ConstPtr& msg)
 {
     /*  Collects information from ROS about the robot's current operation state. This is because different operation states may have different
         limits based on the environment (i.e. teleoperation via the app may have significant delay)  */
@@ -253,14 +291,14 @@ void AmSafety::activeCmdVelCallback(const std_msgs::String::ConstPtr& msg)
         active_cmd_vel = 3;
 }
 
-void AmSafety::ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& msg)
+void AntobotSafety::ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& msg)
 {
     /*  Reads in the data from the ultrasonic sensors and, based on the current movement of the robot, makes a recommendation 
         for whether the robot should slow down or whether its current speed/movement is acceptable. */
     //  Inputs: msg <antobot_msgs::UInt16_Array> - currently an 8-element array which provides the distances sensed by each ultrasonic sensor. 
     //                                                The order starting from msg->data[0] is: 0 - front left; 1 - front; 2 - front right; 3 - right;
     //                                                4 - back right; 5 - back; 6 - back left; 7 - left
-    //  Outputs: Speed recommendation for the robot based on USS data only
+    //  Outputs: publishes filtered USS data to /antobot_safety/uss_dist ROS topic
 
     uint16_t uss_dist_ar[8];
     for (int i=0; i<8; i++)
@@ -269,10 +307,10 @@ void AmSafety::ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& msg)
     // Define the filtered USS dist class variable 
     uss_dist_filt = ussDistFilt(uss_dist_ar);
 
-    AmSafety::output_uss_dist_filt_pub.publish(uss_dist_filt);
+    AntobotSafety::output_uss_dist_filt_pub.publish(uss_dist_filt);
 }
 
-antobot_msgs::UInt16_Array AmSafety::ussDistFilt(uint16_t uss_dist_ar[8])
+antobot_msgs::UInt16_Array AntobotSafety::ussDistFilt(uint16_t uss_dist_ar[8])
 {
     /*  Gets filtered ultrasonic sensor data for each individual sensor, creates the structure
         for the data to be sent, and returns this to the main USS callback function. */
@@ -291,7 +329,7 @@ antobot_msgs::UInt16_Array AmSafety::ussDistFilt(uint16_t uss_dist_ar[8])
     return uss_dist_filt_all; 
 }
 
-uint16_t AmSafety::ussDistFilt_i(uint16_t uss_dist_i, int i)
+uint16_t AntobotSafety::ussDistFilt_i(uint16_t uss_dist_i, int i)
 {
     /*  Calculates filtered data of a single USS sensor by first formatting data to fit into a predetermined window size,
         then carrying out the filter (currently a simple mean) */
@@ -299,17 +337,17 @@ uint16_t AmSafety::ussDistFilt_i(uint16_t uss_dist_i, int i)
     //          i <int> - the element of the corresponding USS sensor
     
     uss_dist_windows[i].push_back(uss_dist_i);
-    if (uss_dist_windows[i].size() > AmSafety::uss_win_size)
+    if (uss_dist_windows[i].size() > AntobotSafety::uss_win_size)
     {
-        uss_dist_windows[i] = AmSafety::pop_front(uss_dist_windows[i]);
+        uss_dist_windows[i] = AntobotSafety::popFront(uss_dist_windows[i]);
     }
 
-    int uss_dist_filt_ii = AmSafety::get_uss_vec_mean(uss_dist_windows[i]);
+    int uss_dist_filt_ii = AntobotSafety::getUssVecMean(uss_dist_windows[i]);
 
     return uss_dist_filt_ii;
 }
 
-std::vector<int> AmSafety::pop_front(std::vector<int> vec)
+std::vector<int> AntobotSafety::popFront(std::vector<int> vec)
 {
     /*  Simple function to pop off the first element of a vector. */
     //  Input: vec <std::vector<int>> - a generic int vector of length >1
@@ -321,7 +359,7 @@ std::vector<int> AmSafety::pop_front(std::vector<int> vec)
     return vec;
 }
 
-int AmSafety::get_uss_vec_mean(std::vector<int> vec)
+int AntobotSafety::getUssVecMean(std::vector<int> vec)
 {
     /*  Filters and gets the mean of a single US sensor over a set window. */
     //  Input: vec <std::vector<int>> - a vector of USS data
@@ -341,8 +379,12 @@ int AmSafety::get_uss_vec_mean(std::vector<int> vec)
     return std::accumulate(vec.begin(), vec.end(), 0.0) / vec.size();
 }
 
-void AmSafety::releaseCallback(const std_msgs::Bool::ConstPtr& msg)
+void AntobotSafety::releaseCallback(const std_msgs::Bool::ConstPtr& msg)
 {
+   /*   Callback function for /antobridge/force_stop_release. Tells the robot it is okay to move again
+        after a force stop command
+   */
+   
    if (msg->data) 
    {
 	  force_stop = false;
@@ -358,16 +400,14 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Rate rate(25);
 
-    // Defines an AmSafety class object using the defined ROS node
-    AmSafety AmSafety1(nh);
+    // Defines an AntobotSafety class object using the defined ROS node
+    AntobotSafety AntobotSafety1(nh);
 
-    // Defines subscribers for calibration and track width adjustment, and links them to the specific class instance of AmSafety
-    ros::Subscriber sub_safety_cmd_vel = nh.subscribe("/antobot_safety/cmd_vel", 10, &AmSafety::safetyCmdVelCallback, &AmSafety1);
-    ros::Subscriber sub_active_cmd_vel = nh.subscribe("/yocs_cmd_vel_mux/active", 10, &AmSafety::activeCmdVelCallback, &AmSafety1);
-
-    // TODO: Add subscriber for costmap
-    ros::Subscriber sub_uss_dist = nh.subscribe("/antobridge/uss_dist", 10, &AmSafety::ussDistCallback, &AmSafety1);
-    ros::Subscriber sub_force_stop_release = nh.subscribe("/antobridge/force_stop_release", 10, &AmSafety::releaseCallback, &AmSafety1);
+    // Defines subscribers for calibration and track width adjustment, and links them to the specific class instance of AntobotSafety
+    ros::Subscriber sub_safety_cmd_vel = nh.subscribe("/antobot_safety/cmd_vel", 10, &AntobotSafety::safetyCmdVelCallback, &AntobotSafety1);
+    ros::Subscriber sub_active_cmd_vel = nh.subscribe("/yocs_cmd_vel_mux/active", 10, &AntobotSafety::activeCmdVelCallback, &AntobotSafety1);
+    ros::Subscriber sub_uss_dist = nh.subscribe("/antobridge/uss_dist", 10, &AntobotSafety::ussDistCallback, &AntobotSafety1);
+    ros::Subscriber sub_force_stop_release = nh.subscribe("/antobridge/force_stop_release", 10, &AntobotSafety::releaseCallback, &AntobotSafety1);
 
 
     // NOTE: We run the ROS loop in a separate thread as external calls such

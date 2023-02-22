@@ -1,23 +1,11 @@
 /*
-# Copyright (c) 2022, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 Description: 	The primary purpose of this code is to serve as a communication channel between the ROS components of
-		the Xavier NX and the the Aurix. This channel goes in 2 directions. It reads information from am_robot/cmd_vel 
+		the Xavier NX and the the Aurix. This channel goes in 2 directions. It reads information from antobot_robot/cmd_vel 
 		and other relevant ROS topics, converts it to the format defined in AntoBridge, and sends the
 		data to the AntoBridge ROS node via publishers. Likewise, it reads data from AntoBridge using subscribers, and
 		passes this data along to the robot to calculate wheel odometry and other relevant information.
@@ -31,6 +19,8 @@ Contacts: 	daniel.freer@antobot.ai
 #include "std_msgs/String.h"
 #include "std_msgs/Bool.h"
 #include <sstream>
+#include <numeric>
+#include "stdlib.h"
 
 #include <antobot_base/antobot_control.h>
 #include <joint_limits_interface/joint_limits_interface.h>
@@ -51,13 +41,11 @@ using joint_limits_interface::PositionJointSoftLimitsInterface;
 using joint_limits_interface::VelocityJointSoftLimitsHandle;
 using joint_limits_interface::VelocityJointSoftLimitsInterface;
 
-//using namespace boost::assign;
-
 
 namespace antobot_hardware_interface
 {
 	
-	antobotControl::antobotControl(ros::NodeHandle& nh) \
+	antobotHardwareInterface::antobotHardwareInterface(ros::NodeHandle& nh) \
 		: nh_(nh)
 	{
 		/* Constructor function - Initialises robot definition and serial port to Aurix, defines the ROS loop
@@ -74,18 +62,21 @@ namespace antobot_hardware_interface
 		nh_.param("/antobot/hardware_interface/loop_hz", loop_hz_, 25.0);
 		ROS_DEBUG_STREAM_NAMED("constructor","Using loop frequency of " << loop_hz_ << " hz");
 		ros::Duration update_freq = ros::Duration(1.0/loop_hz_);
-		non_realtime_loop_ = nh_.createTimer(update_freq, &antobotControl::update, this);
+		non_realtime_loop_ = nh_.createTimer(update_freq, &antobotHardwareInterface::update, this);
 
 		ROS_INFO_NAMED("hardware_interface", "Loaded robot controller.");
 
+		wheel_vel_windows = {{0}, {0}, {0}, {0}};
+		wheel_vels_filt.data = {0, 0, 0, 0};
+
 	}
 
-	antobotControl::~antobotControl()
+	antobotHardwareInterface::~antobotHardwareInterface()
 	{
 		
 	}
 
-	void antobotControl::init()
+	void antobotHardwareInterface::init()
 	{
 		/* Robot initialisation - defines joint names, modes, and related variables as read from the yaml file defined in the launchfile. 
 		Defines joint state handles, including joint position handles and joint velocity handles, sets limits for the controller,
@@ -115,6 +106,7 @@ namespace antobot_hardware_interface
 		// Initialize controller
 		for (int i = 0; i < num_joints_; ++i)
 		{
+			//antobot_driver::Joint joint = antobot1.getJoint(joint_names_[i]);
 
 		  	ROS_DEBUG_STREAM_NAMED("constructor","Loading joint name: " << joint_names_[i]);
 
@@ -123,48 +115,69 @@ namespace antobot_hardware_interface
 		  	joint_state_interface_.registerHandle(jointStateHandle);
 
 			if (joint_modes_[i] == 0) {
-			  	// Create position joint interface
-				JointHandle jointPositionHandle(jointStateHandle, &joint_commands_[i]);
-				JointLimits limits;
-	 	   		SoftJointLimits softLimits;
-
-				softLimits.k_position = HUGE_VAL;
-				softLimits.k_velocity = HUGE_VAL;
-				softLimits.max_position = HUGE_VAL;
-				softLimits.min_position = -HUGE_VAL;
-
-				if (getJointLimits(joint_names_[i], nh_, limits) == false) {
-					ROS_ERROR_STREAM("Cannot set joint limits for " << joint_names_[i]);
-				} else {
-					// Adds joint limits to the position joint soft limits interface
-					PositionJointSoftLimitsHandle jointLimitsHandle(jointPositionHandle, limits, softLimits);
-					positionJointSoftLimitsInterface.registerHandle(jointLimitsHandle);
-				}
-				// Registers joint position handle to the position joint interface
-			  	position_joint_interface_.registerHandle(jointPositionHandle);
+			  	create_position_joint(i, jointStateHandle);
 			}
 			else {
-				// Create velocity joint interface
-				JointHandle jointVelocityHandle(jointStateHandle, &joint_commands_[i]);
-				JointLimits limits;
-	 	   		SoftJointLimits softLimits;
-
-				softLimits.k_position = HUGE_VAL;
-				softLimits.k_velocity = HUGE_VAL;
-				softLimits.max_position = HUGE_VAL;
-				softLimits.min_position = -HUGE_VAL;
-
-				if (getJointLimits(joint_names_[i], nh_, limits) == false) {
-					ROS_ERROR_STREAM("Cannot set joint limits for " << joint_names_[i]);
-				} else {
-					VelocityJointSoftLimitsHandle jointLimitsHandle(jointVelocityHandle, limits, softLimits);
-					velocityJointSoftLimitsInterface.registerHandle(jointLimitsHandle);
-				}
-				// Registers joint velocity handle to the velocity joint interface
-			  	velocity_joint_interface_.registerHandle(jointVelocityHandle);
+				create_velocity_joint(i, jointStateHandle);
 			}
 		}
 
+		init_joint_variables();
+	}
+
+	void antobotHardwareInterface::create_position_joint(int i, JointStateHandle jointStateHandle)
+	{
+		/* Creates and registers a single position-based control joint */
+		
+		// Create position joint interface
+		JointHandle jointPositionHandle(jointStateHandle, &joint_commands_[i]);
+		JointLimits limits;
+	 	SoftJointLimits softLimits;
+
+		softLimits.k_position = HUGE_VAL;
+		softLimits.k_velocity = HUGE_VAL;
+		softLimits.max_position = HUGE_VAL;
+		softLimits.min_position = -HUGE_VAL;
+
+		if (getJointLimits(joint_names_[i], nh_, limits) == false) {
+			ROS_ERROR_STREAM("Cannot set joint limits for " << joint_names_[i]);
+		} else {
+			// Adds joint limits to the position joint soft limits interface
+			PositionJointSoftLimitsHandle jointLimitsHandle(jointPositionHandle, limits, softLimits);
+			positionJointSoftLimitsInterface.registerHandle(jointLimitsHandle);
+		}
+		// Registers joint position handle to the position joint interface
+		position_joint_interface_.registerHandle(jointPositionHandle);
+	}
+
+	void antobotHardwareInterface::create_velocity_joint(int i, JointStateHandle jointStateHandle)
+	{
+		/* Creates and registers a single velocity-based control joint */
+		
+		// Create velocity joint interface
+		JointHandle jointVelocityHandle(jointStateHandle, &joint_commands_[i]);
+		JointLimits limits;
+	 	SoftJointLimits softLimits;
+
+		softLimits.k_position = HUGE_VAL;
+		softLimits.k_velocity = HUGE_VAL;
+		softLimits.max_position = HUGE_VAL;
+		softLimits.min_position = -HUGE_VAL;
+
+		if (getJointLimits(joint_names_[i], nh_, limits) == false) {
+			ROS_ERROR_STREAM("Cannot set joint limits for " << joint_names_[i]);
+		} else {
+			VelocityJointSoftLimitsHandle jointLimitsHandle(jointVelocityHandle, limits, softLimits);
+			velocityJointSoftLimitsInterface.registerHandle(jointLimitsHandle);
+		}
+		// Registers joint velocity handle to the velocity joint interface
+		velocity_joint_interface_.registerHandle(jointVelocityHandle);
+	}
+
+	void antobotHardwareInterface::init_joint_variables()
+	{
+		/* Registers the interfaces for each type of robot joint, and initialises variables to zero */
+		
 		// Registers the interface for each robot joint to the ROS hardware_interface system
 		registerInterface(&joint_state_interface_);
 		registerInterface(&position_joint_interface_);
@@ -173,7 +186,6 @@ namespace antobot_hardware_interface
 		registerInterface(&positionJointSoftLimitsInterface);
 		registerInterface(&velocityJointSoftLimitsInterface);
 
-		// Provides initial values
 		joint_position_[0] = 0;
 		joint_position_[1] = 0;
 		joint_position_[2] = 0;
@@ -200,16 +212,19 @@ namespace antobot_hardware_interface
 		steer_pos[3] = 0;
 	}
 
-	void antobotControl::init_publishers()
+	void antobotHardwareInterface::init_publishers()
 	{
+		/* Initialises ROS publishers which send commands to anto_bridge */
+		
 		wheel_vel_cmd_pub = nh_.advertise<antobot_msgs::Float32_Array>("/antobridge/wheel_vel_cmd", 1);
 		steer_pos_cmd_pub = nh_.advertise<antobot_msgs::Float32_Array>("/antobridge/steer_pos_cmd", 1);
+		wheel_vel_filt_pub = nh_.advertise<antobot_msgs::Float32_Array>("/am/control/wheel_vel_filt", 1);
 	}
 
-	void antobotControl::update(const ros::TimerEvent& e)
+	void antobotHardwareInterface::update(const ros::TimerEvent& e)
 	{
 		/* The callback function for the ROS timer defined in the constructor. This will occur at a rate of 25Hz.
-		The main purpose of this function is to call the read() and write() functions, which read and write from
+		The main purpose of this function is to call the push_motor_info() and write() functions, which read and write from
 		the AntBridge interface. */
 		
 		_logInfo = "\n";
@@ -226,14 +241,15 @@ namespace antobot_hardware_interface
 		push_motor_info();
 		controller_manager_->update(ros::Time::now(), elapsed_time_);
 		write(elapsed_time_);
+
 	}
 
-	void antobotControl::push_motor_info()
+	void antobotHardwareInterface::push_motor_info()
 	{
 		/* Pushes motor information from AntoBridge to the ros controller via the ROS-defined hardware interface
 		*/
 
-		if (num_joints_ < 5)
+		if (num_joints_ < 5)	// Included to allow for more complex robots later
 		{
 
 			joint_velocity_[0] = wheel_vels[0];
@@ -249,34 +265,13 @@ namespace antobot_hardware_interface
 			joint_position_[2] += wheel_vels[2] * dt;
 			joint_position_[3] += wheel_vels[3] * dt;
 
-		}
-		
-		// TODO: Should also incorporate ATWAS controller design (num_joints_ > 5)		
+		}	
 		
 	}
 
-
-
-	uint8_t antobotControl::GetByteFromBools(const bool eightBools[8])
+	void antobotHardwareInterface::write(ros::Duration elapsed_time)
 	{
-		/* Converts an array of 8 booleans into a byte of 8 binary values */
-		// // Input: const bool eightBools[8] - array of 8 booleans
-		// // Returns: uint8_t ret - byte of 8 binary values
-		
-		uint8_t ret = 0;
-		for (int i=0; i<8; i++) if (eightBools[i]) ret |= (1<<i);
-		return ret;
-	}
-
-	void antobotControl::DecodeByteIntoEightBools(uint8_t theByte, bool eightBools[8])
-	{
-		/* Converts a byte of 8 binary values into an array of 8 booleans */
-		for (int i=0; i<8; i++) eightBools[i] = ((theByte & (1<<i)) != 0);
-	}
-
-	void antobotControl::write(ros::Duration elapsed_time)
-	{
-		/* Writes robot commands from am_control to AntoBridge via ROS publishers */
+		/* Writes robot commands from antobot_control to AntoBridge via ROS publishers */
 
 		std::vector<float> motor_commands;
 		antobot_msgs::Float32_Array wheel_vels_cmd;
@@ -313,18 +308,94 @@ namespace antobot_hardware_interface
 		wheel_vels_cmd.data = motor_commands;
 		wheel_vel_cmd_pub.publish(wheel_vels_cmd);
 	}
-	
-	void antobotControl::wheel_vel_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
+
+	antobot_msgs::Float32_Array antobotHardwareInterface::filterWheelVels(float wheel_vel_ar[4])
 	{
-		//ROS_INFO("Wheel vel callback entered!");
+		/*  Gets filtered ultrasonic sensor data for each individual sensor, creates the structure
+			for the data to be sent, and returns this to the main USS callback function. */
+		//  Inputs: wheel_vel_ar <float[4]> - the most recent USS data pulled in for each of the 8 sensors
+		//  Returns: uss_dist_filt_all <antobot_msgs::UInt16_Array> - the filtered data to publish
+
+		antobot_msgs::Float32_Array wheel_vel_filt_all;
+		float wheel_vel_filt_i;
+
+		for (int i=0; i<4; i++)
+		{
+			wheel_vel_filt_i = wheelVelFilt_i(wheel_vel_ar[i], i);
+			wheel_vel_filt_all.data.push_back(wheel_vel_filt_i);
+		}
+
+		wheel_vel_filt_pub.publish(wheel_vel_filt_all);
+
+		return wheel_vel_filt_all; 
+	}
+
+	float antobotHardwareInterface::wheelVelFilt_i(float wheel_vel_i, int i)
+	{
+		/*  Calculates filtered data of a single wheel by first formatting data to fit into a predetermined window size,
+			then carrying out the filter (currently a simple minimum magnitude) */
+		//  Inputs: wheel_vel_i <uint16_t> - the newest data received for a particular sensor
+		//          i <int> - the element of the corresponding USS sensor
+
+		wheel_vel_windows[i].push_back(wheel_vel_i);
+
+		if (wheel_vel_windows[i].size() > antobotHardwareInterface::wVel_win_size)
+		{
+			wheel_vel_windows[i] = antobotHardwareInterface::pop_front(wheel_vel_windows[i]);
+		}
+
+		std::vector<float> vec = wheel_vel_windows[i];
+
+		float mean_wheel_vel_ii = std::accumulate(vec.begin(), vec.end(), 0.0) / vec.size();
+		std::vector<float> vec_abs = vec;
+		for (int i = 0; i<vec.size(); i++)
+			vec_abs[i] = abs(vec[i]);
+
+		float wheel_vel_filt_ii = *min_element(vec_abs.begin(), vec_abs.end());
+		if (mean_wheel_vel_ii < 0)
+			wheel_vel_filt_ii *= -1;
+
+		return wheel_vel_filt_ii;
+	}
+	
+	std::vector<float> antobotHardwareInterface::pop_front(std::vector<float> vec)
+	{
+		/*  Simple function to pop off the first element of a vector. */
+		//  Input: vec <std::vector<float>> - a generic float vector of length > 1
+		//  Returns: vec <std::vector<float>> - a generic float vector of length > 0
+		
+		assert(!vec.empty());
+		vec.erase(vec.begin());
+
+		return vec;
+	}
+
+	void antobotHardwareInterface::wheel_vel_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
+	{
+		/* Callback function for wheel velocities. Passes the information along to class variables */
+
+		
 		wheel_vels[0] = msg->data[0];
 		wheel_vels[1] = msg->data[1];
 		wheel_vels[2] = msg->data[2];
 		wheel_vels[3] = msg->data[3];
+
+		if (false)
+		{
+			wheel_vels_filt = filterWheelVels(wheel_vels);
+			wheel_vels[0] = wheel_vels_filt.data[0];
+			wheel_vels[1] = wheel_vels_filt.data[1];
+			wheel_vels[2] = wheel_vels_filt.data[2];
+			wheel_vels[3] = wheel_vels_filt.data[3];
+		}
+			
 	}
 	
-	void antobotControl::steer_pos_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
+	void antobotHardwareInterface::steer_pos_Callback(const antobot_msgs::Float32_Array::ConstPtr& msg)
 	{
+		/* Callback function for wheel velocities. Only applies to more complicated robot designs with steerable wheels
+		Passes the information along to class variables. */
+		
 		//ROS_INFO("Steer pos callback entered!");
 		steer_pos[0] = msg->data[0];
 		steer_pos[1] = msg->data[1];

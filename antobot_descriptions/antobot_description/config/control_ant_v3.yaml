@@ -10,7 +10,7 @@ antobot_joint_state_publisher:
   type: "joint_state_controller/JointStateController"
   publish_rate: 50
 
-am_robot:
+antobot_robot:
   type: "diff_drive_controller/DiffDriveController"
     
   left_wheel: ["wheel_left_front_joint", "wheel_left_rear_joint"]
@@ -67,53 +67,53 @@ antobot_joint_controller:
 
 # joint limits
 joint_limits:
-    wheel_left_front_joint:
-      has_position_limits: false
-      has_velocity_limits: true
-      max_velocity: 20
-      has_acceleration_limits: false
-      max_acceleration: 0.15
-      has_jerk_limits: false
-      max_jerk: 0.01875
-      has_effort_limits: false
-      max_effort: 3.1415
-      min_effort: -3.1415
+  wheel_left_front_joint:
+    has_position_limits: false
+    has_velocity_limits: true
+    max_velocity: 20
+    has_acceleration_limits: false
+    max_acceleration: 0.15
+    has_jerk_limits: false
+    max_jerk: 0.01875
+    has_effort_limits: false
+    max_effort: 3.1415
+    min_effort: -3.1415
 
-    wheel_left_rear_joint:
-      has_position_limits: false
-      has_velocity_limits: true
-      max_velocity: 20
-      has_acceleration_limits: false
-      max_acceleration: 0.15
-      has_jerk_limits: false
-      max_jerk: 0.01875
-      has_effort_limits: false
-      max_effort: 3.1415
-      min_effort: -3.1415
+  wheel_left_rear_joint:
+    has_position_limits: false
+    has_velocity_limits: true
+    max_velocity: 20
+    has_acceleration_limits: false
+    max_acceleration: 0.15
+    has_jerk_limits: false
+    max_jerk: 0.01875
+    has_effort_limits: false
+    max_effort: 3.1415
+    min_effort: -3.1415
 
-    wheel_right_front_joint:
-      has_position_limits: false
-      has_velocity_limits: true
-      max_velocity: 20
-      has_acceleration_limits: false
-      max_acceleration: 0.15
-      has_jerk_limits: false
-      max_jerk: 0.01875
-      has_effort_limits: false
-      max_effort: 3.1415
-      min_effort: -3.1415
+  wheel_right_front_joint:
+    has_position_limits: false
+    has_velocity_limits: true
+    max_velocity: 20
+    has_acceleration_limits: false
+    max_acceleration: 0.15
+    has_jerk_limits: false
+    max_jerk: 0.01875
+    has_effort_limits: false
+    max_effort: 3.1415
+    min_effort: -3.1415
 
-    wheel_right_rear_joint:
-      has_position_limits: false
-      has_velocity_limits: true
-      max_velocity: 20
-      has_acceleration_limits: false
-      max_acceleration: 0.15
-      has_jerk_limits: false
-      max_jerk: 0.01875
-      has_effort_limits: false
-      max_effort: 3.1415
-      min_effort: -3.1415
+  wheel_right_rear_joint:
+    has_position_limits: false
+    has_velocity_limits: true
+    max_velocity: 20
+    has_acceleration_limits: false
+    max_acceleration: 0.15
+    has_jerk_limits: false
+    max_jerk: 0.01875
+    has_effort_limits: false
+    max_effort: 3.1415
+    min_effort: -3.1415
 
 
 antobot_robot:

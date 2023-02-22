@@ -1,25 +1,10 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-# # # Code Description:     Simulated sensor data for GPS status and collates ultrasonic data
-
+# # # Code Description:     Converts simulated data for GPS and ultrasonic sensors into the same format as actual robot
 # Contact: william.eaton@antobot.ai
 # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -39,7 +24,7 @@ class gpsStatus:
 
 		self.gpsState = UInt8(4) # Very simple, just assumes good RTK
 
-		self.gpsStatus_pub = rospy.Publisher('am_gps_urcu_status', UInt8, queue_size=10)
+		self.gpsStatus_pub = rospy.Publisher('antobot_gps_urcu_status', UInt8, queue_size=10)
 
 		rospy.Timer(rospy.Duration(0.1), self.publishGPSState)
 
@@ -47,10 +32,6 @@ class gpsStatus:
 	def publishGPSState(self,event):
 		
 		self.gpsStatus_pub.publish(self.gpsState)
-
-
-
-
 
 
 class ultrasonics:
@@ -70,7 +51,6 @@ class ultrasonics:
 		self.range8=0
 
 
-        # Create subscribers
 		self.range1_sub = rospy.Subscriber('/ultrasonic1', Range , self.range1_callback)   
 		self.range2_sub = rospy.Subscriber('/ultrasonic2', Range , self.range2_callback)   
 		self.range3_sub = rospy.Subscriber('/ultrasonic3', Range , self.range3_callback)   
@@ -86,12 +66,9 @@ class ultrasonics:
 		# Create timer
 		rospy.Timer(rospy.Duration(0.04), self.publishRanges)
 
-
 	def publishRanges(self,event):
 		self.ranges.data=[self.range1,self.range2,self.range3,self.range4,self.range5,self.range6,self.range7,self.range8]
 		self.ultrasonic_pub.publish(self.ranges)
-
-
 
 	def range1_callback(self,data):
 		self.range1=round(data.range*100)
@@ -119,28 +96,17 @@ class ultrasonics:
 
 
 
-
-
-
 def main(args):
 
-	# Create a ROS node to follow the path
-	rosnode=rospy.init_node('simSensors', anonymous=False)
 
+	rosnode=rospy.init_node('simSensors', anonymous=False)
 	rospy.wait_for_message('/gazebo/model_states',ModelStates)
 
-
-    # Create objects
 	gps=gpsStatus()
 	range=ultrasonics()
 
-
 	rospy.spin()
 
-
-
-
-###########################################################################################################################
 
 if __name__ == '__main__':
     main(sys.argv)

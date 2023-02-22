@@ -52,8 +52,8 @@ height: 50.0
 resolution: 0.1
 
 
-# For global costmap, we use costmap_2d instead of am_costmap_2d. am_costmap_2d clears the costmap every time it updates.
-# am_costmap_2d is only used for local costmap with global_frame set as base_link.
+# For global costmap, we use costmap_2d instead of antobot_costmap_2d. antobot_costmap_2d clears the costmap every time it updates.
+# antobot_costmap_2d is only used for local costmap with global_frame set as base_link.
 plugins: 
 - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
 - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

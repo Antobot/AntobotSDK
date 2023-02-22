@@ -3,25 +3,28 @@
 # All rights reserved.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-#
 # Description: 	The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
 #             	This script subscribes to the IMU and GPS topics and publishes Imu messages over 
 #		        imu/data_corrected topic.     
-#               This node performs the same functions as the antobot_heading.cpp but is written in Python.      	  
+#               This node performs the same functions as the antobot_heading.cpp but is written in Python.   
+# Subscribes to: GPS topic (/antobot_gps_urcu)
+#                imu topic (/imu/data)
+#                EKF odometry topic (/odometry/filtered)
+#                wheel odometry topic (/antobot_robot/odom)
+# Publishes : Calibrated imu topic (/imu/data_corrected) - which is then used in EKF
 # Contacts:     soyoung.kim@antobot.ai
-#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import rospy
 import time
 import math
 import sys, signal
-from geonav_transform import geonav_conversions as gc
-
 import tf
+from geonav_transform import geonav_conversions as gc
 from sensor_msgs.msg import NavSatFix, Imu
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32, UInt8
+from std_srvs.srv import *
 
 def signal_handler(signal, frame):
     print("\nantobot_heading_node_python killed")
@@ -29,11 +32,12 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-class AutoCalibration:
+class autoCalibration:
 
     def __init__(self):
+        # Description: Initialises autoCalibration class
 
-        ## configuration parameters
+        ## configuration parameters 
         self.calib_distance = 1.0 # calibration distance 
         self.angular_zero_tol = 0.1 # Angular velocity (rad/sec)
         self.lin_tol = 0.01 # linear velocity x (m/s)
@@ -46,9 +50,7 @@ class AutoCalibration:
         self.utm_y = 0
         self.utm_x = 0
         self.utm_zone = 0
-
         self.rtk_status = None
-        
 
         # imu
         self.q_imu = []
@@ -65,85 +67,83 @@ class AutoCalibration:
         self.wheel_odom_v = 0
         
         # Other parameters
-        self.direction = None
+        self.direction = None # True: robot moving forward (linear.x velocity > 0), False: moving backward
         self.gps_yaw = None
 
         # Read parameters to set the topic names
-        self.gpsTopic = rospy.get_param('~gps_topic', 'am_gps_urcu')
-        self.imuTopic = rospy.get_param('~imu_topic','imu/data')
-        self.odometryTopic = rospy.get_param('~odometry_topic', 'odometry/filtered')
-        self.wheelodometryTopic = rospy.get_param('~wheel_odometry_topic', 'am_robot/odom')
-
-        self.new = rospy.get_param('~new', False)
+        self.gps_topic = rospy.get_param('~gps_topic', 'antobot_gps_urcu')
+        self.imu_topic = rospy.get_param('~imu_topic','imu/data')
+        self.odometry_topic = rospy.get_param('~odometry_topic', 'odometry/filtered')
+        self.wheelodometry_topic = rospy.get_param('~wheel_odometry_topic', 'antobot_robot/odom')
         self.sim = rospy.get_param("/simulation",False) 
 
-        if self.new:
-            print('use new am_gps_urcu')
-            self.rtk_target_status = 2 # with the new code, status 2 is 3D fixed mode
-            if self.sim:
-                self.rtk_target_status = 0 # in simulation, gps status is always 0
-        else:
-            print('use old am_gps_urcu')
-            self.rtk_statusTopic = '/am_gps_urcu_status'
-            self.subRtkStatus = rospy.Subscriber(self.rtk_statusTopic, UInt8, self.rtkstatusCallback)
-            self.rtk_target_status = 4 
+        self.rtk_target_status = 3 # rtk status is 3 in 3D fixed mode
+        if self.sim:
+            self.rtk_target_status = 0 # in simulation, gps status is always 0
 
         # Subscribers
-        self.subGps = rospy.Subscriber(self.gpsTopic, NavSatFix, self.gpsCallback)
-        self.subImu = rospy.Subscriber(self.imuTopic, Imu, self.imuCallback)
-        self.subOdometry = rospy.Subscriber(self.odometryTopic, Odometry, self.odometryCallback)
-        self.subwheelOdom = rospy.Subscriber(self.wheelodometryTopic,Odometry, self.WheelodomCallback)
-        
+        self.sub_gps = rospy.Subscriber(self.gps_topic, NavSatFix, self.gpsCallback)
+        self.sub_imu = rospy.Subscriber(self.imu_topic, Imu, self.imuCallback)
+        self.sub_odometry = rospy.Subscriber(self.odometry_topic, Odometry, self.odometryCallback)
+        self.sub_wheel_odom = rospy.Subscriber(self.wheelodometry_topic,Odometry, self.wheelOdomCallback)
         
         # Publishers
-        # TODO: fill imu data properly
-        self.pubImu = rospy.Publisher('/imu/data_corrected', Imu, queue_size=10)
-        self.pubImuOffset = rospy.Publisher('/imu/data_offset', Float32, queue_size=10)
+        self.pub_imu = rospy.Publisher('/imu/data_corrected', Imu, queue_size=10)
+        self.pub_imu_offset = rospy.Publisher('/imu/data_offset', Float32, queue_size=10)
 
-        # publish calibration status - launches EKF when initial calibraiton is done (data == 1)
-        # -1: inital value, 1: initial calibration finished, 2: auto calibration running
+        # ServiceClient
+        rospy.wait_for_service('launch_ekf')
+        self.launch_ekf_service = rospy.ServiceProxy('launch_ekf', Trigger)
+        print('service found')
+
+
+        # imu_calibration_status topic is used in antobot_heading_launcher (starts EKF node after the initial calibration)
+        # -1: inital value, 1: initial calibration finished, 2: auto calibration running (every 30 seconds)
         self.imu_calibration_status = -1
-        self.pubCalib = rospy.Publisher('/imu_calibration_status', UInt8, queue_size=10)
+        self.pub_calib = rospy.Publisher('/imu_calibration_status', UInt8, queue_size=10)
 
-        # calculate and see if auto calibraion is needed?  
-        self.timer = rospy.Timer(rospy.Duration(30), self.AutoCalibrate) # findMidLine is the main function that runs corridor following
+        # calculate and see if auto calibraion is needed
+        self.timer = rospy.Timer(rospy.Duration(30), self.autoCalibrate) 
 
 ###################################################################################################       
 
 ### Callback functions 
 
     def gpsCallback(self,msg):
+        # Description: GPS callback function that gets utm coordinates(from lat, long values) and rts status
+
         # UTMNorthing, UTMEasting, UTMZone
-        self.utm_y, self.utm_x, self.utm_zone = gc.LLtoUTM(msg.latitude, msg.longitude)   # convert from gps to utm coordinates  
-        if self.new: # use new gps code
-            self.rtk_status = msg.status.status
+        self.utm_y, self.utm_x, self.utm_zone = gc.LLtoUTM(msg.latitude, msg.longitude)  
+        self.rtk_status = msg.status.status
         if (not self.gps_received):
             self.gps_received = True
 
-    def imuCallback(self,data):   
-        # store imu data
+    def imuCallback(self,data):  
+        # Description: IMU callback function (IMU sensor raw data)
+
         self.q_imu = data.orientation
         self.imu_ang_vel_z = data.angular_velocity.z # value used for checking angular vel
-        
         if (not self.imu_received):
             self.imu_received = True
 
-    def WheelodomCallback(self,data):
+    def wheelOdomCallback(self,data):
+        # Description: Wheel odometry callback function that gets linear x velocity 
+
         self.wheel_odom_v = data.twist.twist.linear.x # value used for checking linear vel
 
     def odometryCallback(self,data):
-        # EKF odometry orientation is the same as calibrated imu's orientation
+        # Description: EKF odometry topic callback function.
+
         self.q_odom = data.pose.pose.orientation # value to compare with gps yaw degree
-        
         if (not self.odometry_received):
             self.odometry_received = True
 
-    def rtkstatusCallback(self,data):
-        self.rtk_status = data.data
+###################################################################################################  
 
-###################################################################################################       
+### Other functions
 
-    def InitialCalibration(self):
+    def checkInputs(self):
+        # Description: Check if the imu, gps data are recieved and check if the RTK status is fixed mode value
 
         while ((not self.imu_received) or (not self.gps_received)):
             print('Waiting for initial imu and gps data new')
@@ -156,42 +156,61 @@ class AutoCalibration:
             rospy.sleep(0.1)
 
         print('RTK status is {}- start calibration'.format(self.rtk_target_status))
-      
-        # save first calibration point
-        rospy.loginfo('calibration started')
 
+
+    def initialCalibration(self):
+        # Description: Function that is called once in the main function. When all the required topics are recieved (self.checkInputs)
+        # this function performs the initial calibration. In the while loop, the starting gps postion is saved and when the 
+        # Calibration conditions are met, the imu_offset is calculated. 
+
+        # Check if all input toics are being published 
+        self.checkInputs() 
+
+        rospy.loginfo('calibration started')
         state = 1
         while (True):
             if state == 1:
-                # moving forward/backward, no angular : set start gps point
-                gps_saved = self.SaveStartGPS()
-                if gps_saved: # when the first gps position is saved
+                gps_saved = self.saveStartGPS()
+                if gps_saved: # if the start gps position is saved
                     state = 2
             elif state == 2:
-                result= self.CheckCondition() # returns the status
+                result= self.checkCondition() 
                 state = result
-            elif state == 3: # use self.gps_yaw
-                print()
-                break
+                if (state == 3):
+                    break
             rospy.sleep(0.1) # othewise the ros shutdown deosn't work (from heading launcher)
-    
       
-        print('gps_yaw {}'.format(self.gps_yaw)) # wrt map x frame
-        imu_angles = tf.transformations.euler_from_quaternion([self.q_imu.x, self.q_imu.y, self.q_imu.z, self.q_imu.w], 'rzyx')   # convert imu orientation from quaternion to euler
-        # imu_angles[0] is angle wrt to map x frame (not sure why it's not roll, pitch,yaw)
+        print('gps_yaw {}'.format(self.gps_yaw))
+        # convert imu orientation from quaternion to euler
+        imu_angles = tf.transformations.euler_from_quaternion([self.q_imu.x, self.q_imu.y, self.q_imu.z, self.q_imu.w], 'rzyx')  
         print('imu angle : {} {} {}'.format(imu_angles[0],imu_angles[1],imu_angles[2])) 
-        # imu_yaw + imu_offset = gps_yaw
-        self.imu_offset = self.gps_yaw - imu_angles[0]   # difference between orientations from imu and gps
+        # Formula used: imu_yaw + imu_offset = gps_yaw
+        self.imu_offset = self.calculateDifference(self.gps_yaw,imu_angles[0])
 
         rospy.loginfo('calibration successful (offset = %f degs)', self.imu_offset / 3.1415 * 180.0)
         self.imu_calibration_status = 1
 
         # Let heading launcher know the inital calibration is finished 
-        self.pubCalib.publish(self.imu_calibration_status)
-        print('Initial calibration finished')
+        self.pub_calib.publish(self.imu_calibration_status)
+        print('Initial calibration finished - now launch ekf nodes - python')
 
-    def SaveStartGPS(self):
-        vel = self.wheel_odom_v # to use consistent value
+
+        
+        rospy.wait_for_service('launch_ekf')
+        srv = TriggerRequest()
+        response = self.launch_ekf_service(srv)
+       
+
+
+
+
+    def saveStartGPS(self):
+        # Description: Save gps point as the starting point if the robot is moving. Set direction depending on the linear x velocity.
+        # Robot wheel odometry's linear x should be larger than self.lin_tol and the imu angular z velocity should be smaller than self.angular_zero_tol.
+        # self.direction is set to True when the robot is moving forward.
+        # Returns: True if the start GPS point is saved, False if the robot velcoity didn't meet the conditons and failed to save the start GPS point.
+
+        vel = self.wheel_odom_v
         if (abs(self.imu_ang_vel_z) < self.angular_zero_tol and (abs(vel) > self.lin_tol)): 
             self.gps_start = [self.utm_x, self.utm_y, self.utm_zone] # Save start gps position
             if vel > 0:
@@ -202,8 +221,16 @@ class AutoCalibration:
         else:
             return False
 
+    def checkCondition(self):
+        # Description: Check several conditions in order to start calibration and returns the state that will be used in the while loop that called this function.
+        # Condition: 1. imu angular z velocity should be smaller than angular_zero_tol.
+        #            2. Robot's direction (forward/backward) should be consistent and hasn't change since the saving of the staring GPS point.
+        #            3. Robot has moved more than calib_distance (calculated based on gps lat/long data)
+        # Returns: state that will be used in the while loop that called this function
+        #          state 1: Reset and save another GPS start point
+        #          state 2: Distance moved is not enough, continue to call checkCondition
+        #          state 3: Distance moved is larger than calib_distance, now exit the while loop and use the self.gps_yaw in the next step of the calibration.
 
-    def CheckCondition(self): # return the status
         # Reset if angular vel is large
         if (abs(self.imu_ang_vel_z) > self.angular_zero_tol):
             print('Reset due to angular velocity')
@@ -239,30 +266,43 @@ class AutoCalibration:
             return 3
         else:
             return 2 # not satisfied
+        
+    def calculateDifference(self, input_a, input_b):
+        # Description: Compare two values in [-pi,pi] and return signed value in the same range
+        # Input: Two radian values in [-pi,pi]
+        # Returns: Difference between two input values in [-pi,pi] 
 
-    def AutoCalibrate(self,event):
+        diff =  input_a - input_b
+        if diff > math.pi:
+            diff -= 2*math.pi
+        elif diff < -math.pi:
+            diff += 2*math.pi
+        return diff
+
+
+    def autoCalibrate(self,event):
+        # Description: Function that is called every 30 seconds to check if the calibration is needed. 
+        # In the while loop, several conditions are checked and if theses conditions are met within 20 seconds, the new imu_offset is calculated (calibration)
+        
         self.started_time = rospy.get_time()
         if (self.imu_calibration_status == 1 and self.odometry_received):
-            print('auto calibration called but skip one time')
+            print('auto calibration called but skip one time') # Since the initial calibration was done recently
             self.imu_calibration_status = 2
-        elif(self.imu_calibration_status == 2): # depending on the timer setting, run this periodically 
+        elif(self.imu_calibration_status == 2):
             print('auto calibration checking started')
-            state = 0
-
+            state = 0 
             while(True):
-                if state == 0:
+                if state == 0: # Check rtk status and ekf odometry
                     if (self.rtk_status == self.rtk_target_status and self.odometry_received):
                         state = 1
-                elif state == 1:
-                    # moving forward/backward, no angular : set start gps point
-                    gps_saved = self.SaveStartGPS()
-                    if gps_saved: # when the first gps position is saved
+                elif state == 1: # Save start gps position
+                    gps_saved = self.saveStartGPS()
+                    if gps_saved: # If the first gps position is saved
                         state = 2
-                elif state == 2:
-                    result= self.CheckCondition() # returns the status
+                elif state == 2: # Check if the auto calibration conditions are met
+                    result= self.checkCondition() 
                     state = result
-                elif state == 3:
-                    # Calibrate 
+                elif state == 3: # Conditions met, start the calibration
                     # gps angle calculated 
                     print("gps angles", self.gps_yaw)
 
@@ -275,24 +315,13 @@ class AutoCalibration:
                     odom_angles = tf.transformations.euler_from_quaternion([self.q_odom.x, self.q_odom.y, self.q_odom.z, self.q_odom.w], 'rzyx') 
                     print("odom angles", odom_angles[0])
 
-                    # imu_yaw + imu_offset = gps_yaw
-                    # Compare two angles in [-pi,pi] and returns signed value in radian
-                    diff = self.gps_yaw - odom_angles[0]
-                    if diff > math.pi:
-                        diff -= 2*math.pi
-                    elif diff < -math.pi:
-                        diff += 2*math.pi
-                    print('diff = ', diff)
-                    diff_deg = abs(diff*180.0/math.pi)
+                    # Formula used: imu_yaw + imu_offset = gps_yaw
+                    diff_rad = self.calculateDifference(self.gps_yaw,odom_angles[0])
+                    diff_deg = abs(diff_rad*180.0/math.pi)
                     print('angle diff = ',diff_deg)
 
                     if diff_deg > self.calib_deg:
-                        imu_offset_tmp = self.gps_yaw - imu_angles[0] 
-                        if imu_offset_tmp > math.pi:
-                            imu_offset_tmp -= 2*math.pi
-                        elif imu_offset_tmp < -math.pi:
-                            imu_offset_tmp += 2*math.pi
-                        self.imu_offset = imu_offset_tmp   # difference between orientations from imu and gps
+                        self.imu_offset = self.calculateDifference(self.gps_yaw,imu_angles[0])  # difference between orientations from imu and gps
                         rospy.loginfo('auto-calibration successful (imu offset = %f degs)', self.imu_offset / 3.1415 * 180.0)
                     else:
                         rospy.loginfo('auto-calibration not required {} deg'.format(diff_deg))
@@ -306,12 +335,13 @@ class AutoCalibration:
         else:
             print('auto calibration called but ignored - Do initial calibration first!')
 
-###################################################################################################   
+    def publishNewIMU(self):
+        # Description: Publish calibrated imu data (/imu/dadta_coreccted) and a topic for debugging purpose (/imu/data_offset)
+        # Input: imu raw data and calculated imu_offset. imu_offset is added to the yaw value of the imu data. 
 
-    def PublishNewIMU(self):
         # convert imu orientation from quaternion to euler
         angles = tf.transformations.euler_from_quaternion([self.q_imu.x, self.q_imu.y, self.q_imu.z, self.q_imu.w], 'rzyx')
-        # add imu offset and convert back to quaternion      
+        # add imu offset to the yaw value  and then convert it  back to quaternion      
         q = tf.transformations.quaternion_from_euler(angles[0] + self.imu_offset, angles[1], angles[2], 'rzyx')   
 
         # create imu message
@@ -322,14 +352,13 @@ class AutoCalibration:
         imuMsg.orientation.y = q[1]
         imuMsg.orientation.z = q[2]
         imuMsg.orientation.w = q[3] 
-        
         imuMsg.angular_velocity.z = self.imu_ang_vel_z  # for EKF inupt
 
         # publish /imu/data_corrected
-        self.pubImu.publish(imuMsg)
+        self.pub_imu.publish(imuMsg)
 
         # Publsih /imu/data_offset
-        self.pubImuOffset.publish(self.imu_offset) 
+        self.pub_imu_offset.publish(self.imu_offset) 
                
         
 ###################################################################################################       
@@ -337,17 +366,17 @@ class AutoCalibration:
 ### Main loop
 
 if __name__ == '__main__':
-    
     # init node
     rosnode = rospy.init_node('antobot_heading_node_py', anonymous=True)
     
-    autoCalib = AutoCalibration()
-    autoCalib.InitialCalibration() # First do initial calibration
+    # Define an autoCalibration object and run the initial calibration
+    autoCalib = autoCalibration()
+    autoCalib.initialCalibration()
 
     # loop rate
     rate = rospy.Rate(10)  # 10hz for imu publishing
     
     while not rospy.is_shutdown():
         if (autoCalib.imu_calibration_status > 0): # after initial calibration
-            autoCalib.PublishNewIMU()
+            autoCalib.publishNewIMU()
         rate.sleep()

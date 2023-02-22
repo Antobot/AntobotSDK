@@ -2,7 +2,7 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 d = generate_distutils_setup(
-    packages=['am_gps_urcu'],
+    packages=['antobot_gps_urcu'],
     package_dir={'': 'src'}
 )
 

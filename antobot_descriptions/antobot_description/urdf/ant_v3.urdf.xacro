@@ -112,8 +112,8 @@
         <updateRate>4.0</updateRate>
         <bodyName>gps_frame</bodyName>
         <frameId>gps_frame</frameId>
-        <topicName>/am_gps_urcu</topicName>
-        <velocityTopicName>/am_gps_vel</velocityTopicName>
+        <topicName>/antobot_gps_urcu</topicName>
+        <velocityTopicName>/antobot_gps_vel</velocityTopicName>
         <referenceLatitude>${referenceLatitude}</referenceLatitude>
         <referenceLongitude>${referenceLongitude}</referenceLongitude>
         <referenceHeading>90</referenceHeading>

@@ -1,18 +1,6 @@
 /*
-# Copyright (c) 2019, ANTOBOT LTD.
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -35,7 +23,7 @@ Contacts: 	daniel.freer@antobot.ai
 #include <vector>
 #include <numeric>
 
-class AmSafety
+class AntobotSafety
 {
 
     protected:
@@ -51,7 +39,16 @@ class AmSafety
         std::vector<std::vector<int>> uss_dist_windows;
         std::vector<bool> light_cmd_ar;
 
+        float time_to_collision = 100;
+        float lin_vel_thresh = 0.2;
+        float ang_vel_thresh = 0.5;
+        float time_collision_thresh = 0.5;      // Threshold could depend on operation type?
+        float hard_dist_thresh = 50.0;
+        bool not_safe = false;
+
         int active_cmd_vel;
+        float prev_linear_vel;
+        float prev_angular_vel;
         float linear_vel;
         float angular_vel;
         geometry_msgs::Twist cmd_vel_msg;
@@ -70,21 +67,21 @@ class AmSafety
     
     public:
     
-        AmSafety(ros::NodeHandle& nh);
-        ~AmSafety();
+        AntobotSafety(ros::NodeHandle& nh);
+        ~AntobotSafety();
         void update(const ros::TimerEvent& e);
         bool ussDistSafetyCheck();
+        bool ussDistSafetyCheck_f();
+        bool ussDistSafetyCheck_b();
         void lightsSafetyOut();
-        void light_cmd_freq();
+        void lightCmdFreq();
         void safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg);
         void activeCmdVelCallback(const std_msgs::String::ConstPtr& msg);
         void ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& msg);
         antobot_msgs::UInt16_Array ussDistFilt(uint16_t uss_dist_ar[8]);
         uint16_t ussDistFilt_i(uint16_t uss_dist, int i);
-        std::vector<int> pop_front(std::vector<int> vec);
-        int get_uss_vec_mean(std::vector<int> vec);
+        std::vector<int> popFront(std::vector<int> vec);
+        int getUssVecMean(std::vector<int> vec);
         void releaseCallback(const std_msgs::Bool::ConstPtr& msg);
-
-
     
 };

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # # # Functional Description:     Teleoperation node with joystick
@@ -11,11 +14,17 @@
 # # #                                        - Buttons: each element is 1 if button is pressed and 0 if not (digital)
 # # #                                        - Axes: each element is a value between -1 and 1 (analogue)
 # # #         Robot operation mode [Int8 message] - received from /switch_mode ROS topic
-# # #                                             - 0: keyboard teleoperation, 2: joystick teleoperation
+# # #                                             - 0: keyboard teleoperation, 2: joystick teleoperation, 3: autonomous mode
 # # # Outputs: Joystick velocity commands [Twist message] - sent over /joy/cmd_vel
 # # #                                                     - Contains individual components of linear and angular velocity commands to be given to the robot
 # # #          Robot operation mode [Int8 message] - sent over /switch_mode ROS topic
-# # #                                              - 0: keyboard teleoperation, 2: joystick teleoperation
+# # #                                              - 0: keyboard teleoperation, 2: joystick teleoperation, 3: autonomous mode
+# # #          Row following initialisation     - sent over /row_following ROS topic, starts/stops forward or backward row-following
+# # #          Force Stop Release             - sent over antobridge/force_stop_release ROS topic
+# # #                                         - if the robot has been forced to stop by Aurix or antobot_safety (USS sensor detection, pressed bumper switch),
+# # #                                           this will release the force stop and allow for robot movement/teleoperation
+# # #          Soft Shutdown                  - sent over /antobridge/soft_shutdown_button
+# # #                                         - tells the robot to shut down in a safe way (handled by anto_supervisor)
 
 # Contact: daniel.freer@antobot.ai
 
@@ -31,22 +40,13 @@ import actionlib
 import time
 from actionlib_msgs.msg import *
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from anto_manager.managerUserInputClient import directUserInputClient
 
 class JoystickTeleop:
     def __init__(self):
         # # # Initialisation of JoystickTeleop class
         
-        # gets the home position from rosparam server
-        # robot will navigate autonomously to this position when given the command
-        if (rospy.has_param('~home_position')):
-            self.home_position = rospy.get_param('~home_position')
-        else:
-            self.home_position = [0, 0, 0]
-            
-            
-        rospy.loginfo("Home position = %s", self.home_position)
-        
-        self.mode = None  # initialise robot operation mode, modes used are 0-4
+        self.mode = None  # initialise robot operation mode, modes used are 0: joystick teleop; 1: forward row-following; 2: backward row-following;
         ###
         self.debug = 0  # print out debug info if self.debug = 1
 
@@ -61,8 +61,6 @@ class JoystickTeleop:
         self.mode_sub = rospy.Subscriber("/switch_mode", UInt8, self.mode_callback) # subscriber for robot operation mode
         
         self.switch_mode_pub = rospy.Publisher('/switch_mode', UInt8, queue_size=5, latch=True)  # publisher for switching operation modes
-        
-        self.wp_status_pub = rospy.Publisher('/wp_status', UInt8, queue_size=5)  # publisher for waypoint status
         
         self.row_follow_pub = rospy.Publisher('/row_following', Empty, queue_size=1) # publisher to start and stop row following
         
@@ -80,19 +78,19 @@ class JoystickTeleop:
         self.axis_dpad_back_forward = 7  # dpad up/down axis number
         self.axis_dpad_left_right = 6  # dpad left/right axis number
         
-        self.axis_lt = 2 # left trigger axis number (go home)
+        self.axis_lt = 2 # left trigger axis number
         self.axis_rt = 5 # right trigger axis number (modifier)
         
         # button numbers
-        self.button_a = 0  # start saving waypoints
-        self.button_b = 1  # stop saving waypoints
+        self.button_a = 0
+        self.button_b = 1
         self.button_x = 2  # brake
-        self.button_y = 3  # store favourite waypoints
+        self.button_y = 3
         self.button_lb = 4  # init manual control with rb
         self.button_rb = 5  # init manual control with lb
         self.button_back = 6 # back button
-        self.button_start = 7 #start button
-        self.button_logitech = 8 #logitech button
+        self.button_start = 7 # start button
+        self.button_logitech = 8 # logitech button
         self.button_ls = 9  # left joystick button
         self.button_rs = 10  # right joystick button
         
@@ -120,41 +118,23 @@ class JoystickTeleop:
         # initialise linear and angular velocities
         self.v = 0
         self.w = 0
-
-        # Set step values (acceleration) - This should be ideally be tuned per robot type
-        self.vStep = 0.05
-        self.wStep = 0.05
         
-        # initialise waypoint recording status
-        self.wp_status = None
-
-        # initialise the move base client
-        self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-        self.client.wait_for_server() # wait for move base to come up
-        
-        ##
-    def cancel_nav_goal(self):
-        # # # Function to cancel active naviagtion goals
-        self.client.cancel_all_goals()   # Cancel any active navigation goals
-        while not self.client.get_state() == GoalStatus.PREEMPTED:   # wait for goal to be cancelled
-            print("Waiting for goal to be cancelled")
-        print("Goal cancelled")
+        # initialise manager client
+        self.userClient = directUserInputClient(userInput=0, sourceID='Joystick')
         
     def mode_callback(self, mode):
         # # # Callback function for the robot operation mode
-        # Inputs: mode [Int8 message] - Used for communicating robot operation mode
-        if (mode.data == 0 or mode.data == 1 or mode.data == 2) and self.client.get_state() == GoalStatus.ACTIVE:
-            self.cancel_nav_goal()
+        # Inputs: mode [Int8 message] - Used for communicating robot operation mode. 0 - keyboard teleop; 3 - autonomous mode
             
         # # # If the robot operation mode is changed from a different script, the self.mode paramter will be set to None, 
         # # # so that the previous mode can be entered again from this script
         
-        # keyboard or app teleoperation  
-        if mode.data == 0 or mode.data == 1:   
+        # keyboard teleoperation  
+        if mode.data == 0:   
             self.mode = None
             
-        # if waypoint following mode not entered from this script
-        if mode.data == 3 and self.mode != 4:
+        # autonomous mode
+        if mode.data == 3:
             self.mode = None
         
     def joy_callback(self, msg):
@@ -204,7 +184,7 @@ class JoystickTeleop:
                 userInput = 2 # pause job   
             
             elif (self.buttons[self.button_b] == 1 and self.buttons_previous[self.button_b] == 0):
-                userInput = 3 # arbort job
+                userInput = 3 # abort job
             
         elif (self.axes[self.axis_rt] == -1):
             # if rt is pressed
@@ -214,67 +194,17 @@ class JoystickTeleop:
             
                 # publish the mode
                 self.switch_mode_pub.publish(10)
-                #empty_msg = Empty()
-                #self.row_follow_pub.publish(empty_msg)
             elif (self.mode != 2 and self.axes[self.axis_dpad_back_forward] == -1):  # dpad backward
                 rospy.loginfo("Drive backward autonomously through rows")
                 self.mode = 2
                 
                 # publish the mode
                 self.switch_mode_pub.publish(11)
-            elif (self.mode != 3 and self.axes[self.axis_dpad_left_right] == -1):  # dpad right
-                rospy.loginfo("Follow me")
-                self.mode = 3
-                
-                # publish the mode
-                #self.switch_mode_pub.publish(3)    
-            elif (self.mode != 4 and self.axes[self.axis_dpad_left_right] == 1):  # dpad left
-                rospy.loginfo("Follow the most recently stored set of waypoints")
-                self.mode = 4
-                
-                # publish the mode
-                self.switch_mode_pub.publish(3)
-            elif (self.mode != 5 and self.axes[self.axis_lt] == -1):
-                rospy.loginfo("Go home")
-                self.mode = 5
-                
-                # publish the mode
-                self.switch_mode_pub.publish(4)
-
-                # send the goal (home) position
-                # home position is configured through the rosparam server
-                # sends the goal to the action server
-                goal = MoveBaseGoal()
-                goal.target_pose.header.frame_id = 'map'
-                goal.target_pose.header.stamp = rospy.get_rostime()
-                goal.target_pose.pose.position.x = self.home_position[0]
-                goal.target_pose.pose.position.y = self.home_position[1]
-                goal.target_pose.pose.position.z = self.home_position[2]
-                goal.target_pose.pose.orientation.w = 1.0
-                self.client.send_goal(goal) 
-            
-            # Waypoint saving whilst in manual mode    
-            elif (self.mode == 0 and self.buttons[self.button_a] == 1 and self.buttons_previous[self.button_a] == 0 and self.wp_status != 0):
-                # A pressed while in manual mode (start recording waypoints)
-                rospy.loginfo("Start recording waypoints")
-                self.wp_status = 0
-                self.wp_status_pub.publish(self.wp_status)
-            elif (self.mode == 0 and self.buttons[self.button_b] == 1 and self.buttons_previous[self.button_b] == 0 and self.wp_status == 0):
-                # B pressed while in manual mode (stop recording waypoints)
-                rospy.loginfo("Stop recording waypoints")
-                self.wp_status = 1
-                self.wp_status_pub.publish(self.wp_status)
-            elif (self.mode == 0 and self.buttons[self.button_y] == 1 and self.buttons_previous[self.button_y] == 0): # and (self.wp_status == 0 or self.wp_status == 1)):
-                # Y pressed while in manual mode (stores the waypoints)
-                rospy.loginfo("Store waypoints")
-                self.wp_status = 2
-                self.wp_status_pub.publish(self.wp_status)
 
         if (self.buttons[self.button_back] == 1 and self.buttons[self.button_start] == 1):
-            rospy.loginfo("Xavier will be power off now")
+            rospy.loginfo("Xavier will be powered off now")
             self.soft_shutdown = True
-
-                
+          
         self.force_stop_release_pub.publish(self.force_stop_release)
         self.soft_shutdown_pub.publish(self.soft_shutdown)
         
@@ -305,6 +235,15 @@ class JoystickTeleop:
         
         self.buttons_previous = msg.buttons
         
+        # Send request to manager server if input is made by user
+        if userInput is not None:
+            if self.userClient.checkForService():
+                self.userClient.userInput = userInput
+                managerResponse = self.userClient.sendDirectUserInput()
+                    
+            else:
+                print("Unable to make request")
+                print("ROS service " + self.userClient.serviceName + " is not available")
         
     def update(self, timer):
         # # # Update function - called iteratively at a rate defined by self.rctrl_loop_hz. The main purpose is to check

@@ -1,16 +1,19 @@
 <package>
   <name>antobot_gazebo</name>
   <version>0.0.1</version>
-  <description>
-     antobot simulation package
-  </description>
-  <author>Daniel Freer</author>
-  <author email="daniel.freer@antobot.ai">Daniel Freer</author>
-  <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
+   <description>The gazebo simulation package for Antobot robots</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="william.eaton@antobot.ai">Will</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>BSD</license>
-  <url type="website">http:///</url>
-  <url type="repository">http:///</url>
-  <url type="bugtracker">http:///</url>
+
   
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -23,10 +26,12 @@
   <!-- <run_depend>create_description</run_depend> -->
   <run_depend>hector_gazebo_plugins</run_depend>
   <!-- <run_depend>keyboard_teleop</run_depend> -->
+  <run_depend>gazebo_ros</run_depend>
   
   <export>
     <gazebo_ros gazebo_media_path="${prefix}"/>
     <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}/worlds"/>
   </export>
   
 </package>

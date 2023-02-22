@@ -40,7 +40,7 @@ if __name__ == '__main__':
         # init node
         rospy.init_node('rtk', anonymous=True)
 
-        gps_pub = rospy.Publisher('am_gps_urcu', NavSatFix, queue_size=10)
+        gps_pub = rospy.Publisher('antobot_gps_urcu', NavSatFix, queue_size=10)
         #gps_vel_pub = rospy.Publisher('am_gps_urcu_vel', TwistWithCovarianceStamped, queue_size=10)
         #gps_status_pub = rospy.Publisher('am_gps_urcu_status', UInt8, queue_size=10)
         rate = rospy.Rate(10)  # 10hz

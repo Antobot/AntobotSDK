@@ -1,16 +1,16 @@
-# antobot_gazebo
+# am_sim
 
-This package is for synthetic testing using the Gazebo simulator.
+This package is for simulated testing using Gazebo.
 
 To use the simulation requires:
-  - Robot description files for each robot, which should be located in the antobot_description package 
+  - Robot description files for each robot, which should be located in the am_description package 
   - **World** files detailing suitable testing scenarios, which are located in this package
-  - Additional large model files (e.g. terrain/obstacles) which are located on the [AntoBot sharepoint](https://antorobot.sharepoint.com/sites/SoftwareSystem/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FSoftwareSystem%2FShared%20Documents%2F03%5FInstallation%26CodeTransfer%2F01%5FOriginalFiles%2F08%5FSimulator&viewid=d9622cc4%2D85f0%2D49e9%2D97b5%2D0377ace98ec2) and downloaded seperately
+  - Additional large model files (e.g. terrain/obstacles) which are usually installed into a hidden gazebo folder, located at "~.gazebo".
+  
+ For simulations that aren't released publically, any large files should be stored on sharepoint to save space on github. These can be downloaded from [here](https://antorobot.sharepoint.com/:f:/r/sites/SoftwareSystem/Shared%20Documents/03_HardwareInstallation/01_OriginalFiles/08_Simulator?csf=1&web=1&e=HyGbTi).
  
-To minimise the ammount of github storage space used, please use sharepoint for any models other than robots.
 
-To launch a simulation (e.g. Ant robot at Windsor):
+As farms can be very large, each farm may have multiple world files for different areas/testing setups. For example, to launch a simulation of Antv3 in the strawberry section of Lathcoats farm:
+**roslaunch am_sim lathcoats_strawberries_ant_v3.launch **
 
-**roslaunch antobot_gazebo ant_sim.launch**
-
-
+At present, each simulation has a seperate launch and settings files. This is intended to make launching each simulation easy (with no command line inputs) and eliminate the risk of any changes to one simulation adversely affecting another.

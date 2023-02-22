@@ -1,26 +1,15 @@
-/*# Copyright (c) 2022, ANTOBOT LTD.
+/*
+# Copyright (c) 2023, ANTOBOT LTD.
 # All rights reserved.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# # # Code Description:     Sets the parameters for operation of the small robot.
+Description: 	Defines the ant robot hardware in a way that is recognisable by the built-in controllers from ROS.
 
-# Contact: daniel.freer@antobot.ai
+Contacts: 	daniel.freer@antobot.ai
 
-# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #*/
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+*/
 
 #ifndef ROS_CONTROL__ANTOBOT_HARDWARE_H
 #define ROS_CONTROL__ANTOBOT_HARDWARE_H
@@ -38,8 +27,10 @@
 
 namespace antobot_hardware_interface
 {
+	/// \brief Hardware interface for a robot
 	class antobotHardware : public hardware_interface::RobotHW 
 	{
+
 		protected:
 
 			// Interfaces
@@ -51,6 +42,7 @@ namespace antobot_hardware_interface
 			joint_limits_interface::PositionJointSoftLimitsInterface position_joint_limits_interface_;
 			joint_limits_interface::VelocityJointSaturationInterface velocity_joint_saturation_interface_;
 			joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limits_interface_;
+
 
 			// Shared memory
 			int                                          num_joints_;
@@ -64,8 +56,8 @@ namespace antobot_hardware_interface
 			std::vector<double>                          joint_lower_limits_;
 			std::vector<double>                          joint_upper_limits_;
 
-	};
+	}; // class
 
-}
+} // namespace
 
 #endif

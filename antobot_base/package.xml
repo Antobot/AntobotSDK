@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!-- based on slaterobotics' implementation https://medium.com/@slaterobotics/how-to-implement-ros-control-on-a-custom-robot-748b52751f2e -->
 <package>
   <name>antobot_base</name>
   <version>0.0.1</version>
@@ -7,12 +8,6 @@
   <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
 
   <license>MIT</license>
-
-  <url type="website"></url>
-  <url type="bugtracker"></url>
-  <url type="repository">/</url>
-
-  <author email="daniel.freer@antobot.ai">Daniel Freer</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 

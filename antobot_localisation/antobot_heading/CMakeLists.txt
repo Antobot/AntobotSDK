@@ -6,6 +6,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED
     roscpp
     std_msgs
+    std_srvs
     nav_msgs
     sensor_msgs
     tf2_geometry_msgs
@@ -18,6 +19,7 @@ catkin_package(
    CATKIN_DEPENDS 
         roscpp
         std_msgs
+        std_srvs
         nav_msgs
         sensor_msgs
         tf2_geometry_msgs
