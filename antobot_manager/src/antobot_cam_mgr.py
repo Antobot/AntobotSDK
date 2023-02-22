@@ -97,7 +97,6 @@ class camera:
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(uuid)
 
-        #cli_args = ['am_cartograph', 'antoCartographer.launch']
         cli_args = ['zed_wrapper', 'zed_no_tf.launch', 'node_name:=zed2_'+self.name+'_node', 'camera_name:=zed2_'+self.name, 'serial_number:='+str(self.serialNumber)]
 
         roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(cli_args)[0]
@@ -116,7 +115,6 @@ class camera:
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
         roslaunch.configure_logging(uuid)
 
-        #cli_args = ['am_cartograph', 'antoCartographer.launch']
         cli_args = ['antobot_navigation', 'pointcloud_to_laser_sim.launch', 'camera_to_activate:='+self.name]
 
         roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(cli_args)[0]

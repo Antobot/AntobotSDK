@@ -157,10 +157,7 @@ class Monitor():
         self.sub_wheel_cmd = rospy.Subscriber("/antobridge/wheel_vel_cmd",Float32_Array,self.wheel_cmd_callback) #pass teleop wheel_vel_cmd to anto_supervisor, it's a float array data type
         self.sub_force_stop = rospy.Subscriber("/antobridge/force_stop",Bool,self.force_stop_callback)           #pass force stop signal to anto_supervisor, it's a boolean type
         self.sub_uss_dist = rospy.Subscriber("/antobridge/uss_dist",UInt16_Array,self.uss_dist_callback)         #pass uss_dist data to anto_supervisor, it's a UInt16 array type
-        #self.sub_odom = rospy.Subscriber('/odometry/filtered', Odometry, self.odom_callback)                     #we are not using this for mileage tracker
         self.sub_mode = rospy.Subscriber('/switch_mode', UInt8, self.mode_callback)                                #mode 0:keyboard, 1: app, 2: joystick 3:autonomous 4:go home
-        #self.sub_gps_status = rospy.Subscriber('am_gps_urcu_status',UInt8,self.GPS_status_callback)
-        # self.sub_mileage_tracker = rospy.Subscriber('/antobot_navigation/distanceTravelled',Float32,self.mileage_callback)
         self.sub_soft_shutdown_button = rospy.Subscriber('/antobridge/soft_shutdown_button',Bool,self.soft_shutdown_callback)
         self.sub_slope_dir = rospy.Subscriber('/imu/data', Imu, self.slope_dir)
         self.imu_calib_status = rospy.Subscriber('/imu_calibration_status',UInt8, self.imu_calib)
@@ -171,7 +168,6 @@ class Monitor():
         self.pub_cpu_temp = rospy.Publisher("/as/cpu_temp",Float32,queue_size=1)#topic to publish the cpu tempreture
         self.pub_cpu_load = rospy.Publisher("/as/cpu_load",UInt8,queue_size=1)#topic to publish the cpu tempreture
         self.pub_storage = rospy.Publisher("/as/storage",Float64, queue_size = 1)
-        #self.pub_auto_mileage = rospy.Publisher("/as/auto_mileage",Float32,queue_size = 1) #data type tbc
         self.pub_total_mileage = rospy.Publisher("/as/total_mileage",Float32,queue_size = 1) #data type tbc
         self.pub_soc = rospy.Publisher("/as/soc",UInt8,queue_size = 1)#percentage soc
         self.pub_As_uBat = rospy.Publisher("/as/As_uBat",Float32,queue_size = 1)

@@ -16,7 +16,7 @@
 <launch>
   
   <!-- Defines the robot in ROS -->
-  <rosparam file="$(find antobot_description)/config/control.yaml" command="load"/>
+  <rosparam file="$(find antobot_description)/config/control_ant_v2.yaml" command="load"/>
 
 
   <!-- Launches the robot controller node -->

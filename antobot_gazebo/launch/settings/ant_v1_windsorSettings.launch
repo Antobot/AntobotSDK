@@ -69,7 +69,7 @@
   <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_cmd_vel_mod" output="screen"/>
 
   <!-- Camera manager -->
-	<node if="true" pkg="anto_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="screen"/>
+	<node if="true" pkg="antobot_manager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="screen"/>
   
 
   <!-- Sensor sim -->
