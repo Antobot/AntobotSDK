@@ -24,7 +24,7 @@ class gpsStatus:
 
 		self.gpsState = UInt8(4) # Very simple, just assumes good RTK
 
-		self.gpsStatus_pub = rospy.Publisher('antobot_gps_urcu_status', UInt8, queue_size=10)
+		self.gpsStatus_pub = rospy.Publisher('antobot_gps_status', UInt8, queue_size=10)
 
 		rospy.Timer(rospy.Duration(0.1), self.publishGPSState)
 

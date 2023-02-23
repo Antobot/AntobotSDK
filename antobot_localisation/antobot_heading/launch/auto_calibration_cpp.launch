@@ -10,7 +10,7 @@
 
 <launch>
   <node pkg="antobot_heading" type="antobot_heading_node" name="antobot_heading_node" output="screen"> 
-    <param name="gps_topic" type="string" value="/antobot_gps_urcu" />
+    <param name="gps_topic" type="string" value="/antobot_gps" />
     <param name="imu_topic" type="string" value="/imu/data" />
     <param name="odometry_topic" type="string" value="/odometry/filtered" />
     <param name="wheel_odometry_topic" type="string" value="/antobot_robot/odom" />

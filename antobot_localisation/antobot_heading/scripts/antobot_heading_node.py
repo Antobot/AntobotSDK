@@ -7,7 +7,7 @@
 #             	This script subscribes to the IMU and GPS topics and publishes Imu messages over 
 #		        imu/data_corrected topic.     
 #               This node performs the same functions as the antobot_heading.cpp but is written in Python.   
-# Subscribes to: GPS topic (/antobot_gps_urcu)
+# Subscribes to: GPS topic (/antobot_gps)
 #                imu topic (/imu/data)
 #                EKF odometry topic (/odometry/filtered)
 #                wheel odometry topic (/antobot_robot/odom)
@@ -71,7 +71,7 @@ class autoCalibration:
         self.gps_yaw = None
 
         # Read parameters to set the topic names
-        self.gps_topic = rospy.get_param('~gps_topic', 'antobot_gps_urcu')
+        self.gps_topic = rospy.get_param('~gps_topic', 'antobot_gps')
         self.imu_topic = rospy.get_param('~imu_topic','imu/data')
         self.odometry_topic = rospy.get_param('~odometry_topic', 'odometry/filtered')
         self.wheelodometry_topic = rospy.get_param('~wheel_odometry_topic', 'antobot_robot/odom')

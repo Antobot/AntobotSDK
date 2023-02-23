@@ -6,7 +6,7 @@
 # Description: The primary purpose of this code is to calculate yaw offset from the robot motion with single GPS. 
 #             This script subscribes to the IMU and GPS topics and publishes Imu messages over 
 # 		    imu/data_corrected topic. antobot_heading node performs the same functions as the antobot_heading_node.py but is written in C++.
-# Subscribes to: GPS topic (/antobot_gps_urcu)
+# Subscribes to: GPS topic (/antobot_gps)
 #                imu topic (/imu/data)
 #                EKF odometry topic (/odometry/filtered)
 #                wheel odometry topic (/antobot_robot/odom)

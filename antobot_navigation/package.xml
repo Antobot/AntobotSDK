@@ -1,27 +1,12 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>antobot_navigation</name>
+  <name>am_nav</name>
   <version>0.0.0</version>
-  <description>The antobot navigation package</description>
+  <description>The am_nav package</description>
+  <maintainer email="soyoung.kim@antobot.ai">So-Young Kim</maintainer>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
+  <license>BSD</license>
 
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
-
-  <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-
-
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
+  
 </package>

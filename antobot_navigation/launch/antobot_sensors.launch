@@ -1,0 +1,20 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:   The primary purpose of this launch file is to launch different sensors. 
+# Contact: soyoung.kim@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+
+<launch>
+
+    <!-- RTK-GNSS launch -->
+    <node if="true" pkg="antobot_gps" type="antobot_gps_node.py" name="rtk_gnss" />
+
+    <!-- BOSCH IMU launch -->
+    <include if="true" file="$(find am_bno055_imu)/launch/am_bno055_imu.launch" />
+
+</launch>

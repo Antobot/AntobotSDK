@@ -112,7 +112,7 @@
         <updateRate>4.0</updateRate>
         <bodyName>gps_frame</bodyName>
         <frameId>gps_frame</frameId>
-        <topicName>/antobot_gps_urcu</topicName>
+        <topicName>/antobot_gps</topicName>
         <velocityTopicName>/antobot_gps_vel</velocityTopicName>
         <referenceLatitude>${referenceLatitude}</referenceLatitude>
         <referenceLongitude>${referenceLongitude}</referenceLongitude>

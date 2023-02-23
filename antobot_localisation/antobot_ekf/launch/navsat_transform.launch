@@ -7,7 +7,7 @@ navsat_transform parameters for sensor fusion localiastion.
      <rosparam command="load" file="$(find antobot_ekf)/params/navsat_transform.yaml" />
      <!-- remap the ros topics from ROS conventions to topic published by the scripts-->
 	<remap from="/odometry/filtered" to="/odometry/filtered"/>
-        <remap from="/gps/fix" to="/antobot_gps_urcu"/>
+        <remap from="/gps/fix" to="/antobot_gps"/>
 	<remap from="/imu/data" to="/imu/data_corrected"/>  
    </node>
 </launch>
