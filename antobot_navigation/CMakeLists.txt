@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(am_nav)
+project(antobot_navigation)
 
 find_package(catkin REQUIRED)
 

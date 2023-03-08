@@ -3,11 +3,10 @@ import paramiko
 from anto_msgs.srv import softShutdown, softShutdownResponse
 import os
 
-# We definitely cannot put our passwords on the SDK!
-# However, I suppose if we are installing the system, we will have to tell them their hostname, username, and password.
-host = 'antobot-desktop'
-user = 'antobot'
-password = 'Antobot2021-'
+# Input host, username and password of installed system before use
+host = 'xxxxxxxxx'
+user = 'xxxxxxx'
+password = 'xxxxxxxxx'
  
 def ssh_exec_command(command): 
     try: 

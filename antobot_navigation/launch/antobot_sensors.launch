@@ -15,6 +15,6 @@
     <node if="true" pkg="antobot_gps" type="antobot_gps_node.py" name="rtk_gnss" />
 
     <!-- BOSCH IMU launch -->
-    <include if="true" file="$(find am_bno055_imu)/launch/am_bno055_imu.launch" />
+    <include if="true" file="$(find imu_bno055)/launch/imu.launch" />
 
 </launch>
