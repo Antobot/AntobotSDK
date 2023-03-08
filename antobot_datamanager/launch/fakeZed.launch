@@ -33,5 +33,5 @@
   <param name="fake_camera_name" value="$(arg camera_name)" /> 
   <param name="serial_number" value="$(arg serial_number)" /> 
 
-  <node pkg="antobot_manager" type="fakeZed.py" name="$(arg node_name)" output="screen"></node>
+  <node pkg="antobot_datamanager" type="fakeZed.py" name="$(arg node_name)" output="screen"></node>
 </launch>

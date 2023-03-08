@@ -154,8 +154,8 @@ class camera:
 def get_cam_sn():
     # function to read the camera serial numbers from yaml file
 
-    parent_folder = Path(__file__).resolve().parent
-    path = str(parent_folder) + "/cameras.yaml"
+    parent_folder = Path(__file__).resolve().parent.parent
+    path = str(parent_folder) + "/config/cameras.yaml"
 
     with open(path, 'r') as file:
         data = yaml.safe_load(file)
@@ -193,7 +193,7 @@ class AvCamMgr:
             print('Camera Manager: This is a simulation - using fake camera calls.')
 
             # Create a service to allow other nodes to start/stop cameras
-            self.srvCamMgr = rospy.Service("/antobot_manager/camera", camManager, self._serviceCallbackCamMgrFake)
+            self.srvCamMgr = rospy.Service("/antobot_datamanager/camera", camManager, self._serviceCallbackCamMgrFake)
 
             # Some state variables
             self.cam_state = 0
@@ -205,7 +205,7 @@ class AvCamMgr:
             print('Camera Manager: This is not a simulation - using real ZED2 camera commands.')
 
             # Create a service to allow other nodes to start/stop cameras
-            self.srvCamMgr = rospy.Service("/antobot_manager/camera", camManager, self._serviceCallbackCamMgr)
+            self.srvCamMgr = rospy.Service("/antobot_datamanager/camera", camManager, self._serviceCallbackCamMgr)
 
             self.antoRecClientLeft = rospy.ServiceProxy('anto_rec_left', antoRec)
             self.antoRecClientRight = rospy.ServiceProxy('anto_rec_right', antoRec)

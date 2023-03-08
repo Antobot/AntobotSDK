@@ -40,7 +40,7 @@ import actionlib
 import time
 from actionlib_msgs.msg import *
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from antobot_manager.managerUserInputClient import directUserInputClient
+from antobot_datamanager.managerUserInputClient import directUserInputClient
 
 class JoystickTeleop:
     def __init__(self):
