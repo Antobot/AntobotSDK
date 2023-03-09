@@ -46,16 +46,6 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_gazebo)/rviz/ant_v1_sensors.rviz"/>
   
-  <!-- EKF from Simulink model -->
-  <node if="false" name="antoboteskf_lk" pkg="antoboteskf_lk" type="AntobotEskf_lk"></node>
-  
-  <!-- TF_BRIDGE -->
-  <node if="false" pkg="antobot_tf_bridge" type="antobot_tf_bridge" name="antobot_tf_bridge" output="screen">
-      <param name="frame_id" value="odom"/>
-      <param name="child_frame_id" value="base_link"/>
-      <param name="sub_topic" value="/odometry/filtered"/>
-  </node>
-  
   <include if="false" file="$(find antobot_nav)/launch/move_base.launch" />
 
   <!-- IMU calibration -->
