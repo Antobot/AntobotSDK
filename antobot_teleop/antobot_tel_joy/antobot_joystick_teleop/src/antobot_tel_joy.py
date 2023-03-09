@@ -40,7 +40,6 @@ import actionlib
 import time
 from actionlib_msgs.msg import *
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from antobot_datamanager.managerUserInputClient import directUserInputClient
 
 class JoystickTeleop:
     def __init__(self):
@@ -118,9 +117,6 @@ class JoystickTeleop:
         # initialise linear and angular velocities
         self.v = 0
         self.w = 0
-        
-        # initialise manager client
-        self.userClient = directUserInputClient(userInput=0, sourceID='Joystick')
         
     def mode_callback(self, mode):
         # # # Callback function for the robot operation mode
@@ -234,16 +230,6 @@ class JoystickTeleop:
                 self.w = self.axes[self.axis_analog_right] * 1.0
         
         self.buttons_previous = msg.buttons
-        
-        # Send request to manager server if input is made by user
-        if userInput is not None:
-            if self.userClient.checkForService():
-                self.userClient.userInput = userInput
-                managerResponse = self.userClient.sendDirectUserInput()
-                    
-            else:
-                print("Unable to make request")
-                print("ROS service " + self.userClient.serviceName + " is not available")
         
     def update(self, timer):
         # # # Update function - called iteratively at a rate defined by self.rctrl_loop_hz. The main purpose is to check
