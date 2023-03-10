@@ -225,10 +225,10 @@ GlobalPlanner:
   default_tolerance: 0.25
 
 #use_dijktra if true, use dijkstra's algorithm. Otherwise, A*.
-  use_dijkstra: true
+  use_dijkstra: false
 
 # use_grid_path if true, create a path that follows the grid boundaries. Otherwise, use a gradient descent method. default false 
-  use_grid_path: false
+  use_grid_path: true
 
 #Factor to multiply each cost from costmap by default 3                                    
   cost_factor: 0.5489 

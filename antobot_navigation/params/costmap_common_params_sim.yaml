@@ -16,10 +16,10 @@ robot_radius: 0.1
 #The obstacle layer tracks the obstacles as read by the sensor data.    
 obstacle_layer:
     enabled: true
-    combination_method: 1
+    combination_method: 0
     observation_sources: pcl_front_laser_scan_sensor pcl_back_laser_scan_sensor
-    pcl_front_laser_scan_sensor: {sensor_frame: zed2_front_left_camera_frame, data_type: LaserScan, topic: /camera/scan/front, inf_is_valid: true, observation_persistence: 0.0, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 0.5, obstacle_range: 10.0, raytrace_range: 12.0}
-    pcl_back_laser_scan_sensor: {sensor_frame: zed2_back_left_camera_frame, data_type: LaserScan, topic: /camera/scan/back, inf_is_valid: true, observation_persistence: 0.0, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 0.5, obstacle_range: 10.0, raytrace_range: 12.0}
+    pcl_front_laser_scan_sensor: {sensor_frame: zed2_front_camera_center, inf_is_valid: true, observation_persistence: 0.0, data_type: LaserScan, topic: /camera/scan/front, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 0.5, obstacle_range: 10.0, raytrace_range: 12}
+    pcl_back_laser_scan_sensor: {sensor_frame: zed2_back_camera_center, inf_is_valid: true, observation_persistence: 0.0, data_type: LaserScan, topic: /camera/scan/back, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 0.5, obstacle_range: 10.0, raytrace_range: 12}
 
 # inflation radius and cost scaling factor are the parameters that determine
 # the inflation. inflation radius controls how far away the zero cost point is from the obstacle. 
@@ -28,6 +28,6 @@ obstacle_layer:
 inflation_layer:
     enabled: true
     cost_scaling_factor:  5.0  # exponential rate at which the obstacle cost drops off (default: 10)
-    inflation_radius:   0.2  # max. distance from an obstacle at which costs are incurred for planning paths.
+    inflation_radius:   1.0  # max. distance from an obstacle at which costs are incurred for planning paths.
 
 

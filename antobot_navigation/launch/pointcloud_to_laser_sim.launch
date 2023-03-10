@@ -10,8 +10,7 @@
 -->
 
 <launch>
-    <arg name="camera_to_activate" default="front" />
-    <node  if="$(eval camera_to_activate == 'back')" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_back">
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_back">
       <remap from="cloud_in" to="/mobile_base/zed2_back/point_cloud/cloud_registered"/>
       <remap from="scan" to="/camera/scan/back" />
       <rosparam>
@@ -25,7 +24,7 @@
         angle_increment: 0.0087
         scan_time: 0.3333
         range_min: 0.45
-        range_max: 10.0
+        range_max: 20.0
         use_inf: true
         
         #concurrency_level affects number of pc queued for processing and the number of threadsused
@@ -36,7 +35,7 @@
       </rosparam>
     </node>
 
-    <node  if="$(eval camera_to_activate == 'front')"  pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_front">
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_front">
       <remap from="cloud_in" to="/mobile_base/zed2_front/point_cloud/cloud_registered"/>
       <remap from="scan" to="/camera/scan/front" />
       <rosparam>
@@ -50,7 +49,7 @@
         angle_increment: 0.0087
         scan_time: 0.3333
         range_min: 0.45
-        range_max: 10.0
+        range_max: 20.0
         use_inf: true
         
         #concurrency_level affects number of pc queued for processing and the number of threadsused

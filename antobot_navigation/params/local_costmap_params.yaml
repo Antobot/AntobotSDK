@@ -28,8 +28,8 @@ local_costmap:
 
 #The width, height,and resolution parameters set the width (meters), height (meters), and resolution (meters/cell) of the costmap
  
-  width: 7.0
-  height: 7.0
+  width: 15.0
+  height: 15.0
 
   
   resolution: 0.1

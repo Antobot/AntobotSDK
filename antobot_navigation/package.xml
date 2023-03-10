@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>am_nav</name>
+  <name>antobot_navigation</name>
   <version>0.0.0</version>
-  <description>The am_nav package</description>
+  <description>The antobot_navigation package</description>
   <maintainer email="soyoung.kim@antobot.ai">So-Young Kim</maintainer>
 
   <license>BSD</license>
