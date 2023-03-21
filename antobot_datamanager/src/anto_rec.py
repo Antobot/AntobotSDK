@@ -88,7 +88,7 @@ class AntoRec:
         self.runtime.sensing_mode = sl.SENSING_MODE.STANDARD
         srv_name, self.cam_name, self.output_basename = get_name()
 
-        self.display_image = True
+        self.display_image = False
 
         self.use_gps = False
         self.listener = None
@@ -228,12 +228,15 @@ class AntoRec:
             err (sl.ERROR_CODE): If SUCCESS is returned, recording is started. Every other code indicates an error.
 
         """
+
+        _, _, self.output_basename = get_name()  # generate recording name based on current time stamp
         recording_param = sl.RecordingParameters(f"{self.output_basename}.svo", sl.SVO_COMPRESSION_MODE.H265)
         err = self.cam.enable_recording(recording_param)
         if err != sl.ERROR_CODE.SUCCESS:
             print(repr(err))
             return err
-
+        self.stop_signal = False
+        self.thread = threading.Thread(target=self.grab_run)
         self.thread.start()
 
         return err
@@ -335,13 +338,13 @@ class AntoRec:
         dark_idx = np.nonzero(mask)
         # find min, max index of the dark region
         try:
-            min_dark_idx = np.min(dark_idx)
+            min_dark_idx = np.max(np.min(dark_idx) - 5, 0)
         except:
             min_dark_idx = 0
         try:
-            max_dark_idx = np.max(dark_idx)
+            max_dark_idx = np.max(np.max(dark_idx) + 5, left_img_array.shape[0] - 1)
         except:
-            max_dark_idx = left_img_array.shape[0] -1
+            max_dark_idx = left_img_array.shape[0] - 1
         print(min_dark_idx, max_dark_idx)
         # generate region of interest(ROI)
         roi = sl.Rect(0, min_dark_idx, left_img_array.shape[1], max_dark_idx - min_dark_idx)

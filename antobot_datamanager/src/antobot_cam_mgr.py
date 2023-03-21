@@ -155,111 +155,101 @@ class AvCamMgr:
     ##############################################################################
 
     def _serviceCallbackCamMgr(self, request):
-       
+
         ## ROS service input:
-        #int8 camera_num		# 1 - front, 2 - back, 3 - left, 4 - right, 5 - left and right
-        #int8 command			# 0 - stop cameras
-                                # 1 - Start front or back cameras using ROS launch for antomove
-                                # 2 - Pass the command along to antoVision to open either left or right cameras
-        
+        # int8 camera_num		# 1 - front, 2 - back, 3 - left, 4 - right, 5 - left and right
+        # int8 command			# 0 - stop cameras
+        # 1 - Start front or back cameras using ROS launch for antomove
+        # 2 - Pass the command along to antoVision to open either left or right cameras
+        # 3 - Pass the command along to antoVision to start recording
+        # 4 - stop video recording
+
         ## ROS Service response:
-        #int8 responseCode		# 1 - success, 0 - failure
-        #string responseString	# Additional info
+        # int8 responseCode		# 1 - success, 0 - failure
+        # string responseString	# Additional info
 
         # Create the return message
         return_msg = camManagerResponse()
 
-        if request.command == 2:  # Recording video using antoVision
-
-            # The logic here can only handle 1 camera at once
-            # Presumably antoVision handles multi camera functionality
-
+        if request.command == 2:  # open recording camera(s)
             if request.camera_num == 3 or request.camera_num == 5:  # Turn left camera on for recording video
                 try:
                     open_response = self.antoRecClientLeft(0)
-
-                    if open_response.responseCode:
-                        rec_response = self.antoRecClientLeft(2)
-                        return_msg.responseCode = rec_response.responseCode
-                        return_msg.responseString = rec_response.responseString
-                    else:
-                        return_msg.responseCode = open_response.responseCode
-                        return_msg.responseString = open_response.responseString
+                    return_msg.responseCode = open_response.responseCode
+                    return_msg.responseString = open_response.responseString
                 except rospy.ServiceException as e:
                     print("Service call failed: %s" % e)
+
             if request.camera_num == 4 or request.camera_num == 5:  # Turn right camera on for recording video
                 try:
                     open_response = self.antoRecClientRight(0)
+                    return_msg.responseCode &= open_response.responseCode
+                    return_msg.responseString += open_response.responseString
+                except rospy.ServiceException as e:
+                    print("Service call failed: %s" % e)
 
-                    if open_response.responseCode:
-                        rec_response = self.antoRecClientRight(2)
-                        return_msg.responseCode &= rec_response.responseCode
-                        return_msg.responseString += rec_response.responseString
-                    else:
-                        return_msg.responseCode &= open_response.responseCode
-                        return_msg.responseString += open_response.responseString
 
+        elif request.command == 3:  # start video recording request
+            if request.camera_num == 3 or request.camera_num == 5:
+                rec_response = self.antoRecClientLeft(2)
+                return_msg.responseCode = rec_response.responseCode
+                return_msg.responseString = rec_response.responseString
+            if request.camera_num == 4 or request.camera_num == 5:
+                rec_response = self.antoRecClientRight(2)
+                return_msg.responseCode &= rec_response.responseCode
+                return_msg.responseString += rec_response.responseString
+
+
+        elif request.command == 4:  # stop video recording request
+            if request.camera_num == 3 or request.camera_num == 5:
+                try:
+                    stop_rec_response = self.antoRecClientLeft(3)
+                    return_msg.responseCode = stop_rec_response.responseCode
+                    return_msg.responseString = stop_rec_response.responseString
+                except rospy.ServiceException as e:
+                    print("Service call failed: %s" % e)
+
+            if request.camera_num == 4 or request.camera_num == 5:
+                try:
+                    stop_rec_response = self.antoRecClientRight(3)
+                    return_msg.responseCode &= stop_rec_response.responseCode
+                    return_msg.responseString += stop_rec_response.responseString
                 except rospy.ServiceException as e:
                     print("Service call failed: %s" % e)
 
 
         elif request.command == 1:  # Roslaunch
             print("Roslaunch requested")
+
             self.cameras[request.camera_num].createLauncher()
-            #self.cameras[request.camera_num].start()
-            self.cameras[request.camera_num].mainThreadCommand=1 # Start the camera node
 
-            self.cameras[request.camera_num].lastTime=rospy.get_rostime() # Get the current time
+            # self.cameras[request.camera_num].start()
+            self.cameras[request.camera_num].mainThreadCommand = 1  # Start the camera node
 
+            self.cameras[request.camera_num].lastTime = rospy.get_rostime()  # Get the current time
 
             self.ros_cams.append(request.camera_num)
             return_msg.responseCode = 1
             return_msg.responseString = "Camera " + str(request.camera_num) + " launched"
 
+
         elif request.command == 0:  # Closes all cameras
             # stop recording and close cameras
-            self.stop_rec_and_close()
+            if request.camera_num == 3 or request.camera_num == 5:
+                close_response = self.antoRecClientLeft(1)
+                return_msg.responseCode = close_response.responseCode
+                return_msg.responseString = close_response.responseString
+
+            if request.camera_num == 4 or request.camera_num == 5:
+                close_response = self.antoRecClientRight(1)
+                return_msg.responseCode &= close_response.responseCode
+                return_msg.responseString += close_response.responseString
 
             self.cameras[1].shutdown()
             self.cameras[2].shutdown()
 
             self.ros_cams = []
             self.rec_cams = []
-            return_msg.responseCode = 1
-            return_msg.responseString = "Turning off all cameras"
-
-        return return_msg
-
-    ##############################################################################
-    ## antoVision specific functions below
-    ##############################################################################
-
-    def stop_rec_and_close(self):
-        return_msg = camManagerResponse()
-
-        try:
-            stop_rec_response = self.antoRecClientLeft(3)
-            if stop_rec_response.responseCode:
-                close_response = self.antoRecClientLeft(1)
-                return_msg.responseCode = close_response.responseCode
-                return_msg.responseString = close_response.responseString
-            else:
-                return_msg.responseCode = stop_rec_response.responseCode
-                return_msg.responseString = stop_rec_response.responseString
-        except rospy.ServiceException as e:
-            print("Service call failed: %s" % e)
-
-        try:
-            stop_rec_response = self.antoRecClientRight(3)
-            if stop_rec_response.responseCode:
-                close_response = self.antoRecClientRight(1)
-                return_msg.responseCode &= close_response.responseCode
-                return_msg.responseString += close_response.responseString
-            else:
-                return_msg.responseCode &= stop_rec_response.responseCode
-                return_msg.responseString += stop_rec_response.responseString
-        except rospy.ServiceException as e:
-            print("Service call failed: %s" % e)
 
         return return_msg
    
