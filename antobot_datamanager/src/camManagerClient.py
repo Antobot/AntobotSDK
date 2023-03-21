@@ -3,15 +3,15 @@
 
 import rospy
 import rosservice
-from anto_msgs.srv import camManager, camManagerRequest,camManagerResponse
+from antobot_msgs.srv import camManager, camManagerRequest,camManagerResponse
 
 class camManagerClient():
     """A class that handles a client to provide updates to higher level nodes"""
-    
-    def __init__(self,camera_num=1,command=0,serviceName = '/antobot_datamanager/camera'):    
-        
+
+    def __init__(self,camera_num=1,command=0,serviceName = '/antobot_datamanager/camera'):
+
         self.serviceName = serviceName
-        
+
         self.camManagerClient = rospy.ServiceProxy(self.serviceName, camManager)
         self.camera_num=camera_num # Data that will be sent. 0 is default, doesnt do anything, just used to test.
         self.command=command
@@ -25,9 +25,9 @@ class camManagerClient():
             return False
 
     def sendCameraCommand(self):
-        
+
         # In ROS it's common to wait for a service. However, this blocks execution and is not always useful. Use checkForService method instead.
-        #rospy.wait_for_service('localUserInput')    
+        #rospy.wait_for_service('localUserInput')
         #camCommand = camManagerRequest
         #camCommand.camera_num=self.camera_num
         #camCommand.command=self.command
@@ -41,9 +41,9 @@ class camManagerClient():
 
 
 if __name__ == "__main__":
-    
+
     # Create the class to handle client-side interaction
-    camClient = camManagerClient(camera_num=1,command=0) 
+    camClient = camManagerClient(camera_num=1,command=0)
 
     # Check that the service is availble before trying to send requests
     serviceState=camClient.checkForService()
