@@ -57,19 +57,16 @@ class MasterTeleop:
         self.rctrl_loop_hz = 30.0
         rospy.Timer(rospy.Duration(1 / self.rctrl_loop_hz), self.update)
 
-        # INitialise the joystick twist value to None
+        # Initialise the joystick twist value to None
         self.joy_twist = None
         
         # Initialises different class instances which may be used in the code (but may not be)
         self.kt = Keyboard_Teleop()
     
-    def move_base_goal_sub(self, goal_in):
-        self.mode_pub.publish(1)
-    
     def mode_callback(self, mode_in):
         # # # Callback function for the "/switch_mode" topic (Int8). The mode received by this function will define
         # # # which teleoperation state the robot is in.
-        # Inputs: mode_in [Int8.msg] - 0: keyboard teleoperation; 1: app control; 2: joystick control; 3: autonomous navigation
+        # Inputs: mode_in [Int8.msg] - 0: keyboard teleoperation; 2: joystick control; 3: autonomous navigation
             
         self.mode = mode_in.data
         if self.mode == 0:
@@ -82,6 +79,14 @@ class MasterTeleop:
         # # # which, if the robot is in joystick teleoperation mode, will be sent to antobot_safety (cmd_vel_mux).
         # Input: data [Twist.msg] - ROS message for movement (linear velocity in x direction, angular velocity in z) 
         self.joy_twist = data
+
+    def move_base_goal_sub(self, goal_in):
+        # # # Callback function for /move_base/goal
+
+        # Switches the mode to "autonomous", disabling cmd_vel messages from antobot_teleop
+        self.mode_pub.publish(3)
+
+        print("Move base subscriber reached (teleop)")
 
     def update(self, timer):
         # # # Update function - called iteratively at a rate defined by self.rctrl_loop_hz. The main purpose is to check
