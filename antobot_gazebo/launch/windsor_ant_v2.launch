@@ -27,5 +27,8 @@
 
   <!-- robot -->
   <include file="$(find antobot_gazebo)/launch/settings/ant_v2_windsorSettings.launch"/>
+
+  <!-- Move base -->
+	<include file="$(find antobot_navigation)/launch/move_base_sim.launch" />
   
 </launch>

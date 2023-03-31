@@ -51,6 +51,7 @@ class MasterTeleop:
         # Define subscribers to mode switch, mqtt (app) velocity, joystick velocity, imu calibration and waypoint filename topics
         self.mode_sub = rospy.Subscriber("/switch_mode", UInt8, self.mode_callback)
         self.joy_cmd_sub = rospy.Subscriber("/joy/cmd_vel", Twist, self.joy_cmd_callback)
+        self.move_base_goal_sub = rospy.Subscriber("/joy/cmd_vel", Twist, self.joy_cmd_callback)
 
         # Defining a timer for the update loop
         self.rctrl_loop_hz = 30.0
@@ -61,6 +62,9 @@ class MasterTeleop:
         
         # Initialises different class instances which may be used in the code (but may not be)
         self.kt = Keyboard_Teleop()
+    
+    def move_base_goal_sub(self, goal_in):
+        self.mode_pub.publish(1)
     
     def mode_callback(self, mode_in):
         # # # Callback function for the "/switch_mode" topic (Int8). The mode received by this function will define
