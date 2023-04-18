@@ -1,60 +1,53 @@
-# -*- coding:utf-8 -*- 
-import paramiko 
-from anto_msgs.srv import softShutdown, softShutdownResponse
+#!/usr/bin/env python3
+
+# Copyright (c) 2019, ANTOBOT LTD.
+# All rights reserved.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+#Description:   This is a python script to kill the nodes and shutdown host pc using ssh
+#Interface:
+#Inputs:      soft shutdown request [softshutdown] - soft shutdown client request send from Anto_supervisor      
+#Contact:     zhuang.zhou@antobot.ai
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+from antobot_msgs.srv import softshutdown, softshutdownResponse
 import os
+import rospy
+import time
 
-# Input host, username and password of installed system before use
-host = 'xxxxxxxxx'
-user = 'xxxxxxx'
-password = 'xxxxxxxxx'
  
-def ssh_exec_command(command): 
-    try: 
-        ssh_client = paramiko.SSHClient() 
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy()) 
-        ssh_client.connect(host,22,user,password) 
-        
-        print("command: " + command)
-        std_in, std_out, std_err = ssh_client.exec_command(command, get_pty=True) 
-        std_in.write(password + '\n')
-        
-        for line in std_out: 
-            print(line.strip("\n"))
-        for line in std_err: 
-            print(line.strip("\n")) 
-            
-        ssh_client.close() 
-    except Exception as e: 
-        print("error: " + str(e)) 
-
 def softshutdownprocess(req):
-    return_msg = softShutdownResponse()
+    return_msg = softshutdownResponse()
     print("soft shutdown service callback entered!")
-
-    #main function: send topic to antobridge, repeat 60 times, kill all the other nodes, shutdown 
-
-    ssh_exec_command("sudo shutdown -h -t 30") #shut down in 30 sec sudo shutdown -h now
-     
-    print("computer will be poweroff in 30 seconds")
-    nodes = os.popen("rosnode list").readlines()
-    for i in range(len(nodes)):
-        nodes[i] = nodes[i].replace("\n","")
-
-    for node in nodes:
-        if node != anto_bridge or anto_supervisor: #tbc if need this 
-            os.system("rosnode kill "+ node)
-   
+    print("Sending softshutdown request to Aurix")
+    time.sleep(4) #leave time to send /antobridge/soft_shutdown_req topic to antobridge, repeat 100 times    
+    print("killing nodes now")
+    os.system("rosnode kill /anto_bridge")
     return_msg.responseBool = True
     return_msg.responseString = "Success!"
-
-    print("shutdown command sent and nodes killed")
-
+    
+    print("will shutdown in 2 sec ")
+    time.sleep(2)
+    os.system("shutdown -h now") #shutdown computer now
     return return_msg
 
 def soft_shutdown_server():
+    #receiving req from antosupervisor 
     rospy.init_node('soft_shutdown_server')
-    s = rospy.Service('soft_shutdown_req', softShutdown,softshutdownprocess)
-    
+    s = rospy.Service('soft_shutdown_req', softshutdown,softshutdownprocess)
     rospy.spin()
 
         
