@@ -1,7 +1,9 @@
-# -*- coding:utf-8 -*- 
+#!/usr/bin/env python3
+
 import paramiko 
-from anto_msgs.srv import softShutdown, softShutdownResponse
+from antobot_msgs.srv import softShutdown,softShutdownResponse
 import os
+import rospy
 
 # Input host, username and password of installed system before use
 host = 'xxxxxxxxx'

@@ -17,7 +17,7 @@ from std_msgs.msg import String, Bool,UInt8,Float64,Float32
 from sensor_msgs.msg import NavSatFix, Imu
 from nav_msgs.msg import Odometry
 from antobot_msgs.msg import UInt8_Array,Float32_Array,UInt16_Array ##check syntax
-from anto_msgs.srv import softshutdown
+from antobot_msgs.srv import softShutdown
 #3rd party
 import socket
 from jtop import jtop
@@ -86,7 +86,7 @@ class Monitor():
 
         """mileage"""
         self.uMode = 0 #robot operation mode
-        self.path = '/mileage' # path where mileage tracker file is saved
+        self.path = 'Desktop/mileage' # path where mileage tracker file is saved
         self.filename = 'mileage.txt'
         self.filenameTmp = 'mileageTmp.txt'
         self.vel = 0
@@ -166,7 +166,7 @@ class Monitor():
         self.pub_soft_shutdown_req = rospy.Publisher("/antobridge/soft_shutdown_req", Bool,queue_size = 1)
 
         # ROS Service
-        self.soft_shutdown_client = rospy.ServiceProxy('soft_shutdown_req',softshutdown)
+        self.soft_shutdown_client = rospy.ServiceProxy('soft_shutdown_req',softShutdown)
         
     
     def imu_calib(self,data):
