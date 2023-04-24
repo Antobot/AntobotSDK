@@ -1,8 +1,8 @@
 mileage for current job(m):
-0
+0.0
 
 Total autonomous mileage include current job(m):
-0
+0.0
 
 Total autonomous mileage history(m):
-0
+0.0
