@@ -180,7 +180,7 @@ class AntoRec:
 
             if status == sl.ERROR_CODE.SUCCESS:
                 return_msg.responseCode = True
-                return_msg.responseString = f"{self.cam_name} starts recording, use Ctrl-C or send command to stop."
+                return_msg.responseString = f"{self.cam_name} starts recording."
             else:
                 return_msg.responseCode = False
                 return_msg.responseString = f"{self.cam_name} recording failed, {repr(status)}."
@@ -191,7 +191,6 @@ class AntoRec:
             return_msg.responseCode = True
             return_msg.responseString = f"{self.cam_name} stopped recording."
 
-        print(return_msg.responseString)
         return return_msg
 
     def open_camera(self):
@@ -229,7 +228,7 @@ class AntoRec:
 
         """
 
-        _, _, self.output_basename = get_name()  # generate recording name based on current time stamp
+        _, _, self.output_basename = get_name() # generate recording name based on current time stamp
         recording_param = sl.RecordingParameters(f"{self.output_basename}.svo", sl.SVO_COMPRESSION_MODE.H265)
         err = self.cam.enable_recording(recording_param)
         if err != sl.ERROR_CODE.SUCCESS:
@@ -338,14 +337,14 @@ class AntoRec:
         dark_idx = np.nonzero(mask)
         # find min, max index of the dark region
         try:
-            min_dark_idx = np.max(np.min(dark_idx) - 5, 0)
+            min_dark_idx = np.max([np.min(dark_idx)-5], [0])
         except:
             min_dark_idx = 0
         try:
-            max_dark_idx = np.max(np.max(dark_idx) + 5, left_img_array.shape[0] - 1)
+            max_dark_idx = np.max([np.max(dark_idx)+5], [left_img_array.shape[0] -1])
         except:
-            max_dark_idx = left_img_array.shape[0] - 1
-        print(min_dark_idx, max_dark_idx)
+            max_dark_idx = left_img_array.shape[0] -1
+
         # generate region of interest(ROI)
         roi = sl.Rect(0, min_dark_idx, left_img_array.shape[1], max_dark_idx - min_dark_idx)
         # sent ROI to zed camera settings

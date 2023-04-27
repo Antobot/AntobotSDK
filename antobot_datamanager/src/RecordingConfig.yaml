@@ -1,0 +1,4 @@
+# base path for recordings
+save_path : '/home/antoscout1/catkin_ws/src/AntoVision/src/av_video/av_record/saved_recordings'
+zed_name : 'ZED_LEFT'
+service_name : 'anto_rec_left'

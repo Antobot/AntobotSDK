@@ -155,15 +155,15 @@ class AvCamMgr:
     ##############################################################################
 
     def _serviceCallbackCamMgr(self, request):
-
+       
         ## ROS service input:
-        # int8 camera_num		# 1 - front, 2 - back, 3 - left, 4 - right, 5 - left and right
-        # int8 command			# 0 - stop cameras
-        # 1 - Start front or back cameras using ROS launch for antomove
-        # 2 - Pass the command along to antoVision to open either left or right cameras
-        # 3 - Pass the command along to antoVision to start recording
-        # 4 - stop video recording
-
+        #int8 camera_num		# 1 - front, 2 - back, 3 - left, 4 - right, 5 - left and right
+        #int8 command			# 0 - stop cameras
+                                # 1 - Start front or back cameras using ROS launch for antomove
+                                # 2 - Pass the command along to antoVision to open either left or right cameras
+                                # 3 - Pass the command along to antoVision to start recording
+                                # 4 - stop video recording
+        
         ## ROS Service response:
         # int8 responseCode		# 1 - success, 0 - failure
         # string responseString	# Additional info
@@ -183,8 +183,12 @@ class AvCamMgr:
             if request.camera_num == 4 or request.camera_num == 5:  # Turn right camera on for recording video
                 try:
                     open_response = self.antoRecClientRight(0)
-                    return_msg.responseCode &= open_response.responseCode
-                    return_msg.responseString += open_response.responseString
+                    if request.camera_num == 5:
+                        return_msg.responseCode &= open_response.responseCode
+                        return_msg.responseString += open_response.responseString
+                    else:
+                        return_msg.responseCode = open_response.responseCode
+                        return_msg.responseString = open_response.responseString
                 except rospy.ServiceException as e:
                     print("Service call failed: %s" % e)
 
@@ -196,8 +200,12 @@ class AvCamMgr:
                 return_msg.responseString = rec_response.responseString
             if request.camera_num == 4 or request.camera_num == 5:
                 rec_response = self.antoRecClientRight(2)
-                return_msg.responseCode &= rec_response.responseCode
-                return_msg.responseString += rec_response.responseString
+                if request.camera_num == 5:
+                    return_msg.responseCode &= rec_response.responseCode
+                    return_msg.responseString += rec_response.responseString
+                else:
+                    return_msg.responseCode = rec_response.responseCode
+                    return_msg.responseString = rec_response.responseString
 
 
         elif request.command == 4:  # stop video recording request
@@ -212,8 +220,12 @@ class AvCamMgr:
             if request.camera_num == 4 or request.camera_num == 5:
                 try:
                     stop_rec_response = self.antoRecClientRight(3)
-                    return_msg.responseCode &= stop_rec_response.responseCode
-                    return_msg.responseString += stop_rec_response.responseString
+                    if request.camera_num == 5:
+                        return_msg.responseCode &= stop_rec_response.responseCode
+                        return_msg.responseString += stop_rec_response.responseString
+                    else:
+                        return_msg.responseCode = stop_rec_response.responseCode
+                        return_msg.responseString = stop_rec_response.responseString
                 except rospy.ServiceException as e:
                     print("Service call failed: %s" % e)
 
@@ -221,11 +233,12 @@ class AvCamMgr:
         elif request.command == 1:  # Roslaunch
             print("Roslaunch requested")
 
+            # check if in simulation mode or not
+
             self.cameras[request.camera_num].createLauncher()
 
             # self.cameras[request.camera_num].start()
             self.cameras[request.camera_num].mainThreadCommand = 1  # Start the camera node
-
             self.cameras[request.camera_num].lastTime = rospy.get_rostime()  # Get the current time
 
             self.ros_cams.append(request.camera_num)
@@ -242,14 +255,20 @@ class AvCamMgr:
 
             if request.camera_num == 4 or request.camera_num == 5:
                 close_response = self.antoRecClientRight(1)
-                return_msg.responseCode &= close_response.responseCode
-                return_msg.responseString += close_response.responseString
+                if request.camera_num == 5:
+                    return_msg.responseCode &= close_response.responseCode
+                    return_msg.responseString += close_response.responseString
+                else:
+                    return_msg.responseCode = close_response.responseCode
+                    return_msg.responseString = close_response.responseString
 
             self.cameras[1].shutdown()
             self.cameras[2].shutdown()
 
             self.ros_cams = []
             self.rec_cams = []
+            # return_msg.responseCode = 1
+            # return_msg.responseString = "Turning off all cameras"
 
         return return_msg
    
@@ -279,4 +298,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
-
