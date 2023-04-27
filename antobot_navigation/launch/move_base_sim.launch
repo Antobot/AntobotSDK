@@ -26,7 +26,7 @@ Contacts: 	soyoung.kim@antobot.ai -->
     <!-- <arg name="base_local_planner" default="base_local_planner/TrajectoryPlannerROS"/> -->
     <arg name="base_global_planner" default="global_planner/GlobalPlanner"/>
     <!-- <arg name="base_global_planner" default="carrot_planner/CarrotPlanner"/> -->
-    <!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->
+
 
    <!--defines the parameters for different costmaps and move_base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log" launch-prefix="taskset -c 0,1,2,3,4,5">

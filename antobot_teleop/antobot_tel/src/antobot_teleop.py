@@ -33,6 +33,7 @@ tel_key_path = Path(__file__).resolve().parent.parent.parent / 'antobot_tel_key'
 sys.path.append(str(tel_key_path))
 
 from antobot_keyboard_teleop import Keyboard_Teleop
+from move_base_msgs.msg import MoveBaseActionGoal
 
 
 class MasterTeleop:
@@ -51,7 +52,7 @@ class MasterTeleop:
         # Define subscribers to mode switch, mqtt (app) velocity, joystick velocity, imu calibration and waypoint filename topics
         self.mode_sub = rospy.Subscriber("/switch_mode", UInt8, self.mode_callback)
         self.joy_cmd_sub = rospy.Subscriber("/joy/cmd_vel", Twist, self.joy_cmd_callback)
-        self.move_base_goal_sub = rospy.Subscriber("/joy/cmd_vel", Twist, self.joy_cmd_callback)
+        self.move_base_goal_sub = rospy.Subscriber("/move_base/goal", MoveBaseActionGoal, self.move_base_goal_sub)
 
         # Defining a timer for the update loop
         self.rctrl_loop_hz = 30.0

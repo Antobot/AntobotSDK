@@ -21,11 +21,12 @@ Contacts: 	soyoung.kim@antobot.ai -->
     <arg name="move_forward_only" default="false"/>
     
     <!-- defining different planners -->
+    <!-- <arg name="base_local_planner" default="eband_local_planner/EBandPlannerROS"/> -->
     <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
     <!-- <arg name="base_local_planner" default="base_local_planner/TrajectoryPlannerROS"/> -->
-    <!-- <arg name="base_global_planner" default="global_planner/GlobalPlanner"/> -->
-    <arg name="base_global_planner" default="carrot_planner/CarrotPlanner"/>
-    <!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->
+    <arg name="base_global_planner" default="global_planner/GlobalPlanner"/>
+    <!-- <arg name="base_global_planner" default="carrot_planner/CarrotPlanner"/> -->
+
 
    <!--defines the parameters for different costmaps and move_base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log" launch-prefix="taskset -c 0,1,2,3,4,5">
