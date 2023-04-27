@@ -165,8 +165,8 @@ class AvCamMgr:
                                 # 4 - stop video recording
         
         ## ROS Service response:
-        #int8 responseCode		# 1 - success, 0 - failure
-        #string responseString	# Additional info
+        # int8 responseCode		# 1 - success, 0 - failure
+        # string responseString	# Additional info
 
         # Create the return message
         return_msg = camManagerResponse()
@@ -237,11 +237,9 @@ class AvCamMgr:
 
             self.cameras[request.camera_num].createLauncher()
 
-
-            #self.cameras[request.camera_num].start()
-            self.cameras[request.camera_num].mainThreadCommand=1 # Start the camera node
-
-            self.cameras[request.camera_num].lastTime=rospy.get_rostime() # Get the current time
+            # self.cameras[request.camera_num].start()
+            self.cameras[request.camera_num].mainThreadCommand = 1  # Start the camera node
+            self.cameras[request.camera_num].lastTime = rospy.get_rostime()  # Get the current time
 
             self.ros_cams.append(request.camera_num)
             return_msg.responseCode = 1
@@ -271,39 +269,6 @@ class AvCamMgr:
             self.rec_cams = []
             # return_msg.responseCode = 1
             # return_msg.responseString = "Turning off all cameras"
-
-        return return_msg
-
-    ##############################################################################
-    ## antoVision specific functions below
-    ##############################################################################
-
-    def stop_rec_and_close(self):
-        return_msg = camManagerResponse()
-
-        try:
-            stop_rec_response = self.antoRecClientLeft(3)
-            if stop_rec_response.responseCode:
-                close_response = self.antoRecClientLeft(1)
-                return_msg.responseCode = close_response.responseCode
-                return_msg.responseString = close_response.responseString
-            else:
-                return_msg.responseCode = stop_rec_response.responseCode
-                return_msg.responseString = stop_rec_response.responseString
-        except rospy.ServiceException as e:
-            print("Service call failed: %s" % e)
-
-        try:
-            stop_rec_response = self.antoRecClientRight(3)
-            if stop_rec_response.responseCode:
-                close_response = self.antoRecClientRight(1)
-                return_msg.responseCode &= close_response.responseCode
-                return_msg.responseString += close_response.responseString
-            else:
-                return_msg.responseCode &= stop_rec_response.responseCode
-                return_msg.responseString += stop_rec_response.responseString
-        except rospy.ServiceException as e:
-            print("Service call failed: %s" % e)
 
         return return_msg
    

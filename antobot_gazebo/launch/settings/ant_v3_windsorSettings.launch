@@ -38,17 +38,20 @@
     <param name="publish_frequency" type="double" value="30.0" />
   </node>
 
-  <node pkg="tf" type="static_transform_publisher" name="laser_frame_to_laser" args="0.0 0.0 0.0 0.0 0.0 0.0 /front_laser_frame /laser 100" /> 
   <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /imu 100" />
   <node pkg="tf" type="static_transform_publisher" name="imu_frame_to_imu2" args="0.0 0.0 0.0 0.0 0.0 0.0 /imu_frame /gyro_link 100" /> 
   <node pkg="tf" type="static_transform_publisher" name="gps_frame" args="0.0 0.0 0.0 0.0 0.0 0.0 /gps_frame /gps 100" />
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_gazebo)/rviz/ant_v3_sensors.rviz"/>
   
-  <include if="false" file="$(find antobot_nav)/launch/move_base.launch" />
+  <!-- Move base -->
+  <include file="$(find antobot_navigation)/launch/move_base_sim.launch" />
 
   <!-- IMU calibration -->
   <include file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
+
+  <!-- pointcloud to laser nodes (Change gazebo depth camera's pointcloud to laser scan)-->
+  <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser_sim.launch"></include>
   
   <!-- Teleop -->
   <include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch" />
@@ -56,10 +59,6 @@
   
   <include if="true" file="$(find antobot_safety)/launch/antobot_cmd_vel_mux.launch" />
   <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_cmd_vel_mod" output="screen"/>
-
-  <!-- Camera manager -->
-	<node if="true" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="screen"/>
-  
 
   <!-- Sensor sim -->
 	<node if="true" pkg="antobot_gazebo" type="simSensors.py" name="simSensors" output="screen"/>

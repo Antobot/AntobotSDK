@@ -25,7 +25,7 @@ from signal import signal, SIGINT
 import rospy
 import tf2_ros
 from sensor_msgs.msg import NavSatFix
-from AntoVision.srv import antoRec, antoRecResponse
+from antobot_msgs.srv import antoRec, antoRecResponse
 
 
 def param_init():

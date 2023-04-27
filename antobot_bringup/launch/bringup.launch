@@ -18,7 +18,7 @@
 	<include if="true" file="$(find antobot_base)/launch/ant_controller.launch"></include>
 
 	<!-- navigation sensors -->
-	<include if="true" file="$(find antobot_nav)/launch/antobot_sensors.launch"></include>
+	<include if="true" file="$(find antobot_navigation)/launch/antobot_sensors.launch"></include>
 	
 	<!-- IMU calibration -->
 	<include file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
@@ -39,14 +39,17 @@
 	<!-- Camera Manager -->
 	<node if="true" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
 
+	<!-- Move base -->
+	<include file="$(find antobot_navigation)/launch/move_base.launch" />
+
+	<!-- pointcloud to laser nodes (for zed camera)-->
+    <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
+
 	<!-- AntoSupervisor -->
-	<node if="true" pkg="anto_supervisor" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
-	<node if="true" pkg="anto_supervisor" type="softshutdownsrv.py" name="soft_shutdown_server" output="screen"/>
-	
-    <!-- pointcloud to laser nodes (for zed camera)-->
-    <include if="true" file="$(find antobot_nav)/launch/pointcloud_to_laser.launch"></include>
+	<node if="true" pkg="antobot_datamanager" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
+	<node if="true" pkg="antobot_datamanager" type="softshutdownsrv.py" name="soft_shutdown_server" output="screen"/>
 
 	<!-- OPC-UA server launch-->
-	<include if="true" file="$(find ac_opcua)/launch/rosopcua_antobot.launch"></include>
+	<include if="false" file="$(find ac_opcua)/launch/rosopcua_antobot.launch"></include>
 
 </launch>

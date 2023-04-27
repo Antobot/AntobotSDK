@@ -16,6 +16,7 @@ Contacts: 	daniel.freer@antobot.ai
 */
 
 #include <time.h>
+#include <math.h>
 
 #include <ros/ros.h>
 #include "antobot_safety/antobot_safety.hpp"
@@ -27,8 +28,10 @@ AntobotSafety::AntobotSafety(ros::NodeHandle& nh) : nh_(nh)
     double loop_hz_ = 25.0;
 
     AntobotSafety::output_cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("/antobot_robot/cmd_vel", 10);
-    AntobotSafety::output_uss_dist_filt_pub = nh_.advertise<antobot_msgs::UInt16_Array>("/antobot_safety/uss_dist", 10);
-	lights_f_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_f", 1);
+    AntobotSafety::output_uss_dist_filt_pub = nh_.advertise<antobot_msgs::UInt16_Array>("/anto_safety/uss_dist", 10);
+    force_stop_type_pub = nh_.advertise<std_msgs::Int8>("/antobot_safety/force_stop_type", 10);  // 0 - none (or release); 1 - front left; 2 - front; 3 - front right; 4 - right spot turn; 
+                                                                                            // 5 - back right; 6- back straight; 7 - back left; 8 - left spot turn
+    lights_f_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_f", 1);
     lights_b_pub = nh_.advertise<std_msgs::Bool>("/antobridge/lights_b", 1);
 
     ros::Duration update_freq = ros::Duration(1.0/loop_hz_);
@@ -42,6 +45,7 @@ AntobotSafety::AntobotSafety(ros::NodeHandle& nh) : nh_(nh)
     light_cmd_ar = {false, false};
 
     force_stop = false;
+    force_stop_type = 0;
 
 }
 
@@ -55,22 +59,40 @@ void AntobotSafety::update(const ros::TimerEvent& e)
     /*  Fixed update rate to check various safety inputs and broadcast the correct outputs
     */
 
-    // Check USS recommendation - commenting out for simulation testing
+    // Check USS recommendation
     if (ussDistSafetyCheck() && !force_stop && !force_stop_release)
     {
-	    ROS_INFO("Force stop!");
-        force_stop = true;
-        t_force_stop = clock();
-        t_safety_light = clock();
+        if (force_stop_type > 0)
+        {
+            // For corner turns, try to scale the movement   
+            float vel_scale = scaleCmdVel();
+
+            // If it isn't safe to scale, force stop the robot
+            if (vel_scale == 0)
+            {
+                force_stop = true;
+                t_force_stop = clock();         // Sets when the robot force stopped
+                t_safety_light = clock();
+            }
+            else
+            {
+                force_stop_type = 0;
+            }
+        }
+        else
+        {
+            // If force stop is triggered while moving straight, force stop the robot
+            force_stop = true;
+            t_force_stop = clock();         // Sets when the robot force stopped
+            t_safety_light = clock();
+        }
     }
 
     // Check costmap recommendation
 
     // Check time of last received command - if none received in the last ~1s, the robot should stop
     if ((float)(clock() - t_lastRcvdCmdVel)/CLOCKS_PER_SEC > 0.05)
-    {
-        // ROS_INFO("Timeout reached!");
-        
+    {   
         cmd_vel_msg.linear.x = 0;
         cmd_vel_msg.angular.z = 0;
     }
@@ -78,7 +100,6 @@ void AntobotSafety::update(const ros::TimerEvent& e)
     // Robot is moving too quickly toward an obstacle
     if (force_stop)
     {
-        // ROS_INFO("Robot force stopped [antobot_safety]!");
         lightsSafetyOut();	// Broadcast safety lights (if needed)
 
         // Set command velocity to 0
@@ -90,6 +111,12 @@ void AntobotSafety::update(const ros::TimerEvent& e)
     prev_angular_vel = cmd_vel_msg.angular.z;
 
     AntobotSafety::output_cmd_vel_pub.publish(cmd_vel_msg);
+
+    std_msgs::Int8 force_stop_type_msg;
+    force_stop_type_msg.data = force_stop_type;
+    force_stop_type_pub.publish(force_stop_type_msg);
+
+    autoRelease();
     
     if (10.0*(clock() - t_release)/(float)CLOCKS_PER_SEC > 0.2)
         force_stop_release = false;  
@@ -105,6 +132,7 @@ bool AntobotSafety::ussDistSafetyCheck()
     //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
 
     not_safe = false;
+    //force_stop_type = 0;
 
     if (linear_vel > lin_vel_thresh)
     {
@@ -114,6 +142,7 @@ bool AntobotSafety::ussDistSafetyCheck()
     }
     else if (linear_vel < -lin_vel_thresh)
     {
+        // Robot is moving backward
         not_safe = ussDistSafetyCheck_b();
     }
     else
@@ -122,19 +151,27 @@ bool AntobotSafety::ussDistSafetyCheck()
         if (angular_vel > ang_vel_thresh)
         {
             // Left turn
-            if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
-                not_safe = true;
+            /*if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
+            {
+                // not_safe = true;
+                // force_stop_type = 7;
+            }*/
         }
         else if (angular_vel < -ang_vel_thresh)
         {
             // Right turn
-            if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
-                not_safe = true;
+            /* if (uss_dist_filt.data[3] < hard_dist_thresh || uss_dist_filt.data[7] < hard_dist_thresh)
+            {
+                // not_safe = true;
+                // force_stop_type = 8;
+            }*/
+            
+        }
+        else    // Robot is not moving
+        {
+            time_to_collision = 100.0;
         }
     }
-
-    if (time_to_collision < time_collision_thresh)
-        not_safe = true;
 
     return not_safe;
 }
@@ -148,25 +185,39 @@ bool AntobotSafety::ussDistSafetyCheck_f()
     //          angular_vel <float> - robot commanded angular velocity
     //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
 
+    int fst = 2;    // 1 - left front; 2 - straight front; 3 - right front
+    bool not_safe_f = false;
+
     time_to_collision = (float)(uss_dist_filt.data[1])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front
+    if (time_to_collision < time_collision_thresh || uss_dist_filt.data[1] < hard_dist_thresh)
+    {
+        not_safe_f = true;
+        force_stop_type = 2;
+        return not_safe_f;
+    } 
 
     if (angular_vel > ang_vel_thresh * linear_vel)           // Robot is turning left while moving forward
     {
         float time_to_collision_fl = (float)(uss_dist_filt.data[0])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front left
-        if (time_to_collision_fl < time_to_collision)
-            time_to_collision = time_to_collision_fl;
+        if (time_to_collision_fl < time_collision_thresh || uss_dist_filt.data[0] < hard_dist_thresh_diag)
+        {
+            force_stop_type = 1;
+            not_safe_f = true;
+            return not_safe_f;
+        }
     }
     else if (angular_vel < -ang_vel_thresh * linear_vel)     // Robot is turning right while moving forward
     {
         float time_to_collision_fr = (float)(uss_dist_filt.data[2])/(100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's front right
-        if (time_to_collision_fr < time_to_collision)
-            time_to_collision = time_to_collision_fr;
+        if (time_to_collision_fr < time_collision_thresh || uss_dist_filt.data[2] < hard_dist_thresh_diag)
+        {
+            force_stop_type = 3;
+            not_safe_f = true;
+            return not_safe_f;
+        } 
     }
 
-    if (uss_dist_filt.data[1] < hard_dist_thresh)
-        not_safe = true;
-
-    return not_safe;
+    return not_safe_f;
 }
 
 bool AntobotSafety::ussDistSafetyCheck_b()
@@ -178,28 +229,41 @@ bool AntobotSafety::ussDistSafetyCheck_b()
     //          angular_vel <float> - robot commanded angular velocity
     //  Returns: not_safe <bool> - true indicates the robot may collide with an object; false means safe movement is possible
     
-    // Robot is moving backward
-    time_to_collision = (float)(uss_dist_filt.data[5])/(100.0*-linear_vel);      // Check time to reach nearest obstacle to the robot's back
+    int fst = 6;    // 7 - left back; 6 - straight back; 5 - right back (force stop type)
+    bool not_safe_b = false;
 
-    if (angular_vel > ang_vel_thresh * linear_vel)
+    time_to_collision = (float)(uss_dist_filt.data[5])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back
+    if (time_to_collision < time_collision_thresh || uss_dist_filt.data[5] < hard_dist_thresh)
+    {
+        not_safe_b = true;
+        force_stop_type = 6;
+        return not_safe_b;
+    } 
+
+    if (angular_vel > - ang_vel_thresh * linear_vel)
     {
         // Robot is moving back right
         float time_to_collision_br = (float)(uss_dist_filt.data[4])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
-        if (time_to_collision_br < time_to_collision)
-            time_to_collision = time_to_collision_br;
+        if (time_to_collision_br < time_collision_thresh || uss_dist_filt.data[4] < hard_dist_thresh_diag)
+        {
+            force_stop_type = 5;
+            not_safe_b = true;
+            return not_safe_b;
+        }      
     }
-    else if (angular_vel < -ang_vel_thresh * linear_vel)
+    else if (angular_vel < - ang_vel_thresh * linear_vel)
     {
         // Robot is moving back left
-        float time_to_collision_bl = (float)(uss_dist_filt.data[6])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back right
-        if (time_to_collision_bl < time_to_collision)
-            time_to_collision = time_to_collision_bl;
+        float time_to_collision_bl = (float)(uss_dist_filt.data[6])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back left
+        if (time_to_collision_bl < time_collision_thresh || uss_dist_filt.data[6] < hard_dist_thresh_diag)
+        {
+            force_stop_type = 7;
+            not_safe_b = true;
+            return not_safe_b;
+        }   
     }
 
-    if (uss_dist_filt.data[5] < hard_dist_thresh)
-        not_safe = true;
-
-    return not_safe;
+    return not_safe_b;
 }
 
 void AntobotSafety::lightsSafetyOut()
@@ -235,17 +299,16 @@ void AntobotSafety::lightCmdFreq()
     /* Sends light commands at a set frequency, defined in the class initialisation
     */
 
-   float t_light_freq_thresh;
-   t_light_freq_thresh = 1.0/safety_light_freq;
+    float t_light_freq_thresh;
+    t_light_freq_thresh = 1.0/safety_light_freq;
 
-   //ROS_INFO_STREAM(10.0*(clock() - t_safety_light)/(float)CLOCKS_PER_SEC);
-   if (10.0*(clock() - t_safety_light)/(float)CLOCKS_PER_SEC > t_light_freq_thresh)
-   {
-        //ROS_INFO("switching light state");
+    // If past a time threshold, lights will change state
+    if (10.0*(clock() - t_safety_light)/(float)CLOCKS_PER_SEC > t_light_freq_thresh)
+    {
         light_cmd_ar[0] = !light_cmd_ar[0];
         light_cmd_ar[1] = !light_cmd_ar[1];
         t_safety_light = clock();
-   }
+    }
 }
 
 void AntobotSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
@@ -256,7 +319,9 @@ void AntobotSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& m
 
     // Max acceleration
     float max_acc = 3.0;  // m/s^2
-    float max_acc_s = max_acc / 25;
+    float max_acc_s = max_acc / 25.0;   // Conversion to expected speed increase at 25 hz (loop rate)
+    float max_dec = 12.0;   // m/s^2
+    float max_dec_s = max_dec / 25.0;   // Conversion to expected speed decrease at 25 hz (loop rate)
     
     // Assigns received value to velocity variables
     linear_vel = msg->linear.x;
@@ -264,7 +329,11 @@ void AntobotSafety::safetyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& m
 
     // Checks acceleration
     if (abs(linear_vel) > abs(prev_linear_vel) + max_acc_s)
-        linear_vel = prev_linear_vel + copysign(max_acc_s, linear_vel); // If acceleration is too high, lowers velocity
+       linear_vel = prev_linear_vel + copysign(max_acc_s, linear_vel); // If acceleration is too high, lowers command speed
+
+    // Checks deceleration
+    if (abs(linear_vel) < abs(prev_linear_vel) - max_dec_s)
+       linear_vel = prev_linear_vel - copysign(max_dec_s, prev_linear_vel); // If deceleration is too fast, keeps speed up
 
     // Assigns values to final output
     cmd_vel_msg.linear.x = linear_vel;
@@ -299,14 +368,20 @@ void AntobotSafety::ussDistCallback(const antobot_msgs::UInt16_Array::ConstPtr& 
     //                                                The order starting from msg->data[0] is: 0 - front left; 1 - front; 2 - front right; 3 - right;
     //                                                4 - back right; 5 - back; 6 - back left; 7 - left
     //  Outputs: publishes filtered USS data to /antobot_safety/uss_dist ROS topic
-
+    antobot_msgs::UInt16_Array uss_dist_filt_all;
     uint16_t uss_dist_ar[8];
+    uint16_t uss_dist_filt_i;
     for (int i=0; i<8; i++)
         uss_dist_ar[i] = msg->data[i];
 
     // Define the filtered USS dist class variable 
-    uss_dist_filt = ussDistFilt(uss_dist_ar);
-
+    //uss_dist_filt = ussDistFilt(uss_dist_ar);
+    for (int i=0; i<8; i++)
+        {
+            uss_dist_filt_i = uss_dist_ar[i];
+            uss_dist_filt_all.data.push_back(uss_dist_filt_i);
+        }
+    uss_dist_filt=uss_dist_filt_all;
     AntobotSafety::output_uss_dist_filt_pub.publish(uss_dist_filt);
 }
 
@@ -379,6 +454,133 @@ int AntobotSafety::getUssVecMean(std::vector<int> vec)
     return std::accumulate(vec.begin(), vec.end(), 0.0) / vec.size();
 }
 
+void AntobotSafety::autoRelease()
+{
+    /* Automatically releases the robot from its force stopped state if the previously 
+    detected object is no longer being detected */
+    
+    if (force_stop)
+    {
+        if (force_stop_type > 0)
+        {
+            if (uss_dist_filt.data[force_stop_type - 1] > hard_dist_thresh)
+            {
+                // Checks timer to re-start navigation (if safe)
+                if (10.0*(clock() - t_force_stop)/(float)CLOCKS_PER_SEC > fs_release_thresh)
+                {
+                    // Force stop release if the time threshold has passed
+                    force_stop = false;
+                    force_stop_release = true;
+                    force_stop_type = 0;
+                    t_release = clock();
+                }
+            }
+            else
+            {
+                t_force_stop = clock();     // Resets the timer if the object is still there
+            }
+        }
+    }  
+}
+
+float AntobotSafety::scaleCmdVel()
+{
+    float vel_scale = 0;
+
+    vel_scale = calcVelScale();
+
+    if (scaleCornerTurn(vel_scale))
+        return vel_scale;
+
+    // Obstacle in front
+    if (force_stop_type == 2)
+    {
+        if (cmd_vel_msg.angular.z > 0.2 && uss_dist_filt.data[0] > hard_dist_thresh)      // Left turn
+        {
+            cmd_vel_msg.linear.x = vel_scale * cmd_vel_msg.linear.x;
+            return vel_scale;
+        }
+        else if (cmd_vel_msg.angular.z < -0.2 && uss_dist_filt.data[2] > hard_dist_thresh)      // Right turn
+        {
+            cmd_vel_msg.linear.x = vel_scale * cmd_vel_msg.linear.x;
+            return vel_scale;
+        }
+    }
+    
+    // Obstacle behind
+    else if (force_stop_type == 6)
+    {
+        if (cmd_vel_msg.angular.z > 0.2 && uss_dist_filt.data[4] > hard_dist_thresh)      // Left turn
+        {
+            cmd_vel_msg.linear.x = vel_scale * cmd_vel_msg.linear.x;
+            return vel_scale;
+        }
+        else if (cmd_vel_msg.angular.z < -0.2 && uss_dist_filt.data[6] > hard_dist_thresh)      // Right turn
+        {
+            cmd_vel_msg.linear.x = vel_scale * cmd_vel_msg.linear.x;
+            return vel_scale;
+        }
+    }
+
+    return vel_scale;  
+}
+
+float AntobotSafety::calcVelScale()
+{
+    /*  Calculates the magnitude by which to scale the velocity of the robot based on which ultrasonic sensor
+        has detected an obstacle, and how far away that obstacle is. */
+    //  Returns: vel_scale <float> the scale (between 0 and 1) by which the velocity will be scaled
+    
+    float vel_scale = 0;
+    
+    // Scale movement based on distance to obstacle
+    if (force_stop_type > 0)
+    {
+        int uss_data = uss_dist_filt.data[force_stop_type - 1];
+
+        if(uss_data > 100)
+            vel_scale = 1;
+        else
+            vel_scale = log10((uss_data-45)/6);
+        if (vel_scale < 0)
+            vel_scale = 0;
+
+    }
+    return vel_scale;
+}
+
+bool AntobotSafety::scaleCornerTurn(float vel_scale)
+{
+    // Forward corner turn (obstacle inside)
+    if (force_stop_type == 1 || force_stop_type == 3)
+    {
+        if (uss_dist_filt.data[1] > hard_dist_thresh)       // If nothing is too close to the front of the robot
+        {
+            // if robot is turning left and the force stop type is in that direction
+            if ((cmd_vel_msg.angular.z > 0.05 && force_stop_type == 1) || (cmd_vel_msg.angular.z < -0.05 && force_stop_type == 3))
+            {
+                cmd_vel_msg.angular.z = vel_scale * cmd_vel_msg.angular.z;
+                return true;
+            }
+        } 
+    }
+
+    // Backward corner turn (obstacle inside)
+    else if (force_stop_type == 5 || force_stop_type == 7)
+    {
+        if (uss_dist_filt.data[5] > hard_dist_thresh)       // If nothing is too close to the back of the robot
+        {
+            if ((cmd_vel_msg.angular.z > 0.05 && force_stop_type == 5) || (cmd_vel_msg.angular.z < -0.05 && force_stop_type == 7))
+            {
+                cmd_vel_msg.angular.z = vel_scale * cmd_vel_msg.angular.z;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void AntobotSafety::releaseCallback(const std_msgs::Bool::ConstPtr& msg)
 {
    /*   Callback function for /antobridge/force_stop_release. Tells the robot it is okay to move again
@@ -389,6 +591,7 @@ void AntobotSafety::releaseCallback(const std_msgs::Bool::ConstPtr& msg)
    {
 	  force_stop = false;
 	  force_stop_release = true;
+      force_stop_type = 0;
       t_release = clock();
    }
 }
@@ -409,9 +612,6 @@ int main(int argc, char** argv)
     ros::Subscriber sub_uss_dist = nh.subscribe("/antobridge/uss_dist", 10, &AntobotSafety::ussDistCallback, &AntobotSafety1);
     ros::Subscriber sub_force_stop_release = nh.subscribe("/antobridge/force_stop_release", 10, &AntobotSafety::releaseCallback, &AntobotSafety1);
 
-
-    // NOTE: We run the ROS loop in a separate thread as external calls such
-    // as service callbacks to load controllers can block the (main) control loop
     ros::MultiThreadedSpinner spinner(2);
     spinner.spin();
 

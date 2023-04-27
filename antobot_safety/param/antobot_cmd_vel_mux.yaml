@@ -14,7 +14,7 @@
 
 subscribers:
   - name:        "Navigation stack"
-    topic:       "/antobot_nav/cmd_vel"
+    topic:       "/antobot_navigation/cmd_vel"
     timeout:     2.0
     priority:    0
     short_desc:  "Velocity commands sent from move base during autonomous navigation"

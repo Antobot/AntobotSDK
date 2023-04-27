@@ -57,8 +57,6 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
-        front_laser_frame:
-          Value: true
         gps:
           Value: true
         gps_frame:
@@ -69,17 +67,13 @@ Visualization Manager:
           Value: true
         imu_frame:
           Value: true
-        laser:
+        laser_link:
           Value: true
         map:
           Value: true
         odom:
           Value: true
         robot_base_link:
-          Value: true
-        scouting_frame_left:
-          Value: true
-        scouting_frame_right:
           Value: true
         ultrasonic1_link:
           Value: true
@@ -143,11 +137,9 @@ Visualization Manager:
           Value: true
         zed2_front_temp_right_link:
           Value: true
-        zed2_mount_link:
-          Value: true
         zed_back_frame:
           Value: true
-        zed_frame:
+        zed_front_frame:
           Value: true
       Marker Alpha: 1
       Marker Scale: 1
@@ -165,15 +157,10 @@ Visualization Manager:
                 imu:
                   {}
               robot_base_link:
-                front_laser_frame:
-                  laser:
-                    {}
                 gps_frame:
                   gps:
                     {}
-                scouting_frame_left:
-                  {}
-                scouting_frame_right:
+                laser_link:
                   {}
                 ultrasonic1_link:
                   {}
@@ -224,7 +211,7 @@ Visualization Manager:
                       {}
                     zed2_front_temp_left_link:
                       {}
-                    zed_frame:
+                    zed_front_frame:
                       {}
                   zed2_front_mag_link:
                     {}
@@ -233,8 +220,6 @@ Visualization Manager:
                       {}
                     zed2_front_temp_right_link:
                       {}
-                zed2_mount_link:
-                  {}
           utm:
             {}
       Update Interval: 0
@@ -247,26 +232,6 @@ Visualization Manager:
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
       Show Trail: false
-      Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic: /costmap_node/costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
-      Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic: /costmap_node_global/costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -289,7 +254,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.009999999776482582
+      Size (m): 0.10000000149011612
       Style: Flat Squares
       Topic: /camera/scan/front
       Unreliable: false
@@ -317,7 +282,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.05000000074505806
+      Size (m): 0.10000000149011612
       Style: Flat Squares
       Topic: /camera/scan/back
       Unreliable: false
@@ -380,7 +345,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/DWAPlannerROS/global_plan
+      Topic: /move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -404,48 +369,8 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/GlobalPlanner/plan
+      Topic: /move_base/DWAPlannerROS/global_plan
       Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: Arrows
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /visual/navRoute
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /visual/navmap
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /posePrediction
-      Name: Marker
-      Namespaces:
-        "": true
-      Queue Size: 100
       Value: true
     - Alpha: 1
       Class: rviz/RobotModel
@@ -461,11 +386,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        front_laser_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         gps_frame:
           Alpha: 1
           Show Axes: false
@@ -474,19 +394,15 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        laser_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         robot_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        scouting_frame_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        scouting_frame_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         ultrasonic1_link:
           Alpha: 1
           Show Axes: false
@@ -621,16 +537,11 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        zed2_mount_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         zed_back_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        zed_frame:
+        zed_front_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -640,14 +551,6 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /carrotArrow
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
     - Alpha: 0.5
       Buffer Length: 1
       Class: rviz/Range
@@ -728,6 +631,26 @@ Visualization Manager:
       Topic: /ultrasonic8
       Unreliable: false
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /move_base/global_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -756,7 +679,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 103.80914306640625
+      Distance: 41.07820129394531
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -764,9 +687,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 6.076523780822754
-        Y: 32.358848571777344
-        Z: -0.8341193795204163
+        X: 4.084681034088135
+        Y: 1.089704990386963
+        Z: -0.8653755784034729
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
