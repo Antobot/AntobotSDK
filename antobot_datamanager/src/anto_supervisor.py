@@ -87,82 +87,55 @@ class Monitor():
 
         """mileage"""
         self.uMode = 0 #robot operation mode
-        self.path = 'Desktop/mileage' # path where mileage tracker file is saved
-        self.filename = 'mileage.txt'
-        self.filenameTmp = 'mileageTmp.txt'
         self.vel = 0
         self.angular_vel = 0
         self.driving_state = 0
         self.timestamp = 0 # Used to time how long robot drives straight
         self.lon = None
         self.lat = None
-        self.utm = None
-        self.previous_utm = None
-
-         # Create directory for file if it doesn't exist
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        
-        # If file exists, read mileages from file
-          # If not, set mileages as 0
-        if os.path.exists(os.path.join(self.path, self.filename)):
-            with open(os.path.join(self.path, self.filename)) as f:
-                lines = f.readlines()
-                self.mileage_temp = float(lines[1]) #mileage from last job
-                self.mileage_total_temp = float(lines[4])
-                self.mileage_total = float(lines[7])
-                if self.mileage_total_temp > self.mileage_total: #the running of the antosupervisor must be earlier then antocartogrpher,so this number will be from last job
-                    self.mileage_total = self.mileage_total_temp
-        else:
-            self.mileage_temp = 0
-            self.mileage_total = 0
-            self.mileage_total_temp = 0
-
-        self.mileage_past = 0
         self.b_robot_movement = False # default robot is not move
         self.u_robot_movement_cnt = 0
 
         """ alarm data initialization"""
-        self.previous_lati = None
-        self.previous_longti = None
-        self.wheel_fdbk = None
-        self.wheel_cmd = None
-        self.force_stop = None
-        self.uss_data = None
-        self.b_vel_cmd = False    # default no moving command is being sent
-
+        self.As_wheel_cmd = None
+        self.As_wheel_vel = None
+        self.Am_force_stop = 0
+        self.Ab_force_stop = False
+        self.As_uss_data = None
+        self.As_b_vel_cmd = False    # default no moving command is being sent
         self.anto_bridge_function = False
         
-        "Xavier monitor"
+        #Xavier monitor
         self.jetson = jtop()
         self.jetson.start()
 
 
+        self.pub_GPS_status = rospy.Publisher("/as/GPS_status",Bool,queue_size = 1)
 
         # ROS subscriber
         self.sub_As_uBat = rospy.Subscriber("/antobridge/Ab_uBat",UInt8_Array,self.battery_callback)             #pass battery voltage to anto_supervisor, it's an array data type
         self.sub_GPS_data = rospy.Subscriber("/antobot_gps",NavSatFix,self.GPS_callback)                         #pass GPS data to anto_supervisor, it's a data type of NavSatFix, include data.latitude & data.longitude
         self.sub_wheel_vel_cmd = rospy.Subscriber("/antobridge/wheel_vel",Float32_Array,self.wheel_vel_callback) #pass wheel_vel speed to anto_supervisor, it's a float array data type 
         self.sub_wheel_cmd = rospy.Subscriber("/antobridge/wheel_vel_cmd",Float32_Array,self.wheel_cmd_callback) #pass teleop wheel_vel_cmd to anto_supervisor, it's a float array data type
-        self.sub_force_stop = rospy.Subscriber("/antobridge/force_stop",Bool,self.force_stop_callback)           #pass force stop signal to anto_supervisor, it's a boolean type
+        self.sub_force_stop = rospy.Subscriber("/antobridge/force_stop",Bool,self.ab_force_stop_callback)           #pass force stop signal to anto_supervisor, it's a boolean type
+        self.sub_am_force_stop = rospy.Subscriber("/antobot_safety/force_stop_type",Int8,self.am_force_stop_callback)
         self.sub_uss_dist = rospy.Subscriber("/antobridge/uss_dist",UInt16_Array,self.uss_dist_callback)         #pass uss_dist data to anto_supervisor, it's a UInt16 array type
         self.sub_mode = rospy.Subscriber('/switch_mode', UInt8, self.mode_callback)                                #mode 0:keyboard, 1: app, 2: joystick 3:autonomous 4:go home
         self.sub_soft_shutdown_button = rospy.Subscriber('/antobridge/soft_shutdown_button',Bool,self.soft_shutdown_callback)
-        self.sub_slope_dir = rospy.Subscriber('/imu/data', Imu, self.slope_dir)
+        self.sub_slope_dir = rospy.Subscriber('/imu/data_corrected', Imu, self.slope_dir)
         self.imu_calib_status = rospy.Subscriber('/imu_calibration_status',UInt8, self.imu_calib)
         self.recalib_status = rospy.Subscriber('/recalib_status',UInt8,self.imu_recalib)
         
         # ROS Publisher
         self.pubslopeDirection = rospy.Publisher("/imu/slope_direction", UInt8, queue_size=1) #topic to publish the slope direction
+        self.pub_roll_Direction = rospy.Publisher("/imu/roll_direction", UInt8, queue_size=1)
         self.pub_cpu_temp = rospy.Publisher("/as/cpu_temp",Float32,queue_size=1)#topic to publish the cpu tempreture
         self.pub_cpu_load = rospy.Publisher("/as/cpu_load",UInt8,queue_size=1)#topic to publish the cpu tempreture
         self.pub_storage = rospy.Publisher("/as/storage",Float64, queue_size = 1)
-        self.pub_total_mileage = rospy.Publisher("/as/total_mileage",Float32,queue_size = 1) #data type tbc
         self.pub_soc = rospy.Publisher("/as/soc",UInt8,queue_size = 1)#percentage soc
         self.pub_As_uBat = rospy.Publisher("/as/As_uBat",Float32,queue_size = 1)
         self.pub_batlvl = rospy.Publisher("/as/batlvl",String,queue_size = 1)
         self.pub_network = rospy.Publisher("/as/network",Bool,queue_size = 1)
-        self.pub_GPS_status = rospy.Publisher("/as/GPS_status",Bool,queue_size = 1)
         self.pub_As_uAlarm = rospy.Publisher("/as/alarm",UInt8,queue_size =1)
         self.pub_soft_shutdown_req = rospy.Publisher("/antobridge/soft_shutdown_req", Bool,queue_size = 1)
 
@@ -187,24 +160,11 @@ class Monitor():
         elif data ==2:
             print("Recalibration occured")
 
-             
 
 
-    """
-    def power_consumption_robot():
-        ##if Aurix can send power consumption of robot, pass it through antobridge, here can subscribe and broadcast it
-    """
- 
     def xavier_monitor(self):
-        # with jtop() as jetson:
-        #     while jetson.ok():
-        #         jtopstats= jetson.stats
-        #         #print(type(jtopstats))
-        #         self.As_cputemp = jtopstats["Temp CPU"]
-        #jetson = jtop()
-        #jetson.start()
+        #access to Jtop and read the xavier info
         jtopstats = self.jetson.stats      
-        #jetson.close
         self.As_cputemp = jtopstats["Temp CPU"]
         CPU1 = jtopstats["CPU1"]
         CPU2 = jtopstats["CPU2"]
@@ -216,10 +176,7 @@ class Monitor():
         self.pub_cpu_temp.publish(self.As_cputemp)
         self.pub_cpu_load.publish(self.As_cpuload)
 
-    """ Nice to have
-    def robot_temperature():
 
-    """
 
     def network_status(self): #works
        #Returns False if it fails to resolve Google's URL, True otherwise#
@@ -227,28 +184,11 @@ class Monitor():
             socket.gethostbyname("www.google.co.uk")
             self.As_bNetwork = True
             self.pub_network.publish(self.As_bNetwork)
-            #self.pub_network.publish(True)
-            #return True
         except:
             self.As_bNetwork = False
             self.pub_network.publish(self.As_bNetwork)
-            #self.pub_network.publish(False)
-            #return False
-
-    """
-    def GPS_status_callback(self,data):
-
-        if data == 4: #maybe syntax error?
-            self.As_bGNSS = True #is in fix mode
-        else:
-            self.As_bGNSS = False
-        self.pub_GPS_status.publish(self.As_bGNSS)
 
 
-        #return self.As_bGNSS
-    """
-
-   
     def storage_management(self): #works
             #Returns True if there isn't enough disk space, False otherwise.#
         
@@ -267,54 +207,31 @@ class Monitor():
 
 
     def emergency_alarm(self): #GNSS data needed
-        #receive the all /antobridge/wheel_vel from antobridge = wheel_fdbk
-        #receive the all /antobridge/wheel_vel_cmd from antobridge = wheel_cmd
-        good_flg = 0
-        #GPS_data.latitude = 0
-        #GPS_data.longtitude = 0
-        # difference_lati = abs(self.lat - self.previous_lati)
-        # differenece_longti = abs(self.lon - self.previous_longti)
-        # previous_lati = self.lat
-        # previous_longti = self.lon
-        # lati_threshold = 0 #TBC
-        # longti_threshold = 0 #TBC, when stand still, check what's the lati and longti change range
-        #how to deal with delay under this algorithm
+        #emergency alarm to report the abnormal status of rebot 
         self.As_uAlarm = 0
-
-        if self.force_stop == True:
-            self.As_uAlarm = 2
-
-        if self.anto_bridge_function == False: #anto_bridge not work (either node die or spi communication fail)
-            self.As_uAlarm = 3
-        elif self.b_vel_cmd == True:
-            if self.u_robot_movement_cnt > 3:
-                self.As_uAlarm = 1 # alarm 1, robot stuck some where
-
-
+        if self.Am_force_stop > 0 or self.Ab_force_stop == True:
+            self.As_uAlarm = 2 #force stop triggered
+        if self.anto_bridge_function == False and self.alarm_3_cnt == 0 : #anto_bridge not work (either node die or spi communication fail)
+            self.As_uAlarm = 1
+        else:
+            self.alarm_3_cnt = 0
+        if self.As_b_vel_cmd == True: #command is send
+            if abs(self.As_wheel_vel[0]) < abs(self.As_wheel_cmd[0]) * 0.5 or abs(self.As_wheel_vel[1]) < abs(self.As_wheel_cmd[1]) * 0.5 or abs(self.As_wheel_vel[2]) < abs(self.As_wheel_cmd[2])*0.5 or abs(self.As_wheel_vel[3]) < abs(self.As_wheel_cmd[3])*0.5:
+                self.As_stuck_cnt = self.As_stuck_cnt + 1
+            else:
+                self.As_stuck_cnt = 0
+            if self.As_stuck_cnt > 4:
+                self.As_uAlarm = 3
+            if self.As_wheel_cmd[0]*self.As_wheel_cmd[2] < 0: #spot turn command
+                if self.turn == False:
+                    self.As_uAlarm = 3 #immediate report
+        else:
+            self.u_robot_movement_cnt = 0
         self.anto_bridge_function = False #set this flag to false before next antobridge topic callback
-
-
-        # #this for loop maybe has some issue
-        # for i in self.wheel_cmd:
-        #     if i > 0.5: #what's the minimum speed cmd?
-        #         for j in self.wheel_fdbk:
-        #             if j >0.5 : #robot wheel is moving
-        #                 good_flg = good_flg+1
-        #                 if self.As_bRTK and self.As_bGNSS == True:
-        #                     if difference_lati < lati_threshold and differenece_longti < longti_threshold: #The robot not move
-        #                         self.As_uAlarm = 1 # alarm 1, robot stuck some where
-        #             else: #cmd has sent but wheel not move
-        #                 if self.force_stop == True:
-        #                     if self.uss_data[1] < 25 and self.uss_data[5] < 25: #25 is a distance threshold that indicating obstacle are blocking both front and back of the robot 
-        #                         self.As_uAlarm = 2
-        #                 else: #force stop not triggered
-        #                     self.As_uAlarm = 3 #mainly harware issue, wheel/motor stop working
-        #self.As_uAlarm = 0
         self.pub_As_uAlarm.publish(self.As_uAlarm)
     
     def print_monitor(self):
         #sys.stdout.write("self.As_uSoC:",self.As_uSoC)
-        
         print("self.As_bNetwork",self.As_bNetwork)
         print("self.As_uBat:",self.As_uBat)
         print("self.As_uSoC:",self.As_uSoC)
@@ -323,20 +240,6 @@ class Monitor():
         print("self.As_bGNSS:",self.As_bGNSS)
         print("cpu temp:",self.As_cputemp)
 
-        """
-        sys.stdout.write("self.As_sBatlvl:" + self.As_sBatlvl + "\n")
-        sys.stdout.write("self.As_fPwr:" + self.As_fPwr + "\n")
-        sys.stdout.write("self.As_uCPUtemp:" + self.As_uCPUtemp + "\n")
-        sys.stdout.write("self.As_uUtil:" + self.As_uUtil + "\n")
-        sys.stdout.write("self.As_b4G:" + self.As_b4G + "\n")
-        sys.stdout.write("self.As_Wifi:" + self.As_Wifi + "\n")
-        sys.stdout.write("self.bEthernet:" + self.bEthernet + "\n")
-        sys.stdout.write("self.As_bRTK:" + self.As_bRTK + "\n")
-        sys.stdout.write("self.As_bGNSS:" + self.As_bGNSS + "\n")
-        sys.stdout.write("self.As_bStorage:" + self.As_bStorage + "\n")
-        sys.stdout.write("self.As_uAlarm:" + self.As_uAlarm + "\n")
-        sys.stdout.write("self.As_bStorage:" + self.As_bStorage + "\n")
-        """
 
     # Callback function for robot operation mode
     # mode 0:keyboard, 1: app, 2: joystick 3:autonomous 4:go home
@@ -396,78 +299,45 @@ class Monitor():
         self.pub_As_uBat.publish(self.As_uBat)
         self.pub_batlvl.publish(self.As_sBatlvl)
 
-        #print(self.As_sBatlvl)
-        #return self.As_sBatlvl
 
     def GPS_callback(self,gps_msg):
-        #print("sending GPS data from callback")
-        #GPS_data = data
-        #record mileage using GPS
-        self.lat = gps_msg.latitude
-        self.lon = gps_msg.longitude
-        #print("GPS topic received")
-        utmx, utmy, utmzone = gc.LLtoUTM(self.lat, self.lon) #convert to UTM coordinates
-        self.utm = [utmx, utmy, utmzone]
-        if gps_msg.status == 2: #2 = fix mode
+        #gps callback function, if gps status is 3 then it's in fix mode
+        self.GPS_freq_cnt = self.GPS_freq_cnt + 1
+        if  gps_msg.status.status == 3:
             self.As_bGNSS = True
-        else:                   #0 = neither fixed or float, 1 =  float mode
-            self.As_bGNSS = False 
-        
-        """
-        if self.previous_utm is not None:
-            if self.utm[2] == self.previous_utm[2]: # if both points are in the same utm zone
-                dist = math.sqrt((self.utm[0] - self.previous_utm[0])**2 + (self.utm[1] - self.previous_utm[1])**2)
-                self.total_dist += dist
-                if self.uMode >= 3: # autonomous mode
-                    self.auto_dist += dist
-        self.previous_utm = self.utm
-        """
-    def mileage_callback(self,mileage):
-        self.mileage_temp = mileage.data
-        if self.mileage_temp == self.mileage_past:
-            self.b_robot_movement = False
-            self.u_robot_movement_cnt = self.u_robot_movement_cnt+1
+            self.As_lat = gps_msg.latitude
+            self.As_lon = gps_msg.longitude
+            #print("GPS True")
         else:
-            self.b_robot_movement = True
-            self.u_robot_movement_cnt = 0
-        self.mileage_past = self.mileage_temp
-
-        if self.mileage_temp ==0:
-            self.mileage_total = self.mileage_total_temp
-        self.mileage_total_temp = self.mileage_temp + self.mileage_total
-        self.pub_total_mileage.publish(self.mileage_total_temp)
+            #print("GPS False")
+            self.As_bGNSS = False
+        self.pub_GPS_status.publish(self.As_bGNSS)
 
 
-
-    def writeToFile(self):
-        lines = ['mileage for current job(m):\n', str(self.mileage_temp), '\n\n', 'Total autonomous mileage include current job(m):\n', str(self.mileage_total_temp), '\n\n', 'Total autonomous mileage history(m):\n', str(self.mileage_total)]
-        with open(os.path.join(self.path, self.filenameTmp), 'w') as f: #if it not exist, need to create first
-            f.writelines(lines) # write mileages to temporary file
-        copyfile(os.path.join(self.path, self.filenameTmp), os.path.join(self.path, self.filename)) # copy mileages from temporary file to permanent file
-        os.remove(os.path.join(self.path, self.filenameTmp)) # delete temporary file
-        #self.pub_auto_mileage.publish(self.auto_dist)
-        
-        
 
     def wheel_vel_callback(self,data):
         #print("sending wheel velocity data from callback")
         self.anto_bridge_function = True
-        #print("wheel_fdbk:",self.wheel_fdbk[1])
+        self.alarm_3_cnt = self.alarm_3_cnt +1
+        self.As_wheel_vel = data.data
         return
 
     def wheel_cmd_callback(self,data):
         #print("sending teleop speed command data from callback")
         self.wheel_cmd = data.data
-        if self.wheel_cmd[0] !=0 or self.wheel_cmd[1] !=0 or self.wheel_cmd[2] !=0 or self.wheel_cmd[3] !=0: #command any  of the wheel move
+        if self.wheel_cmd[0] !=0 or self.wheel_cmd[1] !=0 or self.wheel_cmd[2] !=0 or self.wheel_cmd[3] !=0: #command any of the wheel move
             self.b_vel_cmd = True  #sent wheel moving cmd 
         else:
             self.b_vel_cmd = False 
-        print("wheel_vel_cmd sent:",self.b_vel_cmd)
         return
 
-    def force_stop_callback(self,data):
+    def am_force_stop_callback(self,data):
+        self.Am_force_stop = data.data #True as triggered, false as not triggered
+        return
+
+    def ab_force_stop_callback(self,data):
         #print("sending force stop signal from callback")
-        self.force_stop = data.data #True as triggered, false as not triggered
+        self.Ab_force_stop = data.data #True as triggered, false as not triggered
         return
 
     def uss_dist_callback(self,data):
@@ -477,9 +347,6 @@ class Monitor():
 
     def slope_dir(self,data):
         angles = tf.transformations.euler_from_quaternion([data.orientation.x,data.orientation.y,data.orientation.z,data.orientation.w],'rzyx') #data.y, data.z, data.w], 'rzyx')   # convert imu orientation from quaternion to euler
-        #print("pitch",angles[1]*180/3.14)
-        #print("yaw",angles[0])
-        #print("rosll",angles[2])
         if angles[1] < -self.slope_offset : #offset of 1 degree
             self.pubslopeDirection.publish(1) #slope is upwards
         elif angles[1] > self.slope_offset:
@@ -487,31 +354,20 @@ class Monitor():
         else:
             self.pubslopeDirection.publish(0) #level ground
 
-    
-"""
-if __name__ == '__main__':
-    rospy.init_node ('Monitor_node')
-    MonitorNode = Monitor()
-    rate = rospy.Rate(1)
+        if angles[2] < -self.roll_offset : #offset of 1 degree  //angle 0 =roll,10 degree
+            self.pub_roll_Direction.publish(1) #roll left
+        elif angles[2] > self.roll_offset:
+            self.pub_roll_Direction.publish(2) #roll right
+        else:
+            self.pub_roll_Direction.publish(0) #robot balance
 
-    while not rospy.is_shutdown():
-        
-        
-        #MonitorNode.battery_callback()
-        MonitorNode.storage_management()
-        MonitorNode.network_status()
-        MonitorNode.battery_lvl()
+        if angles[0] != self.yaw_past : #offset of 1 degree 
+            self.turn = True #doing turning
+        else:
+            self.turn = False#not turning
+        self.yaw_past = angles[0]
 
-        #MonitorNode.distbyGPS()
-        MonitorNode.writeToFile()
 
-        MonitorNode.xavier_monitor()
-
-        MonitorNode.print_monitor()
-        MonitorNode.writeToFile()
-
-        rate.sleep()
-"""
 
 def main():
     #print("Here")
@@ -524,18 +380,13 @@ def main():
     #MonitorNode = Monitor()
     try:
         while not rospy.is_shutdown():
-             #MonitorNode.battery_callback()
             MonitorNode.storage_management()
             MonitorNode.network_status()
             MonitorNode.battery_lvl()
-
-            #MonitorNode.distbyGPS()
-            MonitorNode.writeToFile()
             MonitorNode.emergency_alarm()
             MonitorNode.xavier_monitor()
             MonitorNode.soft_shutdown_process()
             MonitorNode.print_monitor()
-            #MonitorNode.writeToFile()
             rate.sleep()
     except:
         print("Exception occured!!")
