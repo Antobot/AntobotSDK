@@ -82,6 +82,9 @@ class Monitor():
         self.voltage_cnt = 0
         self.soft_shutdown_req = False
         self.slope_offset = 15*3.14/180 # imu_slope offset
+        self.roll_offset = 10*3.14/180
+        self.yaw_past = 0
+        self.turn = False
 
         # self.pub_GPS_status = False
 
@@ -303,14 +306,9 @@ class Monitor():
 
     def GPS_callback(self,gps_msg):
         #gps callback function, if gps status is 3 then it's in fix mode
-        self.GPS_freq_cnt = self.GPS_freq_cnt + 1
         if  gps_msg.status.status == 3:
             self.As_bGNSS = True
-            self.As_lat = gps_msg.latitude
-            self.As_lon = gps_msg.longitude
-            #print("GPS True")
         else:
-            #print("GPS False")
             self.As_bGNSS = False
         self.pub_GPS_status.publish(self.As_bGNSS)
 
