@@ -251,7 +251,7 @@ bool AntobotSafety::ussDistSafetyCheck_b()
             return not_safe_b;
         }      
     }
-    else if (angular_vel < - ang_vel_thresh * linear_vel)
+    else if (angular_vel <  ang_vel_thresh * linear_vel)
     {
         // Robot is moving back left
         float time_to_collision_bl = (float)(uss_dist_filt.data[6])/(-100.0*linear_vel);      // Check time to reach nearest obstacle to the robot's back left
