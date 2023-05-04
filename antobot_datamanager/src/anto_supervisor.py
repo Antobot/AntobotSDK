@@ -13,7 +13,7 @@
 
 #ROS related
 import rospy
-from std_msgs.msg import String, Bool,UInt8,Float64,Float32
+from std_msgs.msg import String, Bool,UInt8,Float64,Float32,Int8
 from sensor_msgs.msg import NavSatFix, Imu
 from nav_msgs.msg import Odometry
 from antobot_msgs.msg import UInt8_Array,Float32_Array,UInt16_Array ##check syntax
@@ -104,6 +104,7 @@ class Monitor():
         self.As_uss_data = None
         self.As_b_vel_cmd = False    # default no moving command is being sent
         self.anto_bridge_function = False
+        self.alarm_3_cnt = 0
         
         #Xavier monitor
         self.jetson = jtop()
@@ -371,13 +372,9 @@ class Monitor():
 
 def main():
     #print("Here")
-    rospy.init_node ('anto_supervisor')
-    
+    rospy.init_node ('anto_supervisor')   
     rate = rospy.Rate(1)
     MonitorNode = Monitor()
-    #MonitorNode.print_monitor()
-    #MonitorNode.writeToFile()
-    #MonitorNode = Monitor()
     try:
         while not rospy.is_shutdown():
             MonitorNode.storage_management()
