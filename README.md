@@ -18,6 +18,7 @@ It includes all software needed to run the robot, and to connect to any sensors 
   - ZED ROS Wrapper: https://github.com/stereolabs/zed-ros-wrapper
     - Enables use of ZED camera within ROS
 - [Jetson Stats (jtop)](https://pypi.org/project/jetson-stats/)
+- [pyserial](https://pyserial.readthedocs.io/en/latest/pyserial.html)
   
 ### Recommended:
 - pointcloud_to_laserscan: https://github.com/ros-perception/pointcloud_to_laserscan
