@@ -46,9 +46,13 @@ if __name__ == '__main__':
                     gpsfix.latitude = geo.lat 
                     gpsfix.longitude = geo.lon 
                     gpsfix.altitude = geo.height
-                    print("gps carrsoln",geo.flags.carrSoln)
+                    #print("gps carrsoln",geo.flags.carrSoln)
                     if geo.flags.carrSoln == 2:  #fix mode =2 ; float mode = 1
                         gpsfix.status.status = geo.fixType
+                    elif geo.flags.carrSoln == 1:  #fix mode =2 ; float mode = 1
+                        gpsfix.status.status = 1
+                    else:
+                        gpsfix.status.status = 0
                     #print("carrSoln: ",geo.flags[4])
                     # Assumptions made on covariance
                     gpsfix.position_covariance[0] = (geo.hAcc*0.001)**2 
