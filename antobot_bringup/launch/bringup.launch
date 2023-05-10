@@ -21,7 +21,7 @@
 	<include if="true" file="$(find antobot_navigation)/launch/antobot_sensors.launch"></include>
 	
 	<!-- IMU calibration -->
-	<include if="false" file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
+	<include if="true" file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
 	
 	<!-- robot description -->
 	<include if="true" file="$(find antobot_description)/launch/param_ant_v2.launch"></include>
@@ -40,10 +40,10 @@
 	<node if="true" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
 
 	<!-- Move base -->
-	<include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
+	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch" />
 
 	<!-- pointcloud to laser nodes (for zed camera)-->
-    <include if="false" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
+    <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
 
 	<!-- AntoSupervisor -->
 	<node if="true" pkg="antobot_datamanager" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
