@@ -15,7 +15,7 @@ local_costmap:
   robot_base_frame: base_link
   
 #update_frequency parameter determines the frequency, in Hz, at which the costmap will run its update loop
-  update_frequency: 3.0
+  update_frequency: 5.0
 #publish_frequency parameter determines the rate, in Hz, at which the costmap will publish visualization information.
   publish_frequency: 3.0
 
@@ -28,8 +28,8 @@ local_costmap:
 
 #The width, height,and resolution parameters set the width (meters), height (meters), and resolution (meters/cell) of the costmap
  
-  width: 15.0
-  height: 15.0
+  width: 10.0
+  height: 10.0
 
   
   resolution: 0.1
