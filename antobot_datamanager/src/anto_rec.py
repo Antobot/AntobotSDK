@@ -55,9 +55,8 @@ def get_name():
 
     """
     # Get the absolute path of output file
-    parent_folder = Path(__file__).resolve().parent
-    path = str(parent_folder) + "/RecordingConfig.yaml"
-    print(path)
+    parent_folder = Path(__file__).resolve().parent.parent
+    path = str(parent_folder) + "/config/RecordingConfig.yaml"
 
     with open(path, 'r') as file:
         data = yaml.safe_load(file)
