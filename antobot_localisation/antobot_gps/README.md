@@ -3,10 +3,8 @@
 The antobot_gps repository outlook:
 * build
 * src
-  * am_gps_nRTK.py: Python script for F9P in nRTK -> works with F9P 04B version via USB
   * antobot_gps_node.py: Python script for F9P in uRCU via SPI using the sparkfun library 
   * gps_config.py: Python script to configure the F9P in uRCU via SPI
-  * one certificate and keyID file for PointPerfect server for nRTK
   * antobot_gps:
     * third party dependencies to run the antobot_gps_node.py (LICENCE provided)
 * setup.py: installation file for antobot_gps
