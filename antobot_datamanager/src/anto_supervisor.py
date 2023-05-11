@@ -77,6 +77,8 @@ class Monitor():
         self.As_bGNSS = False
         self.As_bStorage = False
         self.As_uAlarm = 0
+        self.GPS_freq_cnt = 0
+        self.GPS_freq = 0
         self.As_bStorage = False
         self.voltage_pre = 55
         self.voltage_cnt = 0
@@ -109,6 +111,8 @@ class Monitor():
         self.anto_bridge_function = False
         self.alarm_3_cnt = 0
         
+        
+        
         #Xavier monitor
         self.jetson = jtop()
         self.jetson.start()
@@ -126,6 +130,7 @@ class Monitor():
         self.pub_network = rospy.Publisher("/as/network",Bool,queue_size = 1)
         self.pub_As_uAlarm = rospy.Publisher("/as/alarm",UInt8,queue_size =1)
         self.pub_soft_shutdown_req = rospy.Publisher("/antobridge/soft_shutdown_req", Bool,queue_size = 1)
+        self.pub_GPS_freq = rospy.Publisher("/as/GPS_freq",UInt8 ,queue_size = 1)
 
         # ROS subscriber
         self.sub_As_uBat = rospy.Subscriber("/antobridge/Ab_uBat",UInt8_Array,self.battery_callback)             #pass battery voltage to anto_supervisor, it's an array data type
@@ -348,6 +353,14 @@ class Monitor():
         else:
             self.turn = False#not turning
         self.yaw_past = angles[0]
+        
+
+    def GPS_frq(self):
+        self.GPS_freq = 0
+        self.GPS_freq = self.GPS_freq_cnt
+        self.GPS_freq_cnt = 0
+        print("GPS_freq:",self.GPS_freq)
+        self.pub_GPS_freq.publish(self.GPS_freq)
 
 
 
