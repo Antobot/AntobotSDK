@@ -10,7 +10,9 @@ It includes all software needed to run the robot, and to connect to any sensors 
 - Simulation of the robot's operation in a virtual environment (Windsor)
 
 ## Dependencies:
-- antobridge: Antobot proprietary software for which source code is not provided due to security reasons. This piece communicates between the on-board Jetson and other components of the uRCU.
+- antobridge: Antobot proprietary software for which source code is not provided for security. This piece communicates between the on-board Jetson and other components of the uRCU.
+- ROS Noetic (Desktop Full)
+- ROS Navigation (ros-noetic-navigation)
 - geonav_transform: Please clone/download the scripts from [here](https://github.com/bsb808/geonav_transform) and place them into your catkin_ws/src
 - IMU sensor driver software (IMU built into uRCU): https://github.com/dheera/ros-imu-bno055
 - ZED Software
