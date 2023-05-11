@@ -20,3 +20,16 @@ rosservice call /anto_manager/camera 3 2
 </pre>
 
 Please note that the IP address for each specific camera should also be configured in config/cameras.yaml to ensure the correct camera is opened every time.
+
+## Anto_Supervisor
+
+anto_supervisor.py publishes a wealth of information over ROS to give you an easy understanding of how the system is operating. This includes: 
+- /as/cpu_temp: CPU temperature <float32>
+- /as/cpu_load: CPU load (percentage) <uint8>
+- /as/storage: Remaining storage space (gigabytes) <float64>
+- /as/soc:  State of charge (percentage remaining) <uint8>
+- /as/uBat: Battery level (volts)   <float32>
+- /imu/slope_direction: Tells the direction of the slope    <uint8>
+- /imu/roll_direction: Tells the direction of robot roll    <uint8>
+
+

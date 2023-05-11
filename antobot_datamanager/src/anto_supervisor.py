@@ -113,8 +113,19 @@ class Monitor():
         self.jetson = jtop()
         self.jetson.start()
 
-
+        # ROS Publisher
         self.pub_GPS_status = rospy.Publisher("/as/GPS_status",Bool,queue_size = 1)
+        self.pubslopeDirection = rospy.Publisher("/imu/slope_direction", UInt8, queue_size=1)   # topic to publish the slope (pitch) direction
+        self.pub_roll_Direction = rospy.Publisher("/imu/roll_direction", UInt8, queue_size=1)   # topic to publish the roll direction
+        self.pub_cpu_temp = rospy.Publisher("/as/cpu_temp",Float32,queue_size=1)    # topic to publish the cpu temperature
+        self.pub_cpu_load = rospy.Publisher("/as/cpu_load",UInt8,queue_size=1)      # topic to publish the cpu load
+        self.pub_storage = rospy.Publisher("/as/storage",Float64, queue_size = 1)   # topic to publish the free storage space (gigabytes)
+        self.pub_soc = rospy.Publisher("/as/soc",UInt8,queue_size = 1)              # percentage (state of charge)
+        self.pub_As_uBat = rospy.Publisher("/as/As_uBat",Float32,queue_size = 1)    # battery level (volts)
+        self.pub_batlvl = rospy.Publisher("/as/batlvl",String,queue_size = 1)       # battery level (high, medium, low, alert)
+        self.pub_network = rospy.Publisher("/as/network",Bool,queue_size = 1)
+        self.pub_As_uAlarm = rospy.Publisher("/as/alarm",UInt8,queue_size =1)
+        self.pub_soft_shutdown_req = rospy.Publisher("/antobridge/soft_shutdown_req", Bool,queue_size = 1)
 
         # ROS subscriber
         self.sub_As_uBat = rospy.Subscriber("/antobridge/Ab_uBat",UInt8_Array,self.battery_callback)             #pass battery voltage to anto_supervisor, it's an array data type
@@ -129,24 +140,10 @@ class Monitor():
         self.sub_slope_dir = rospy.Subscriber('/imu/data_corrected', Imu, self.slope_dir)
         self.imu_calib_status = rospy.Subscriber('/imu_calibration_status',UInt8, self.imu_calib)
         self.recalib_status = rospy.Subscriber('/recalib_status',UInt8,self.imu_recalib)
-        
-        # ROS Publisher
-        self.pubslopeDirection = rospy.Publisher("/imu/slope_direction", UInt8, queue_size=1) #topic to publish the slope direction
-        self.pub_roll_Direction = rospy.Publisher("/imu/roll_direction", UInt8, queue_size=1)
-        self.pub_cpu_temp = rospy.Publisher("/as/cpu_temp",Float32,queue_size=1)#topic to publish the cpu tempreture
-        self.pub_cpu_load = rospy.Publisher("/as/cpu_load",UInt8,queue_size=1)#topic to publish the cpu tempreture
-        self.pub_storage = rospy.Publisher("/as/storage",Float64, queue_size = 1)
-        self.pub_soc = rospy.Publisher("/as/soc",UInt8,queue_size = 1)#percentage soc
-        self.pub_As_uBat = rospy.Publisher("/as/As_uBat",Float32,queue_size = 1)
-        self.pub_batlvl = rospy.Publisher("/as/batlvl",String,queue_size = 1)
-        self.pub_network = rospy.Publisher("/as/network",Bool,queue_size = 1)
-        self.pub_As_uAlarm = rospy.Publisher("/as/alarm",UInt8,queue_size =1)
-        self.pub_soft_shutdown_req = rospy.Publisher("/antobridge/soft_shutdown_req", Bool,queue_size = 1)
 
         # ROS Service
         self.soft_shutdown_client = rospy.ServiceProxy('soft_shutdown_req',softShutdown)
         
-    
     def imu_calib(self,data):
         if data == 0:
             print("Heading is correct")
@@ -155,7 +152,6 @@ class Monitor():
         elif data == 2:
             print("Heading is off")
 
-
     def imu_recalib(self,data):
         if data == 0:
             print("recalibration cancelled either due to rotation or no heading offset")
@@ -163,8 +159,6 @@ class Monitor():
             print("in recalibration mode")
         elif data ==2:
             print("Recalibration occured")
-
-
 
     def xavier_monitor(self):
         #access to Jtop and read the xavier info
@@ -180,9 +174,7 @@ class Monitor():
         self.pub_cpu_temp.publish(self.As_cputemp)
         self.pub_cpu_load.publish(self.As_cpuload)
 
-
-
-    def network_status(self): #works
+    def network_status(self):
        #Returns False if it fails to resolve Google's URL, True otherwise#
         try:
             socket.gethostbyname("www.google.co.uk")
@@ -192,50 +184,48 @@ class Monitor():
             self.As_bNetwork = False
             self.pub_network.publish(self.As_bNetwork)
 
-
-    def storage_management(self): #works
-            #Returns True if there isn't enough disk space, False otherwise.#
+    def storage_management(self):
+        # # # Calculates how much storage is remaining
+        # Returns: True if there isn't enough disk space, False otherwise.#
         
         du = shutil.disk_usage(disk)
         self.As_bStorage = False
         # Calculate the percentage of free space
         percent_free = 100 * du.free / du.total
         # Calculate how many free gigabytes
-        gigabytes_free = du.free / (2**30)  
-        #print("gigabytes_free:",gigabytes_free)
+        gigabytes_free = du.free / (2**30)
         self.pub_storage.publish(gigabytes_free)
 
         if gigabytes_free < min_gb or percent_free < min_percent: #min_percent=5%
             self.As_bStorage = True
         return self.As_bStorage
 
-
     def emergency_alarm(self): #GNSS data needed
-        #emergency alarm to report the abnormal status of rebot 
+        # # # Emergency alarm to report the abnormal status of robot
+
         self.As_uAlarm = 0
         if self.Am_force_stop > 0 or self.Ab_force_stop == True:
-            self.As_uAlarm = 2 #force stop triggered
-        if self.anto_bridge_function == False and self.alarm_3_cnt == 0 : #anto_bridge not work (either node die or spi communication fail)
-            self.As_uAlarm = 1
+            self.As_uAlarm = 2      # force stop triggered
+        if self.anto_bridge_function == False and self.alarm_3_cnt == 0 : 
+            self.As_uAlarm = 1      # anto_bridge error (either node has died or spi communication has failed)
         else:
             self.alarm_3_cnt = 0
-        if self.As_b_vel_cmd == True: #command is send
+        if self.As_b_vel_cmd == True:   # command is sent
             if abs(self.As_wheel_vel[0]) < abs(self.As_wheel_cmd[0]) * 0.5 or abs(self.As_wheel_vel[1]) < abs(self.As_wheel_cmd[1]) * 0.5 or abs(self.As_wheel_vel[2]) < abs(self.As_wheel_cmd[2])*0.5 or abs(self.As_wheel_vel[3]) < abs(self.As_wheel_cmd[3])*0.5:
                 self.As_stuck_cnt = self.As_stuck_cnt + 1
             else:
                 self.As_stuck_cnt = 0
             if self.As_stuck_cnt > 4:
                 self.As_uAlarm = 3
-            if self.As_wheel_cmd[0]*self.As_wheel_cmd[2] < 0: #spot turn command
+            if self.As_wheel_cmd[0]*self.As_wheel_cmd[2] < 0: # spot turn command
                 if self.turn == False:
-                    self.As_uAlarm = 3 #immediate report
+                    self.As_uAlarm = 3 # immediate report
         else:
             self.u_robot_movement_cnt = 0
         self.anto_bridge_function = False #set this flag to false before next antobridge topic callback
         self.pub_As_uAlarm.publish(self.As_uAlarm)
     
     def print_monitor(self):
-        #sys.stdout.write("self.As_uSoC:",self.As_uSoC)
         print("self.As_bNetwork",self.As_bNetwork)
         print("self.As_uBat:",self.As_uBat)
         print("self.As_uSoC:",self.As_uSoC)
@@ -245,15 +235,18 @@ class Monitor():
         print("cpu temp:",self.As_cputemp)
 
 
-    # Callback function for robot operation mode
-    # mode 0:keyboard, 1: app, 2: joystick 3:autonomous 4:go home
+    
     def mode_callback(self, mode):
+        # # # Callback function for robot operation mode
+        # Inputs: mode - 0:keyboard, 2: joystick, 3:autonomous
         self.uMode = mode.data
         return self.uMode
 
 
-    def battery_callback(self, Ab_uBat): #works
-            # # # The callback function for battery data (/antobridge/Ab_uBat), get the voltage,filter it and pass it to battery_indication function to get the percentage voltage and level
+    def battery_callback(self, Ab_uBat):
+        # # # The callback function for battery data (/antobridge/Ab_uBat), get the voltage, filter it and pass it to 
+        # # # the battery_indication function to get the percentage voltage and level
+
         voltage_decimal = float(Ab_uBat.data[1])
         voltage = float(Ab_uBat.data[0])+ voltage_decimal/100
         if voltage == self.voltage_pre:
@@ -265,32 +258,28 @@ class Monitor():
         if self.voltage_cnt > 5:
             if voltage <self.As_uBat:
                 self.As_uBat = voltage #low pass
-
-        
-    def soft_shutdown_callback(self,soft_shutdown):  #soft shutdown button on joystick pressed
+      
+    def soft_shutdown_callback(self,soft_shutdown):  
+        # # # Soft shutdown button on joystick pressed
         if soft_shutdown.data == True:
             self.soft_shutdown_req = True
 
-
-    def soft_shutdown_process(self): #send req to antobridge, call the power off service
+    def soft_shutdown_process(self): 
+        # # # Sends request to antobridge to call the power off service
         if self.soft_shutdown_req == True:
             self.pub_soft_shutdown_req.publish(self.soft_shutdown_req)
             soft_shutdown_reponse = self.soft_shutdown_client(1)
 
-
-
     def battery_lvl(self):#works
         counter = 100
-        #print("voltage in battery_lvl", voltage)
         #The look up SOC table
-        #print("self.As_uBat:",self.As_uBat)
         while counter >0:
-            #print(counter)
             if self.As_uBat >= 39+counter*0.156 : #0.156=0.012(increasment)*13(series)
                 self.As_uSoC = counter
                 break
             counter = counter - 1
-        #The level convertion 
+
+        #The level conversion 
         if self.As_uSoC >= 80:
             self.As_sBatlvl = "high"
         elif self.As_uSoC >= 55:
@@ -299,30 +288,26 @@ class Monitor():
             self.As_sBatlvl = "low"
         else:
             self.As_sBatlvl = "alert"
+
         self.pub_soc.publish(self.As_uSoC)
         self.pub_As_uBat.publish(self.As_uBat)
         self.pub_batlvl.publish(self.As_sBatlvl)
 
-
     def GPS_callback(self,gps_msg):
-        #gps callback function, if gps status is 3 then it's in fix mode
+        #gps callback function, if gps status is 3 then it's in RTK fixed mode (best accuracy)
         if  gps_msg.status.status == 3:
             self.As_bGNSS = True
         else:
             self.As_bGNSS = False
         self.pub_GPS_status.publish(self.As_bGNSS)
 
-
-
     def wheel_vel_callback(self,data):
-        #print("sending wheel velocity data from callback")
         self.anto_bridge_function = True
         self.alarm_3_cnt = self.alarm_3_cnt +1
         self.As_wheel_vel = data.data
         return
 
     def wheel_cmd_callback(self,data):
-        #print("sending teleop speed command data from callback")
         self.wheel_cmd = data.data
         if self.wheel_cmd[0] !=0 or self.wheel_cmd[1] !=0 or self.wheel_cmd[2] !=0 or self.wheel_cmd[3] !=0: #command any of the wheel move
             self.b_vel_cmd = True  #sent wheel moving cmd 
@@ -335,12 +320,10 @@ class Monitor():
         return
 
     def ab_force_stop_callback(self,data):
-        #print("sending force stop signal from callback")
         self.Ab_force_stop = data.data #True as triggered, false as not triggered
         return
 
     def uss_dist_callback(self,data):
-        #print("sending force stop signal from callback")
         self.uss_data = data 
         return
 
@@ -369,7 +352,6 @@ class Monitor():
 
 
 def main():
-    #print("Here")
     rospy.init_node ('anto_supervisor')   
     rate = rospy.Rate(1)
     MonitorNode = Monitor()
