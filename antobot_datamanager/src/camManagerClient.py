@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Example script to send higher level nodes progress updates"""
+
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+#   Description:   Handles requests to open and close cameras on the Ant Robot Platform.
+#   Inputs:        Service calls for opening and closing cameras for different purposes. 
+#   Contact:     jinhuan.liu@antobot.ai
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 import rospy
 import rosservice
@@ -25,12 +35,6 @@ class camManagerClient():
             return False
 
     def sendCameraCommand(self):
-
-        # In ROS it's common to wait for a service. However, this blocks execution and is not always useful. Use checkForService method instead.
-        #rospy.wait_for_service('localUserInput')
-        #camCommand = camManagerRequest
-        #camCommand.camera_num=self.camera_num
-        #camCommand.command=self.command
 
         try:
             response = self.camManagerClient(self.camera_num,self.command)
