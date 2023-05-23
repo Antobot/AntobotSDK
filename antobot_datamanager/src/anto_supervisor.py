@@ -300,6 +300,8 @@ class Monitor():
 
     def GPS_callback(self,gps_msg):
         #gps callback function, if gps status is 3 then it's in RTK fixed mode (best accuracy)
+        print("in GPS callback")
+        self.GPS_freq_cnt = self.GPS_freq_cnt+1
         if  gps_msg.status.status == 3:
             self.As_bGNSS = True
         else:
@@ -353,6 +355,9 @@ class Monitor():
         else:
             self.turn = False#not turning
         self.yaw_past = angles[0]
+        print("pitch angle",angles[1]*180/3.14)
+        print("roll angle",angles[2]*180/3.14)
+        print("yaw angle",angles[0]*180/3.14)
         
 
     def GPS_frq(self):
@@ -377,6 +382,7 @@ def main():
             MonitorNode.xavier_monitor()
             MonitorNode.soft_shutdown_process()
             MonitorNode.print_monitor()
+            MonitorNode.GPS_frq()
             rate.sleep()
     except:
         print("Exception occured!!")
