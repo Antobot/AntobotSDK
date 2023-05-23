@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>antobot_datamanager</name>
+  <version>0.0.0</version>
+  <description>The antobot_datamanager package</description>
+
+  <maintainer email="will@todo.todo">will</maintainer>
+
+  <license>TODO</license>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

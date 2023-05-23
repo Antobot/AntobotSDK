@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: antobot_safety
+Description: Description of antobot_safety
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lantobot_safety_nodelet -lyaml-cpp
+Requires: roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs antobot_msgs

@@ -394,6 +394,15 @@ class GPS:
         #print("Received bytes from set_baudrate",ubx_str)
         self.check_ubx_uart(received_bytes)
         
+        #configuring the gps rate
+        rate_meas = self.cfg_rate_meas()
+        self.spiport.writebytes(rate_meas)
+        print("rate set to 8") 
+    
+        received_bytes = self.receive_ubx_bytes_from_spi()
+        #print("Received bytes from set_baudrate",ubx_str)
+        self.check_ubx_uart(received_bytes)
+        
 if __name__ == '__main__':
     try:
         spiport = spidev.SpiDev()
