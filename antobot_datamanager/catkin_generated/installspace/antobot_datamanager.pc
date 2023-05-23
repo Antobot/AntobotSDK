@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: antobot_datamanager
-Description: Description of antobot_datamanager
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

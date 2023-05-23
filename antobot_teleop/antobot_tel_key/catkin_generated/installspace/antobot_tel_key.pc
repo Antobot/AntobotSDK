@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: antobot_tel_key
-Description: Description of antobot_tel_key
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
