@@ -16,7 +16,7 @@
       <rosparam>
         target_frame: zed2_back_left_camera_frame
         transform_tolerance: 0.01
-        min_height: -0.1
+        min_height: 0.4
         max_height: 0.8
         
         angle_min: -3.14
@@ -41,7 +41,7 @@
       <rosparam>
         target_frame: zed2_front_left_camera_frame
         transform_tolerance: 0.01
-        min_height: -0.1
+        min_height: 0.4
         max_height: 0.8
         
         angle_min: -3.14
