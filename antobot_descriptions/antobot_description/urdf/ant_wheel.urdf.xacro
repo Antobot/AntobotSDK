@@ -41,7 +41,7 @@
       </visual>
       <collision>
         <geometry>
-          <cylinder length="0.08" radius="0.16" />
+          <sphere radius="0.16" />
         </geometry>
         <origin xyz="0 ${centreOffset} 0" rpy="${M_PI/2} 0 0" />
       </collision>

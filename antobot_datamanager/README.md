@@ -16,7 +16,7 @@ command: 0 - close cameras, 1 - start ROS wrapper, 2 - open cameras, 3 - start v
 
 For example, if you want to open the left camera, the command should be: 
 <pre>
-rosservice call /anto_manager/camera 3 2
+rosservice call /antobot_datamanager/camera 3 2
 </pre>
 
 Please note that the IP address for each specific camera should also be configured in config/cameras.yaml to ensure the correct camera is opened every time.
