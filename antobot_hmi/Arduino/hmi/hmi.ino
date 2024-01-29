@@ -143,7 +143,15 @@ void loop() {
   {
     switch (current_page)
     {
+      case Battery:
+        if (button_sum == 10)
+        {
+          current_page = Power01;
+          sendpagecmd(current_page);
+        }
+        break;
 
+      
       case Power01:
         if (button_sum == 100)
         {
@@ -159,7 +167,7 @@ void loop() {
         {
 
           current_page = Battery; //when there is no serial input, then go to next page:Power11
-          sendpagecmd(current_page);
+          sendtxtpagecmd(current_page,SoCstr);
         }
         break;
 
