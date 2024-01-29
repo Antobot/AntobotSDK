@@ -65,7 +65,7 @@ int X2A_Checksum;
 
 
 //list all the page name for case
-enum pages {boot,logo,battery, power01,power02,power10
+enum pages {boot,logo,Battery, Power01,Power02,Power10
            };
 unsigned char current_page;
 unsigned char last_page;
@@ -108,7 +108,7 @@ void setup() {
   SoCstr = String(X2A_uBat);
   X2A_uBat_past=X2A_uBat;
 
-  current_page = battery;
+  current_page = Battery;
   sendtxtpagecmd(current_page, SoCstr);
 
   A2X_bPower = false;
@@ -158,7 +158,7 @@ void loop() {
         else if (button_sum == 10)
         {
 
-          current_page = Power10; //when there is no serial input, then go to next page:Power11
+          current_page = Battery; //when there is no serial input, then go to next page:Power11
           sendpagecmd(current_page);
         }
         break;
@@ -194,15 +194,15 @@ void loop() {
 
      if (X2A_bPower == 1)  //shutdown request from any source
         {
-          current_page = power10;
+          current_page = Power10;
           sendpagecmd(current_page);
           }
     }
-  }
+  
 
 
   //generate message and send to Xavier
-  if (A2X_bPoweer == true)
+  if (A2X_bPower == true)
     A2X_bPower_str = "1";
   else
     A2X_bPower_str = "0";
