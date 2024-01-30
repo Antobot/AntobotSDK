@@ -171,14 +171,12 @@ class HMIBridge():
 
     
     def state_machine(self):
-        #set as default fist
-        #print("HMI - self.current_state = ",self.current_state)
-        self.X2A_bPower = 0
-
+        #logic of 
         if  self.cs_status == True:
             if self.A2X_bPower == 1:
                 self.X2A_bPower = 1
                 self.pub_soft_shutdown_button.publish(1)
+            
 
 
     def battery_soc_callback(self,data):
@@ -188,7 +186,7 @@ class HMIBridge():
     def soft_shutdown_callback(self,soft_shutdown):  
         # # # Soft shutdown button on joystick pressed
         if soft_shutdown.data == True:
-            self.X2A_bPower = True
+            self.X2A_bPower = 1
 
 
 def main():
