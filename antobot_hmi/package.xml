@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>antobot_manager_hmi</name>
+  <name>antobot_hmi</name>
   <version>0.0.0</version>
-  <description>The antobot_manager_hmi package</description>
+  <description>The antobot_hmi package</description>
   <maintainer email="zhuang.zhou@antobot.ai">Zhuang Zhou</maintainer>
   <license>TODO</license>
 
