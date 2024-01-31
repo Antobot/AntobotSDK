@@ -52,5 +52,7 @@
 
 	<!-- OPC-UA server launch-->
 	<include if="false" file="$(find ac_opcua)/launch/rosopcua_antobot.launch"></include>
-
+ 
+	<!-- HMI -->
+	<node if="true" pkg="antobot_hmi" type="hmi_xavier.py" name="anto_HMIbridge" output="log"/>
 </launch>

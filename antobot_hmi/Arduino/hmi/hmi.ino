@@ -15,24 +15,28 @@
 
 /************************************************************************************************************************/
 
-//Description:   This is a arduino script receive info from xavier and send command to HMI screen.
-//Interface:     serial port
-//Inputs:        
+//Description:   This is a arduino script receive infomation from and to xavier and send command to HMI screen. - SDK Version
+//Interface:     serial port        
 //Contact:     zhuang.zhou@antobot.ai
 
 /************************************************************************************************************************/
 
 
 //variable claim
+//button GPIO config
 int up = 10;
 int okay = 11;
 int down = 12;
+
+//Button related variables
 int upstate_pre;
 int okaystate_pre;
 int downstate_pre;
 
 int buttonsum;
 int button_sum;
+
+//Battery related variables
 String X2A_uBat_str;
 String SoCstr;
 int SoC;
@@ -89,6 +93,7 @@ void setup() {
   downstate_pre = 1;
 
   X2A_Status = false;
+  //initial start up page
   Serial1.print("page boot\xFF\xFF\xFF");
   Serial.print("385906f\n");
   delay(6000);
@@ -119,7 +124,7 @@ void loop() {
   button_sum = ButtonPress();
 
   readXavier();
-   Serial2.print(current_page);
+   Serial2.print(current_page); //a use of Serial2 to avoid block to Serial1 
   //delay(10);
   if (newData == true) {
     newData = false;
@@ -137,9 +142,7 @@ void loop() {
     flash_page_battery = false;
     }
 
-  //Serial2.print(SoCstr);
-  
-  if (button_sum > 0)
+  if (button_sum > 0) //if button is pressed
   {
     switch (current_page)
     {
@@ -166,7 +169,7 @@ void loop() {
         else if (button_sum == 10)
         {
 
-          current_page = Battery; //when there is no serial input, then go to next page:Power11
+          current_page = Battery;
           sendtxtpagecmd(current_page,SoCstr);
         }
         break;
@@ -206,9 +209,7 @@ void loop() {
           sendpagecmd(current_page);
           }
     }
-  
-
-
+ 
   //generate message and send to Xavier
   if (A2X_bPower == true)
     A2X_bPower_str = "1";
@@ -216,13 +217,11 @@ void loop() {
     A2X_bPower_str = "0";
 
 
-
-
   sum = A2X_header1 + A2X_header2 + A2X_bPower;
   A2X_Checksum = 256 - sum % 256;
   strA2XMsg = String(A2X_header1, HEX) + String(A2X_header2, HEX)  + A2X_bPower_str+ String(A2X_Checksum, HEX) + '\n';
 
-  //delay(10);
+
   Serial2.print(strA2XMsg);
   Serial.print(strA2XMsg);
   Serial2.print("finish print");
@@ -235,16 +234,16 @@ int ButtonPress() { //function to check which button(es) is being pressed
   int upstate = digitalRead(up);
   int okaystate = digitalRead(okay);
   int downstate = digitalRead(down);
-  if (upstate == 0 && upstate_pre == 1) //
+  if (upstate == 0 && upstate_pre == 1) 
   {
     buttonsum = buttonsum + 100;
   }
 
-  if (okaystate == 0 && okaystate_pre == 1) //and
+  if (okaystate == 0 && okaystate_pre == 1) 
   {
     buttonsum = buttonsum + 10;
   }
-  if (downstate == 0 && downstate_pre == 1) //and downstate_pre==1
+  if (downstate == 0 && downstate_pre == 1) 
   {
     buttonsum = buttonsum + 1;
   }
@@ -255,7 +254,7 @@ int ButtonPress() { //function to check which button(es) is being pressed
   return buttonsum;
 }
 
-void sendtxtpagecmd(int pagecmd, String SoC_str) //function to send cmd to go to the specific page
+void sendtxtpagecmd(int pagecmd, String SoC_str) //function to send cmd to go to the specific page, with user input text
 {
   pageID = pagecmd;
   Serial1.print("page ");
@@ -266,7 +265,7 @@ void sendtxtpagecmd(int pagecmd, String SoC_str) //function to send cmd to go to
   Serial1.flush();
 }
 
-void sendpagecmd(int pagecmd) //function to send cmd to go to the specific page
+void sendpagecmd(int pagecmd) //function to send cmd to go to the specific page, without user input text
 {
   pageID = pagecmd;
   Serial1.print("page ");
@@ -275,11 +274,10 @@ void sendpagecmd(int pagecmd) //function to send cmd to go to the specific page
   Serial1.flush();
 }
 
-void readXavier()
+void readXavier()  //read from Xavier
 {
   char X2A_uBat_char[3];
-
-  while (Serial.available() > 0 && newData == false) //if?
+  while (Serial.available() > 0 && newData == false) 
   {
     X2A_Status = true;
     X2A_Msg = Serial.readString();
@@ -297,6 +295,5 @@ void readXavier()
       newData = true;
       break;
     }
-
   }
 }
