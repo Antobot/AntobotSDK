@@ -38,13 +38,13 @@
 
 	<!-- Camera Manager -->
 	<node if="false" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
-	<include if="true" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
+	<include if="false" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
 
-	<!-- Move base -->
-	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch" />
+	<!-- Move base (for zed camera)-->
+	<include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
 
 	<!-- pointcloud to laser nodes (for zed camera)-->
-    	<include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
+    	<include if="false" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
 
 	<!-- AntoSupervisor -->
 	<node if="true" pkg="antobot_datamanager" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
