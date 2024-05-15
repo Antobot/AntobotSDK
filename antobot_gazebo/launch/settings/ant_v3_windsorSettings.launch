@@ -43,9 +43,6 @@
   <node pkg="tf" type="static_transform_publisher" name="gps_frame" args="0.0 0.0 0.0 0.0 0.0 0.0 /gps_frame /gps 100" />
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find antobot_gazebo)/rviz/ant_v3_sensors.rviz"/>
-  
-  <!-- Move base -->
-  <include file="$(find antobot_navigation)/launch/move_base_sim.launch" />
 
   <!-- IMU calibration -->
   <include file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
