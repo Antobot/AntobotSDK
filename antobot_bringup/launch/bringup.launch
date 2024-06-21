@@ -24,7 +24,7 @@
 	<include if="true" file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
 	
 	<!-- robot description -->
-	<include if="true" file="$(find antobot_description)/launch/param_ant_v2.launch"></include>
+	<include if="true" file="$(find antobot_description)/launch/param_ant_v3.launch"></include>
 
 	<!-- Master Teleop -->
 	<node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" />	
@@ -37,14 +37,10 @@
 	<node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
 
 	<!-- Camera Manager -->
-	<node if="false" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
 	<include if="false" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
 
 	<!-- Move base (for zed camera)-->
 	<include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
-
-	<!-- pointcloud to laser nodes (for zed camera)-->
-    	<include if="false" file="$(find antobot_navigation)/launch/pointcloud_to_laser.launch"></include>
 
 	<!-- AntoSupervisor -->
 	<node if="true" pkg="antobot_datamanager" type="anto_supervisor.py" name="anto_supervisor" output="log"/>

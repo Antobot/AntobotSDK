@@ -85,12 +85,22 @@
     </gazebo>
  
 
-    <!-- Leishen 3D lidar -->
+    <!-- Leishen 3D lidar - front: c32, back: c16 -->
+    <link name="laser_link_c32">
+    </link>
+    <joint name="lidar_joint_c32" type="fixed">
+      <parent link="robot_base_link"/>
+      <child link="laser_link_c32"/>
+      <origin xyz="0.683 -0.088 0.465" rpy="0 0 3.14"/>
+    </joint>
 
-    <xacro:include filename="$(find antobot_description)/urdf/ls_ch128x1.urdf.xacro"/>
-    <xacro:ls_ch128x1 name='front' originX='0.7266' originY='0.0' originZ='0.286' rotZ='${-M_PI/2}'/>
-     <xacro:ls_ch128x1 name='rear' originX='-0.741599' originY='0.0' originZ='0.286' rotZ='${M_PI/2}'/>
-
+    <link name="laser_link_c16">
+    </link>
+    <joint name="lidar_joint_c16" type="fixed">
+      <parent link="robot_base_link"/>
+      <child link="laser_link_c16"/>
+      <origin xyz="-0.683 0.088 0.465" rpy="0 0 0"/>
+    </joint>
 
   
     <!-- GPS -->
