@@ -84,7 +84,6 @@ class AntoRec:
         self.cam = sl.Camera()
         self.init_params = param_init()
         self.runtime = sl.RuntimeParameters()
-        self.runtime.sensing_mode = sl.SENSING_MODE.STANDARD
         srv_name, self.cam_name, self.output_basename = get_name()
 
         self.display_image = False
