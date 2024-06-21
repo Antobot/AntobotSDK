@@ -18,9 +18,9 @@ obstacle_layer:
     track_unknown_space: true
     enabled: true
     combination_method: 1
-    observation_sources: pcl_front_laser_scan_sensor pcl_back_laser_scan_sensor
-    pcl_front_laser_scan_sensor: {sensor_frame: zed2_front_left_camera_frame, data_type: LaserScan, topic: /camera/scan/front, inf_is_valid: true, observation_persistence: 0.2, marking: true, clearing: true, min_obstacle_height: -1, max_obstacle_height: 1, obstacle_range: 9.0, raytrace_range: 9.5}
-    pcl_back_laser_scan_sensor: {sensor_frame: zed2_back_left_camera_frame, data_type: LaserScan, topic: /camera/scan/back, inf_is_valid: true, observation_persistence: 0.0, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 0.5, obstacle_range: 9.0, raytrace_range: 9.5}
+    observation_sources: pcl_front_c32 pcl_back_c16
+    pcl_front_c32: {sensor_frame: laser_link_c32, data_type: PointCloud2, topic: /c32/lslidar_point_cloud, inf_is_valid: true, observation_persistence: 0.0, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 1.5, obstacle_range: 10, raytrace_range: 11}
+    pcl_back_c16: {sensor_frame: laser_link_c16, data_type: PointCloud2, topic: /c16/lslidar_point_cloud, inf_is_valid: true, observation_persistence: 0.0, marking: true, clearing: true, min_obstacle_height: -0.2, max_obstacle_height: 1.5, obstacle_range: 10, raytrace_range: 11}
 
 # inflation radius and cost scaling factor are the parameters that determine
 # the inflation. inflation radius controls how far away the zero cost point is from the obstacle. 

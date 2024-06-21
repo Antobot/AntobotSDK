@@ -156,7 +156,7 @@ DWAPlannerROS:
 
   # Goal Tolerance Parametes
 
-  xy_goal_tolerance: 0.5 #larger values make the way point following unnatural (stops every waypoint)
+  xy_goal_tolerance: 1.5 #larger values make the way point following unnatural (stops every waypoint)
   yaw_goal_tolerance: 6.0
 #latch_xy_goal_tolerance: latch_xy_goal_tolerance: if the robot ever reaches the goal xy location it will simply rotate in place, default: false
   latch_xy_goal_tolerance: false
