@@ -19,7 +19,7 @@ For example, if you want to open the left camera, the command should be:
 rosservice call /antobot_datamanager/camera 3 2
 </pre>
 
-Please note that the IP address for each specific camera should also be configured in config/cameras.yaml to ensure the correct camera is opened every time.
+Please note that the serial number for each specific camera should also be configured in config/cameras.yaml to ensure the correct camera is opened every time.
 
 ## Anto_Supervisor
 
