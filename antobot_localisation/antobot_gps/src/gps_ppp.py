@@ -83,7 +83,7 @@ class nRTK:
 
         # Topic names and QoS
         rospack = rospkg.RosPack()
-        packagePath=rospack.get_path('antobot_devices_gps')
+        packagePath=rospack.get_path('antobot_gps')
         self.mqtt_topics = [(f"/pp/ip/eu", 0), ("/pp/ubx/mga", 0), ("/pp/ubx/0236/ip", 0)]
         self.userdata = { 'gnss': self.nRTK_correction, 'topics': self.mqtt_topics }
         self.client = mqtt.Client(client_id=self.client_id, userdata=self.userdata)
