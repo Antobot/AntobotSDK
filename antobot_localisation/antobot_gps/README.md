@@ -3,7 +3,6 @@
 The antobot_gps repository outlook:
 * build
 * src
-  * antobot_gps_node.py: Python script for F9P in uRCU via SPI using the sparkfun library
   * gps_base_station.py: Python script for F9P using the Antobot base station for RTK corrections (via radio link)
   * gps_ppp.py: Python script for F9P using Thingstream PointPerfect for RTK corrections (via 4G connection) 
   * gps_config.py: Python script to configure the F9P in uRCU via SPI
