@@ -37,7 +37,7 @@
 	<node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
 
 	<!-- Camera Manager -->
-	<include if="false" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
+	<include if="true" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
 
 	<!-- Move base (for zed camera)-->
 	<include if="false" file="$(find antobot_navigation)/launch/move_base.launch" />
