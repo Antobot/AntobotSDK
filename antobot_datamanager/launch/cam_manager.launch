@@ -29,7 +29,7 @@
   <!-- antoManager -->
   <node pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="screen" />
   
-  <machine name='carrierboard' address='antoscout1-desktop' env-loader="/opt/ros/noetic/env.sh" user="antoscout1" password="Antobot2021-"/>
+  <machine name='carrierboard' address='antovision-desktop' env-loader="~/catkin_ws/devel/env.sh" user="antovision" password="AntobotWMG"/>
   <node machine="carrierboard" name="anto_rec" pkg="antobot_datamanager" type="anto_rec.py" />
 
 </launch>
