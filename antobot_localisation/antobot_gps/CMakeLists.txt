@@ -17,7 +17,8 @@ include_directories(
 
 catkin_install_python(PROGRAMS
    src/gps_config.py
-   src/antobot_gps_node.py
+   src/gps_base_station.py
+   src/gps_ppp.py
    src/antobot_gps/ublox_gps.py
    src/antobot_gps/core.py
    src/antobot_gps/sparkfun_predefines.py
