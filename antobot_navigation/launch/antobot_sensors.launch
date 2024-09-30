@@ -12,8 +12,8 @@
 <launch>
 
     <!-- RTK-GNSS launch -->
-    <node if="true" pkg="antobot_gps" type="gps_base_station.py" name="rtk_gnss" />
-    <node if="false" pkg="antobot_gps" type="gps_ppp.py" name="gps_ppp" />
+    <node if="false" pkg="antobot_gps" type="gps_base_station.py" name="rtk_gnss" />
+    <node if="true" pkg="antobot_gps" type="gps_ppp.py" name="gps_ppp" />
 
     <!-- BOSCH IMU launch -->
     <include if="true" file="$(find imu_bno055)/launch/imu.launch" />
