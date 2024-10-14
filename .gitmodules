@@ -1,0 +1,6 @@
+[submodule "AntobotDevices"]
+	path = AntobotDevices
+	url = https://github.com/Antobot/AntobotDevices.git
+[submodule "AntobotPlatform"]
+	path = AntobotPlatform
+	url = https://github.com/Antobot/AntobotPlatform.git
