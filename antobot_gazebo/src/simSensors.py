@@ -14,7 +14,7 @@ from sensor_msgs.msg import Range
 from std_msgs.msg import UInt8
 from gazebo_msgs.msg import ModelStates
 
-from antobot_msgs.msg import UInt16_Array
+from antobot_platform_msgs.msg import UInt16_Array
 
 
 class gpsStatus:
