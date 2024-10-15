@@ -53,7 +53,7 @@
   
   <!-- Teleop -->
   <include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch" />
-  <node if="true" pkg="antobot_teleop" type="teleop.py" name="master_teleop" output="screen" />
+  <node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" output="screen" />
   
   <include if="true" file="$(find antobot_safety)/launch/cmd_vel_mux.launch" />
   <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="safety_cmd_vel_mod" output="screen"/>
