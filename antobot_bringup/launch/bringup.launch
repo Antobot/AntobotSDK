@@ -15,13 +15,13 @@
 <launch>
 
 	<!-- controllers -->
-	<include if="true" file="$(find antobot_base)/launch/ant_controller.launch"></include>
+	<include if="true" file="$(find antobot_control)/launch/ant_controller.launch"></include>
 
 	<!-- navigation sensors -->
 	<include if="true" file="$(find antobot_navigation)/launch/antobot_sensors.launch"></include>
 	
 	<!-- IMU calibration -->
-	<include if="true" file="$(find antobot_heading)/launch/antobot_heading_launcher.launch"></include>
+	<node if="true" pkg="antobot_heading" type="heading_ekf_launcher.py" name="heading_launch_node"></node>
 	
 	<!-- robot description -->
 	<include if="true" file="$(find antobot_description)/launch/param_ant_v3.launch"></include>
@@ -37,18 +37,16 @@
 	<node if="true" pkg="antobot_safety" type="antobot_safety_node" name="antobot_safety_node" output="screen"/>
 
 	<!-- Camera Manager -->
-	<include if="true" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
+	<include if="true" file="$(find antobot_devices_camera)/launch/cam_manager.launch" />
 
 	<!-- Move base (for zed camera)-->
 	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch" />
 
 	<!-- AntoSupervisor -->
-	<node if="true" pkg="antobot_datamanager" type="anto_supervisor.py" name="anto_supervisor" output="log"/>
-	<node if="true" pkg="antobot_datamanager" type="softshutdownsrv.py" name="soft_shutdown_server" output="screen"/>
+	<node if="true" pkg="antobot_monitor" type="softShutdown.py" name="soft_shutdown" output="log"/>
+	<node if="true" pkg="antobot_monitor" type="moveMonitor.py" name="move_monitor" output="log"/>
+        <node if="true" pkg="antobot_monitor" type="sysMonitor.py" name="system_monitor" output="log"/>
 
-	<!-- OPC-UA server launch-->
-	<include if="false" file="$(find ac_opcua)/launch/rosopcua_antobot.launch"></include>
- 
 	<!-- HMI -->
 	<node if="true" pkg="antobot_hmi" type="hmi_xavier.py" name="anto_HMIbridge" output="log"/>
 </launch>
