@@ -43,9 +43,9 @@
 	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch" />
 
 	<!-- AntoSupervisor -->
-	<node if="true" pkg="antobot_monitor" type="softShutdown.py" name="soft_shutdown" output="log"/>
-	<node if="true" pkg="antobot_monitor" type="robotMonitor.py" name="robot_monitor" output="log"/>
-        <node if="true" pkg="antobot_monitor" type="urcuMonitor.py" name="urcu_monitor" output="log"/>
+	<node if="true" pkg="antobot_urcu_monitor" type="softShutdown.py" name="soft_shutdown" output="log"/>
+	<node if="true" pkg="antobot_robot_monitor" type="robotMonitor.py" name="robot_monitor" output="log"/>
+        <node if="true" pkg="antobot_urcu_monitor" type="urcuMonitor.py" name="urcu_monitor" output="log"/>
 
 	<!-- HMI -->
 	<node if="true" pkg="antobot_hmi" type="hmi_xavier.py" name="anto_HMIbridge" output="log"/>
