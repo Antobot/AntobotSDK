@@ -4,23 +4,21 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # Code Description: This example configuration file includes robot specific information. Make a copy of this file in the 
-#                       same directory (antobot_description/config) with file name of robot_config.yaml
+#                       same directory (antobot_description/config) with file name of platform_config.yaml
 #                       This file is included in github repository.
 
 # Author:       soyoung.kim@antobot.ai
 # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 ## High-level configuration
-mileage_path: "/mileage/"
 
-robot_hardware: False
-robot_platform: "ant"   # Could be "ant" or "dog"
+robot_hardware: True
+robot_platform: "ant"  
 robot_version: 4
-robot_role: "Assist"
+robot_role: "platform"
+location: "uk"
 
-pathFollower: True
 
-#imu_compensated_frame: False # set this value to False if the imu in URCU is faulty and showing imu drift
 
 ## Sensor information
 
@@ -51,7 +49,7 @@ lidar:
 
     device_ip: 192.168.1.201 
     msop_port: 2370
-    difop_port: 2371 
+    difop_port: 2371  
 
 gps:
   urcu:
@@ -64,7 +62,8 @@ gps:
     mode: "navigation"
 
     device_port: "/dev/ttyTHS0"
-    rtk_type: "ppp"
+    rtk_type: "ntrip"   #ppp or ntrip or ant_mqtt
+    #time_zone: "UKsummer"  #todo
 
 
 imu:
@@ -86,4 +85,5 @@ imu:
     y: 0
     mode: "record"
     switch: False
+
 
