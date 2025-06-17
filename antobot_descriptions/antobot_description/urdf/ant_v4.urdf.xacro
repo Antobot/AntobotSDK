@@ -5,7 +5,7 @@
 # All rights reserved.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # Code Description:     URDF for AntoBot Ant v2
+# # # Code Description:     URDF for AntoBot Ant v4 (using ant_v3 dae for body) - currently only white robot with narrow wheel base
 # Contact: william.eaton@antobot.ai
 # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 -->
@@ -20,8 +20,7 @@
   <xacro:property name="referenceLongitude"    value="$(arg referenceLongitude)" />   
 
   <xacro:arg name="referenceHeading"   default="90.0" />
-  <xacro:property name="referenceHeading"    value="$(arg referenceHeading)" />   
-
+  <xacro:property name="referenceHeading"    value="$(arg referenceHeading)" />  
 
   <!-- Need argument to get from launch file -->
   <xacro:arg name="params_path" default="../config/platform_config.yaml"/> 
@@ -42,22 +41,22 @@
     <link name="robot_base_link">
       <visual>
         <geometry>
-          <mesh filename="package://antobot_description/meshes/ant_v2_body.dae" scale="1 1 1"/>
+          <mesh filename="package://antobot_description/meshes/ant_v3_body.dae" scale="1 1 1"/>
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </visual>
       <collision>
        <geometry>
-          <mesh filename="package://antobot_description/meshes/ant_v2_body.dae" scale="1 1 1"/>
+          <mesh filename="package://antobot_description/meshes/ant_v3_body.dae" scale="1 1 1"/>
         </geometry>
         <origin xyz="0 0 0" rpy="0 0 0"/>
       </collision>
       <inertial>
-        <mass value="50" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="14.4" ixy="0.0" ixz="0"
-                 iyy="14.4" iyz="0.0"
-                 izz="14.4" />
+        <origin xyz="0 0 0"/>
+        <mass value="50"/>
+        <inertia ixx="1.219624785" ixy="0.0" ixz="-0.984790199"
+                 iyy="2.134816831" iyz="0.0"
+                 izz="2.304314375" />
       </inertial>
     </link>
     
@@ -67,6 +66,36 @@
       <child link="robot_base_link" />
     </joint>
 
+ 
+    <!-- Wheels link -->
+    
+    <xacro:include filename="$(find antobot_description)/urdf/ant_wheel.urdf.xacro"/>
+    <xacro:ant_wheel name='left_front' originX='0.26' originY='0.26' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='left_rear' originX='-0.26' originY='0.26' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='right_rear' originX='-0.26' originY='-0.26' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+    <xacro:ant_wheel name='right_front' originX='0.26' originY='-0.26' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+
+
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+    </gazebo>
+
+    <!-- Gazebo ground truth-->
+    <gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <frameName>world</frameName>
+      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffset>0 0 0</rpyOffset>
+    </plugin>
+    </gazebo>
+ 
     <xacro:property name="lidar_list" value="${mp['lidar']}" />
 
     <!-- Leishen C16 front lidar -->
@@ -97,60 +126,7 @@
         <origin xyz="${mp['lidar']['c16_2']['px']} ${mp['lidar']['c16_2']['py']} ${mp['lidar']['c16_2']['pz']}" rpy="${mp['lidar']['c16_2']['r']} ${mp['lidar']['c16_2']['p']} ${mp['lidar']['c16_2']['y']}"/> 
       </joint>
     </xacro:if>
-   
 
-
-
-    
-
-    <!-- Wheels link -->
-    <xacro:include filename="$(find antobot_description)/urdf/ant_wheel.urdf.xacro"/> 
-    <xacro:ant_wheel name='left_front' originX='0.27738' originY='0.3' originZ='-0.013175' rotZ='${M_PI}' centreOffset='0.06'/>
-    <xacro:ant_wheel name='left_rear' originX='-0.27738' originY='0.3' originZ='-0.013175' rotZ='${M_PI}' centreOffset='0.06'/>
-    <xacro:ant_wheel name='right_rear' originX='-0.27738' originY='-0.3' originZ='-0.013175' rotZ='0' centreOffset='-0.06'/>
-    <xacro:ant_wheel name='right_front' originX='0.27738' originY='-0.3' originZ='-0.013175' rotZ='0' centreOffset='-0.06'/>
-
-
-    <gazebo>
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>/</robotNamespace>
-      </plugin>
-    </gazebo>
-
-
-
-
-
-
-
-
-    <!-- Gazebo ground truth-->
-    <gazebo>
-    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>10.0</updateRate>
-      <bodyName>base_link</bodyName>
-      <topicName>ground_truth/state</topicName>
-      <gaussianNoise>0.0</gaussianNoise>
-      <frameName>world</frameName>
-      <xyzOffset>0 0 0</xyzOffset>
-      <rpyOffset>0 0 0</rpyOffset>
-    </plugin>
-    </gazebo>
- 
-  
-    
-
- 
-
-    
-
-
-
-
-
-
-  
     <!-- GPS -->
     <joint name="gps_joint" type="fixed">
       <parent link="robot_base_link"/>
@@ -216,28 +192,30 @@
     <!-- Actual sensors output on combined topic /antobridge/uss_dist -->
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="1" xyz="0.5355 0.317 0.282" rpy="0 0 0.785398" />
+    <xacro:ultrasonic id="1" xyz="0.6066 0.2866 0.2835" rpy="0 0 0.785398" />
     
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="2" xyz="0.66 0 0.2935" rpy="0 0 0" />
+    <xacro:ultrasonic id="2" xyz="0.732599 0.08 0.277043" rpy="0 0 0" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="3" xyz="0.5535 -0.317 0.282" rpy="0 0 -0.785398" />
+    <xacro:ultrasonic id="3" xyz="0.6066 -0.2866 0.2835" rpy="0 0 -0.785398" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="4" xyz="-0.0165 -0.3385 0.282" rpy="0 0 -1.5708" />
+    <xacro:ultrasonic id="4" xyz="-0.0075 -0.312247 0.284043" rpy="0 0 -1.5708" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="5" xyz="-0.5685 -0.317 0.282" rpy="0 0 -2.35619" />
+    <xacro:ultrasonic id="5" xyz="-0.621588 -0.286588 0.283543" rpy="0 0 -2.35619" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="6" xyz="-0.5899 0 0.2878" rpy="0 0 3.14159" />
+    <xacro:ultrasonic id="6" xyz="-0.747596 -0.08 0.277043" rpy="0 0 3.14159" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="7" xyz="-0.5685 0.317 0.282" rpy="0 0 2.35619" />
+    <xacro:ultrasonic id="7" xyz="-0.621588 0.286589 0.283543" rpy="0 0 2.35619" />
 
     <xacro:include filename="$(find antobot_description)/urdf/ultrasonic.urdf.xacro"/>
-    <xacro:ultrasonic id="8" xyz="-0.0165 0.3385 0.282" rpy="0 0 1.5708" />
+    <xacro:ultrasonic id="8" xyz="-0.0075 0.312247 0.284043" rpy="0 0 1.5708" />
+
+
 
     <!-- For scouting - left -->
     <joint name="scouting_joint_left" type="fixed">
@@ -257,6 +235,7 @@
 
     <link name="scouting_frame_right"/>
     
+
   </xacro:macro>
   <xacro:antobot_ant/>
 </robot>

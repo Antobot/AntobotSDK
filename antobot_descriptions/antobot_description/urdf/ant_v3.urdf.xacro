@@ -19,6 +19,18 @@
   <xacro:arg name="referenceLongitude"   default="-0.6079828525888944" />
   <xacro:property name="referenceLongitude"    value="$(arg referenceLongitude)" />   
 
+  <xacro:arg name="referenceHeading"   default="90.0" />
+  <xacro:property name="referenceHeading"    value="$(arg referenceHeading)" />  
+
+  <!-- Need argument to get from launch file -->
+  <xacro:arg name="params_path" default="../config/platform_config.yaml"/> 
+
+  <!-- Need seperate property for xacro inorder processing -->
+  <xacro:property name="params_path" value="$(arg params_path)"/> 
+
+  <!-- Read in the yaml dict as mp (short for model parameters) currently used for C16 angle-->
+  <xacro:property name="mp" value="${xacro.load_yaml(params_path)}"/> 
+
 
   <!-- Ant Robot -->
   <xacro:macro name="antobot_ant">
@@ -58,10 +70,10 @@
     <!-- Wheels link -->
     
     <xacro:include filename="$(find antobot_description)/urdf/ant_wheel.urdf.xacro"/>
-    <xacro:ant_wheel name='left_front' originX='0.26' originY='0.2324' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
-    <xacro:ant_wheel name='left_rear' originX='-0.26' originY='0.2324' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
-    <xacro:ant_wheel name='right_rear' originX='-0.26' originY='-0.2324' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
-    <xacro:ant_wheel name='right_front' originX='0.26' originY='-0.2324' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+    <xacro:ant_wheel name='left_front' originX='0.26' originY='0.3' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='left_rear' originX='-0.26' originY='0.3' originZ='-0.013975' rotZ='${M_PI}' centreOffset='0.06'/>
+    <xacro:ant_wheel name='right_rear' originX='-0.26' originY='-0.3' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
+    <xacro:ant_wheel name='right_front' originX='0.26' originY='-0.3' originZ='-0.013975' rotZ='0' centreOffset='-0.06'/>
 
 
     <gazebo>
@@ -84,30 +96,42 @@
     </plugin>
     </gazebo>
  
+    <xacro:property name="lidar_list" value="${mp['lidar']}" />
 
-    <!-- Leishen 3D lidar - front: c32, back: c16 -->
-    <link name="laser_link_c32">
-    </link>
-    <joint name="lidar_joint_c32" type="fixed">
-      <parent link="robot_base_link"/>
-      <child link="laser_link_c32"/>
-      <origin xyz="0.683 -0.088 0.465" rpy="0 0 3.14"/>
-    </joint>
+    <!-- Leishen C16 front lidar -->
+    <xacro:if value="${'c16' in lidar_list}"> 
+      <xacro:include filename="$(find antobot_description)/urdf/c16.urdf.xacro"/>
+      <xacro:property name="location" value="${mp['lidar']['c16']['location']}" />
+      <xacro:c16 link_prefix='' joint_prefix='' position='${location}'/>
+      <xacro:c16_gazebo robot_ns='' position='${location}'/>
 
-    <link name="laser_link_c16">
-    </link>
-    <joint name="lidar_joint_c16" type="fixed">
-      <parent link="robot_base_link"/>
-      <child link="laser_link_c16"/>
-      <origin xyz="-0.683 0.088 0.465" rpy="0 0 0"/>
-    </joint>
+      <joint name="lidar_c16_joint_${mp['lidar']['c16']['location']}" type="fixed">
+        <parent link="robot_base_link"/>
+        <child link="laser_link_${mp['lidar']['c16']['location']}_static"/>
+        <!-- <origin xyz="0.615 0.145 0.427" rpy="0 0 3.15"/> --><!-- When mounted low, on the left of the robot head -->
+        <origin xyz="${mp['lidar']['c16']['px']} ${mp['lidar']['c16']['py']} ${mp['lidar']['c16']['pz']}" rpy="${mp['lidar']['c16']['r']} ${mp['lidar']['c16']['p']} ${mp['lidar']['c16']['y']}"/> 
+      </joint>
+    </xacro:if>
 
-  
+    <!-- Leishen C16 rear lidar -->
+    <xacro:if value="${'c16_2' in lidar_list}">
+      <xacro:include filename="$(find antobot_description)/urdf/c16.urdf.xacro"/>
+      <xacro:property name="location" value="${mp['lidar']['c16_2']['location']}" />
+      <xacro:c16 link_prefix='' joint_prefix='' position='${location}'/>
+      <xacro:c16_gazebo robot_ns='' position='${location}'/>
+
+      <joint name="c16_lidar_joint_${mp['lidar']['c16_2']['location']}" type="fixed">
+        <parent link="robot_base_link"/>
+        <child link="laser_link_${mp['lidar']['c16_2']['location']}_static"/>
+        <origin xyz="${mp['lidar']['c16_2']['px']} ${mp['lidar']['c16_2']['py']} ${mp['lidar']['c16_2']['pz']}" rpy="${mp['lidar']['c16_2']['r']} ${mp['lidar']['c16_2']['p']} ${mp['lidar']['c16_2']['y']}"/> 
+      </joint>
+    </xacro:if>
+    
     <!-- GPS -->
     <joint name="gps_joint" type="fixed">
       <parent link="robot_base_link"/>
       <child link="gps_frame"/>
-      <origin xyz="0.6854 -0.135 0.5518" rpy="0 0 0"/>
+      <origin xyz="${mp['gps']['urcu']['px']} ${mp['gps']['urcu']['py']} ${mp['gps']['urcu']['pz']}" rpy="${mp['gps']['urcu']['r']} ${mp['gps']['urcu']['p']} ${mp['gps']['urcu']['y']}"/> 
     </joint>
     <link name="gps_frame">
       <inertial>
@@ -120,13 +144,13 @@
     <gazebo>
       <plugin name="gazebo_ros_gps" filename="libhector_gazebo_ros_gps.so" >
         <updateRate>4.0</updateRate>
-        <bodyName>gps_frame</bodyName>
-        <frameId>gps_frame</frameId>
+        <bodyName>robot_base_link</bodyName> <!-- GPS plugin in simulation is publishing gps topic in base_link position - affecting EKF -->
+        <frameId>robot_base_link</frameId>
         <topicName>/antobot_gps</topicName>
-        <velocityTopicName>/antobot_gps_vel</velocityTopicName>
+        <velocityTopicName>/am_gps_vel</velocityTopicName>
         <referenceLatitude>${referenceLatitude}</referenceLatitude>
         <referenceLongitude>${referenceLongitude}</referenceLongitude>
-        <referenceHeading>90</referenceHeading>
+        <referenceHeading>${referenceHeading}</referenceHeading>
         <referenceAltitude>10</referenceAltitude>
         <offset>0 0 0</offset>
         <drift>0.0 0.0 0.0</drift>
@@ -192,27 +216,25 @@
     <xacro:ultrasonic id="8" xyz="-0.0075 0.312247 0.284043" rpy="0 0 1.5708" />
 
 
-    <!-- Front facing ZED camera -->
-    <joint name="zed2_joint" type="fixed">
-        <parent link="robot_base_link"/>
-        <child link="zed2_front_camera_center"/>
-        <origin xyz="0.711123 0 0.3574" rpy="0 0 0"/>
+
+    <!-- For scouting - left -->
+    <joint name="scouting_joint_left" type="fixed">
+      <origin xyz="0.641 0.03 0.6" rpy="-${pi/2} 0.0 0.0"/>
+      <parent link="robot_base_link"/>
+      <child link="scouting_frame_left"/>
     </joint>
 
-    <!-- Back facing ZED -->
-    <joint name="zed2_joint_back" type="fixed">
-        <parent link="robot_base_link"/>
-        <child link="zed2_back_camera_center"/>
-        <origin xyz="-0.725838 0 0.3574" rpy="0 0 ${M_PI}"/>
+    <link name="scouting_frame_left"/>
+
+    <!-- For scouting - right -->
+    <joint name="scouting_joint_right" type="fixed">
+      <origin xyz="0.641 0.03 0.6" rpy="${pi/2} ${pi} 0.0"/>
+      <parent link="robot_base_link"/>
+      <child link="scouting_frame_right"/>
     </joint>
+
+    <link name="scouting_frame_right"/>
     
-
-    <xacro:include filename="$(find antobot_description)/urdf/zed2.urdf.xacro"/>
-    <xacro:zed2 link_prefix='' joint_prefix='' position='front'/>
-    <xacro:zed2 link_prefix='' joint_prefix='' position='back'/>
-
-    <xacro:zed2_gazebo robot_ns='' position='front'/>
-    <xacro:zed2_gazebo robot_ns='' position='back'/>
 
   </xacro:macro>
   <xacro:antobot_ant/>

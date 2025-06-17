@@ -21,7 +21,7 @@
   <arg name="referenceLongitude"  default="-0.6079646901954604" />
   <param name="robot_description" command="$(find xacro)/xacro '$(find antobot_description)/urdf/ant_v2.urdf.xacro' referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
 
-  <rosparam command="load" file="$(find antobot_description)/config/control_ant_v2.yaml" />
+  <rosparam command="load" file="$(find antobot_description)/config/control_ant.yaml" />
 
 
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"

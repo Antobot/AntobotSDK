@@ -1,0 +1,89 @@
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# # # Code Description: This example configuration file includes robot specific information. Make a copy of this file in the 
+#                       same directory (antobot_description/config) with file name of robot_config.yaml
+#                       This file is included in github repository.
+
+# Author:       soyoung.kim@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+## High-level configuration
+mileage_path: "/mileage/"
+
+robot_hardware: False
+robot_platform: "ant"   # Could be "ant" or "dog"
+robot_version: 4
+robot_role: "Assist"
+
+pathFollower: True
+
+#imu_compensated_frame: False # set this value to False if the imu in URCU is faulty and showing imu drift
+
+## Sensor information
+
+lidar:
+  c16:    # Front lidar
+    px: 0.683
+    py: -0.088
+    pz: 0.465
+    r: 0
+    p: 0
+    y: 3.14
+    mode: "navigation"
+    location: "front"
+
+    device_ip: 192.168.1.200 
+    msop_port: 2368
+    difop_port: 2369    
+
+  c16_2:  # Back lidar
+    px: -0.683
+    py: 0.088
+    pz: 0.465
+    r: 0
+    p: 0
+    y: 0.0
+    mode: "navigation"
+    location: "back"
+
+    device_ip: 192.168.1.201 
+    msop_port: 2370
+    difop_port: 2371 
+
+gps:
+  urcu:
+    px: 0.683
+    py: -0.088
+    pz: 0.528
+    r: 0
+    p: 0
+    y: 0
+    mode: "navigation"
+
+    device_port: "/dev/ttyTHS0"
+    rtk_type: "ppp"
+
+
+imu:
+  urcu:
+    px: -0.1146
+    py: -0.01941
+    pz: 0.1832
+    r: 0
+    p: 0
+    y: 0
+    mode: "navigation"
+    switch: True
+  xsens:
+    px: 0
+    py: 0
+    pz: 0
+    r: 0
+    p: 0
+    y: 0
+    mode: "record"
+    switch: False
+
