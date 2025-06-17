@@ -27,10 +27,11 @@
 	<include if="true" file="$(find antobot_description)/launch/param_ant_v3.launch"></include>
 
 	<!-- Master Teleop -->
-	<node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" />	
+	<!--<node if="true" pkg="antobot_tel" type="antobot_teleop.py" name="master_teleop" />-->	
+	<include if="true" file="$(find antobot_teleop)/launch/teleop.launch"></include>
 	
 	<!-- Joystick Teleop -->
-	<include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch"></include>
+	<!--<include if="true" file="$(find antobot_joystick_teleop)/launch/antobot_tel_joy.launch"></include>-->
 
 	<!-- antobot_safety -->
 	<include if="true" file="$(find antobot_safety)/launch/cmd_vel_mux.launch" />
