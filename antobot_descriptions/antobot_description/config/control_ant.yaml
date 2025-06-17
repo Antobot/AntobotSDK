@@ -2,7 +2,7 @@
 # All rights reserved.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # Code Description:     Defines parameters for Antobot Ant v3
+# # # Code Description:     Defines parameters for Antobot Ant robots
 # Contact: william.eaton@antobot.ai
 # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -17,7 +17,7 @@ antobot_robot:
   right_wheel: ["wheel_right_front_joint", "wheel_right_rear_joint"]
 
   wheel_separation_multiplier: 1.0 # default: 1.0
-  wheel_radius_multiplier    : 0.92 # default: 1.0 - for 32cm
+  wheel_radius_multiplier    : 1.0 # default: 1.0 
 
   publish_rate: 50
   pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
@@ -52,76 +52,74 @@ antobot_robot:
        - wheel_right_front_joint
        - wheel_right_rear_joint
      joints_modes: [1, 1, 1, 1] # 0: steering, 1: velocity
-      
 
 # controllers
 antobot_joint_controller:     
   wheel_left_front_joint_controller:
     type: effort_controllers/JointVelocityController
     joint: wheel_left_front_joint
-    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+    pid: {p: 1.0, i: 0, d: 0, i_clamp: 1.0}
   wheel_left_rear_joint_controller:
     type: effort_controllers/JointVelocityController
     joint: wheel_left_rear_joint
-    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+    pid: {p: 1.0, i: 0, d: 0, i_clamp: 1.0}
   wheel_right_front_joint_controller:
     type: effort_controllers/JointVelocityController
     joint: wheel_right_front_joint
-    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+    pid: {p: 1.0, i: 0, d: 0, i_clamp: 1.0}
   wheel_right_rear_joint_controller:
     type: effort_controllers/JointVelocityController
     joint: wheel_right_rear_joint
-    pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 1000.0}
+    pid: {p: 1.0, i: 0, d: 0, i_clamp: 1.0}
+
 
 
 # joint limits
 joint_limits:
-  wheel_left_front_joint:
-    has_position_limits: false
-    has_velocity_limits: true
-    max_velocity: 20
-    has_acceleration_limits: false
-    max_acceleration: 0.15
-    has_jerk_limits: false
-    max_jerk: 0.01875
-    has_effort_limits: false
-    max_effort: 3.1415
-    min_effort: -3.1415
+    wheel_left_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: true
+      max_acceleration: 6.0
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
 
-  wheel_left_rear_joint:
-    has_position_limits: false
-    has_velocity_limits: true
-    max_velocity: 20
-    has_acceleration_limits: false
-    max_acceleration: 0.15
-    has_jerk_limits: false
-    max_jerk: 0.01875
-    has_effort_limits: false
-    max_effort: 3.1415
-    min_effort: -3.1415
+    wheel_left_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: true
+      max_acceleration: 6.0
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
 
-  wheel_right_front_joint:
-    has_position_limits: false
-    has_velocity_limits: true
-    max_velocity: 20
-    has_acceleration_limits: false
-    max_acceleration: 0.15
-    has_jerk_limits: false
-    max_jerk: 0.01875
-    has_effort_limits: false
-    max_effort: 3.1415
-    min_effort: -3.1415
+    wheel_right_front_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: true
+      max_acceleration: 6.0
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415
 
-  wheel_right_rear_joint:
-    has_position_limits: false
-    has_velocity_limits: true
-    max_velocity: 20
-    has_acceleration_limits: false
-    max_acceleration: 0.15
-    has_jerk_limits: false
-    max_jerk: 0.01875
-    has_effort_limits: false
-    max_effort: 3.1415
-    min_effort: -3.1415
-  
-
+    wheel_right_rear_joint:
+      has_position_limits: false
+      has_velocity_limits: true
+      max_velocity: 20
+      has_acceleration_limits: true
+      max_acceleration: 6.0
+      has_jerk_limits: false
+      max_jerk: 0.01875
+      has_effort_limits: false
+      max_effort: 3.1415
+      min_effort: -3.1415

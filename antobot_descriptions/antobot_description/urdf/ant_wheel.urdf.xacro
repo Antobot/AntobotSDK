@@ -30,6 +30,7 @@
       <origin xyz="${originX} ${originY} ${originZ}" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
       <limit effort="300" velocity="100.0" />
+      <dynamics damping="0.7" friction="0.1" />
     </joint>
 
     <link name="wheel_${name}_link">
@@ -37,28 +38,51 @@
         <geometry>
           <mesh filename="package://antobot_description/meshes/ant_wheel.dae" scale="1 1 1" />          
         </geometry>
-          <origin xyz="0 0 0" rpy="0 0 ${rotZ}"/>
+        <origin xyz="0 0 0" rpy="0 0 ${rotZ}"/>
       </visual>
       <collision>
         <geometry>
-          <sphere radius="0.16" />
-        </geometry>
+					<cylinder length="0.11" radius="0.16" />
+				</geometry>
         <origin xyz="0 ${centreOffset} 0" rpy="${M_PI/2} 0 0" />
       </collision>
       <inertial>
-        <mass value="1.5" />
+        <mass value="2" />
         <origin xyz="0 0 0" />
-        <inertia ixx="0.009688532" ixy="0.0" ixz="0.0"
-                  iyy="0.016578154" iyz="0.0"
-                  izz="0.009688532" />
+        <inertia ixx="0.0576" ixy="0.0" ixz="0"
+                 iyy="0.0576" iyz="0.0"
+                 izz="0.0576" />
       </inertial>
     </link>  
 
     <gazebo reference="wheel_${name}_link">
-      <mu1>0.4</mu1>
-      <mu2>0.4</mu2>
-      <kp>10000000.0</kp>
-      <kd>100.0</kd>
+      <collision>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.000000</mu>
+              <mu2>1</mu2>
+              <fdir1>1 0 0</fdir1>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.5</restitution_coefficient>
+            <threshold>0.1</threshold>
+          </bounce>
+          <contact>
+            <ode>
+              <soft_cfm>0.000000</soft_cfm>
+              <soft_erp>0.200000</soft_erp>
+              <kp>1000000000.000000</kp>
+              <kd>1.000000</kd>
+              <max_vel>100.000000</max_vel>
+              <min_depth>0.01000</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
     </gazebo>
 
     <transmission name="wheel_${name}_trans" type="SimpleTransmission">

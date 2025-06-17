@@ -21,7 +21,7 @@
   <arg name="referenceLongitude"  default="-0.6079646901954604" />
   <param name="robot_description" command="$(find xacro)/xacro '$(find antobot_description)/urdf/ant_v2.urdf.xacro' referenceLatitude:=$(arg referenceLatitude) referenceLongitude:=$(arg referenceLongitude)" />
 
-  <rosparam command="load" file="$(find antobot_description)/config/control_ant_v2.yaml" />
+  <rosparam command="load" file="$(find antobot_description)/config/control_ant.yaml" />
 
 
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
@@ -51,8 +51,8 @@
   <!-- pointcloud to laser nodes (Change gazebo depth camera's pointcloud to laser scan)-->
   <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser_sim.launch"></include>
   
-  <!-- Teleop -->
-  <node if="true" pkg="antobot_teleop" type="teleop.py" name="master_teleop" output="screen" />
+  <!-- Master Teleop -->	
+	<include if="true" file="$(find antobot_teleop)/launch/teleop.launch"></include>
   
   <include if="true" file="$(find antobot_safety)/launch/cmd_vel_mux.launch" />
   <node if="true" pkg="antobot_safety" type="antobot_safety_node" name="safety_cmd_vel_mod" output="screen"/>

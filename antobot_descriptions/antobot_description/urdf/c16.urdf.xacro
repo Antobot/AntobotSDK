@@ -1,36 +1,25 @@
 <?xml version="1.0"?>
 
-<!--
-# Copyright (c) 2023, ANTOBOT LTD.
-# All rights reserved.
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # Code Description:     URDF for Lieshen CH128X1 Lidar
-# Contact: william.eaton@antobot.ai
-# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
--->
-
-
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-  <xacro:macro name="ch128" 
+  <xacro:macro name="c16" 
                params="link_prefix:=''
                        joint_prefix:=''
                        position:='front'">
 
     <!-- Lidar Center (Emission point) -->
-    <link name="laser_link_ch128_${position}">
+    <link name="laser_link_${position}_static">
     </link>
 
-    <joint name="ch128_lidar_${position}_frame_joint" type="fixed">
-        <parent link="laser_link_${position}"/>
+    <joint name="c16_lidar_${position}_frame_joint" type="fixed">
+        <parent link="laser_link_${position}_static"/>
         <child link="laser_link_${position}_frame"/>
         <origin xyz="0 0 -0.046093" rpy="0 0 0"/> 
     </joint>
 
     <!-- The lidar frame position - for visualisation -->
-    <link name="laser_link_ch128_${position}_frame">
+    <link name="laser_link_${position}_frame">
       <inertial>
         <mass value="1.0"/>
         <origin xyz="0 0 0"/>
@@ -41,19 +30,19 @@
       </inertial>
       <visual>
         <geometry>
-            <mesh filename="package://antobot_description/meshes/ls_ch128x1_lowPoly.dae" scale="1 1 1" />      
+            <mesh filename="package://antobot_description/meshes/c16.dae" scale="1 1 1" />      
         </geometry>
       </visual>
       <collision>
         <geometry>
-            <mesh filename="package://antobot_description/meshes/ls_ch128x1_lowPoly.dae" scale="1 1 1" />      
+            <mesh filename="package://antobot_description/meshes/c16.dae" scale="1 1 1" />      
         </geometry>
       </collision>
     </link>
 
   </xacro:macro>
 
-  <xacro:macro name="ch128_gazebo"
+  <xacro:macro name="c16_gazebo"
                params="robot_ns:=''
                position='front'">
 
@@ -62,8 +51,8 @@
       <xacro:property name="link_prefix" value="${robot_ns}/"/>
     </xacro:if>
 
-    <gazebo reference="laser_link_${position}">
-      <sensor type="ray" name="ch128_${position}">
+    <gazebo reference="laser_link_${position}_static">
+      <sensor type="ray" name="lidar_${position}">
         <always_on>true</always_on>
         <pose>0 0 0 0 0 0</pose>
         <visualize>false</visualize>
@@ -93,8 +82,8 @@
             <gaussianNoise>0.00</gaussianNoise>
             <alwaysOn>true</alwaysOn>
             <updateRate>5</updateRate>
-            <topicName>/c16_${position}/lslidar_point_cloud</topicName>
-            <frameName>laser_link_ch128_imu_${position}</frameName>
+            <topicName>/lidar_${position}/lslidar_point_cloud</topicName>
+            <frameName>laser_link_${position}</frameName>
         </plugin>
       </sensor>
     </gazebo>
@@ -102,4 +91,3 @@
   </xacro:macro>
 
 </robot>
-
