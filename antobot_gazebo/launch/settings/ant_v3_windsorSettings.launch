@@ -48,9 +48,6 @@
   <!-- IMU calibration -->
   <include file="$(find antobot_heading)/launch/heading_launcher.launch"></include>
 
-  <!-- pointcloud to laser nodes (Change gazebo depth camera's pointcloud to laser scan)-->
-  <include if="true" file="$(find antobot_navigation)/launch/pointcloud_to_laser_sim.launch"></include>
-  
   <!-- Master Teleop -->	
 	<include if="true" file="$(find antobot_teleop)/launch/teleop.launch"></include>
   
@@ -59,5 +56,8 @@
 
   <!-- Sensor sim -->
 	<node if="true" pkg="antobot_gazebo" type="simSensors.py" name="simSensors" output="screen"/>
+
+  <!-- Leishen 3d lidar launch (antobot_description/config/platform_config.yaml) -->
+  <node if="true" pkg="antobot_devices_lidar" type="lidar_manager.py" name="lidarManager" />
 
 </launch>
