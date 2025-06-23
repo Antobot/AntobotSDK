@@ -2,14 +2,15 @@
 The Software Development Kit for Antobot's Mobile Robot Platform.
 
 It includes all software needed to run the robot, and to connect to any sensors that will be sold along with the robot. This includes:
-- Robot bringup, description and control scripts to control the robot using a ROS Twist command
-- Robot localisation scripts, including GPS driver software, EKF, and GPS-based heading calibration software
-- Basic safety software which is able to stop the robot if the ultrasonic sensors
-- Management software for cameras and video recording, data supervision, and joystick-based robot shutdown
-- Software to teleoperate the robot using the keyboard or a joystick
-- Simulation of the robot's operation in a virtual environment (Windsor)
+- Robot bringup scripts to easily launch the most important functions of the robot (antobot_bringup)
+- Robot description package for the different versions of the ant platform, including different sensor configurations (antobot_descriptions)
+- Simulation of the robot's operation in a virtual environment in Windsor (antobot_gazebo)
+- Example scripts for using the Human-Machine Interface (HMI) on the robot to display important information and enable users to provide simple inputs to the system
+- The remaining scripts are in submodules:
+  - AntobotDevices: handles all devices compatible with the Ant Platform, including GPS, IMU, LiDAR, and cameras. See the submodule for more information.
+  - AntobotPlatform: the core software for the Ant Platform, including scripts specific to the robot, as well as for managing the Universal Robot Control Unit (uRCU). See the submodule for more information.
 
-## Dependencies:
+## Dependencies (depending on package purchased):
 - antobridge: Antobot proprietary software for which source code is not provided for security. This piece communicates between the on-board Jetson and other components of the uRCU.
 - ROS Noetic (Desktop Full)
 - ROS Navigation (ros-noetic-navigation)
