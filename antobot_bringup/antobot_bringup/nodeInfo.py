@@ -188,6 +188,9 @@ if auto_launch:
         nodeDict['urcuMonitor']=AntobotSWNode("urcuMonitor","antobot_urcu","urcuMonitor","SW212","/",[],"system")
         nodeDict['shutdownSrv']=AntobotSWNode("shutdownSrv","antobot_urcu","softshutdown","SW214","/",[],"system")
  
+    if hmi_hardware :
+        nodeDict['antoHMI']=Node("antoHMI","antobot_hmi","anto_HMI","SW250","/",[],"system")
+
     if lidar_hardware:
         nodeDict['lidarManager']=AntobotSWNode("lidarManager","antobot_devices_lidar","lidar_manager.py","SW232","/",[],"sensor", ssh=aRCU_ssh_list)
 
