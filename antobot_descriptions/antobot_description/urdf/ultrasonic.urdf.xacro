@@ -60,6 +60,7 @@
             <resolution>0.02</resolution>
           </range>
         </ray>
+        <!--
         <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range"> 
           <topicName>ultrasonic${id}</topicName>
           <frameName>ultrasonic${id}_link</frameName>
@@ -69,6 +70,7 @@
           <radiation>INFRARED</radiation>
           <fov>1.0472</fov>
         </plugin>
+        -->
       </sensor>  
     </gazebo>
     

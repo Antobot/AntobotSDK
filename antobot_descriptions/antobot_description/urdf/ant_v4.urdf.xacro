@@ -12,16 +12,6 @@
 
 <robot name="antobot_ant" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Position for gazebo-->
-  <xacro:arg name="referenceLatitude"   default="51.45315122695476" />
-  <xacro:property name="referenceLatitude"    value="$(arg referenceLatitude)" />
-        
-  <xacro:arg name="referenceLongitude"   default="-0.6079828525888944" />
-  <xacro:property name="referenceLongitude"    value="$(arg referenceLongitude)" />   
-
-  <xacro:arg name="referenceHeading"   default="90.0" />
-  <xacro:property name="referenceHeading"    value="$(arg referenceHeading)" />  
-
   <!-- Need argument to get from launch file -->
   <xacro:arg name="params_path" default="../config/platform_config.yaml"/> 
 
@@ -30,7 +20,6 @@
 
   <!-- Read in the yaml dict as mp (short for model parameters) currently used for C16 angle-->
   <xacro:property name="mp" value="${xacro.load_yaml(params_path)}"/> 
-
 
   <!-- Ant Robot -->
   <xacro:macro name="antobot_ant">
@@ -77,55 +66,117 @@
 
 
     <gazebo>
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>/</robotNamespace>
+      <plugin
+        filename="ignition-gazebo-diff-drive-system"
+        name="ignition::gazebo::systems::DiffDrive">
+        <left_joint>wheel_left_front_joint</left_joint>
+        <left_joint>wheel_left_rear_joint</left_joint>
+        <right_joint>wheel_right_front_joint</right_joint>
+        <right_joint>wheel_right_rear_joint</right_joint>
+        <wheel_separation>1.25</wheel_separation>
+        <wheel_radius>0.3</wheel_radius>
+        <odom_publish_frequency>1</odom_publish_frequency>
+        <publish_odom>true</publish_odom>
+        <odom_topic>/odom</odom_topic>
+        <odom_frame>odom</odom_frame>
+        <robot_base_frame>base_link</robot_base_frame>
+        <max_linear_acceleration>1</max_linear_acceleration>
+        <min_linear_acceleration>-1</min_linear_acceleration>
+        <max_angular_acceleration>2</max_angular_acceleration>
+        <min_angular_acceleration>-2</min_angular_acceleration>
+        <max_linear_velocity>2.0</max_linear_velocity>
+        <min_linear_velocity>-2.0</min_linear_velocity>
+        <max_angular_velocity>1</max_angular_velocity>
+        <min_angular_velocity>-1</min_angular_velocity>
       </plugin>
+
+
+      <plugin
+        filename="ignition-gazebo-joint-state-publisher-system"
+        name="ignition::gazebo::systems::JointStatePublisher">
+      </plugin>
+
+
+
     </gazebo>
 
-    <!-- Gazebo ground truth-->
-    <gazebo>
-    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>10.0</updateRate>
-      <bodyName>base_link</bodyName>
-      <topicName>ground_truth/state</topicName>
-      <gaussianNoise>0.0</gaussianNoise>
-      <frameName>world</frameName>
-      <xyzOffset>0 0 0</xyzOffset>
-      <rpyOffset>0 0 0</rpyOffset>
-    </plugin>
-    </gazebo>
+
+
+    <xacro:property name="role" value="${mp['robot_role']}" />
+    
+    <xacro:if value="${role == 'UV'}">
+      <!-- UV Frame link -->
+      <link name="uvFrame">
+        <visual>
+          <geometry>
+            <mesh filename="package://antobot_description/meshes/uvFrame.dae" scale="1 1 1"/>
+          </geometry>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+        </visual>
+        <collision>
+        <geometry>
+            <mesh filename="package://antobot_description/meshes/uvFrame.dae" scale="1 1 1"/>
+          </geometry>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+        </collision>
+      </link>
+      
+      <joint name="uvFrame_joint" type="fixed">
+        <origin xyz="0 0 0.01" rpy="0 0 0" />
+        <parent link="robot_base_link"/>
+        <child link="uvFrame" />
+      </joint>
+    </xacro:if>
  
-    <xacro:property name="lidar_list" value="${mp['lidar']}" />
+  
+    <!-- ROS2 Humble doesn't support xacro:for yet - use if statements instead -->
+    <xacro:property name="robot_hardware"  value="${mp['robot_hardware']}"/>
+    <xacro:property name="lidars" value="${mp['lidar']}" />
 
-    <!-- Leishen C16 front lidar -->
-    <xacro:if value="${'c16' in lidar_list}"> 
+    <!-- Lidar 1 -->
+    <xacro:if value="${1 in lidars}">
+      <xacro:property name="lidar1" value="${lidars[1]}"/>
+      <xacro:property name="type1" value="${lidar1['type']}"/>
+      <xacro:property name="device_id"  value="${lidar1['device_id']}"/>
+
+      <!-- Include URDF for that lidar type -->
       <xacro:include filename="$(find antobot_description)/urdf/c16.urdf.xacro"/>
-      <xacro:property name="location" value="${mp['lidar']['c16']['location']}" />
-      <xacro:c16 link_prefix='' joint_prefix='' position='${location}'/>
-      <xacro:c16_gazebo robot_ns='' position='${location}'/>
+      <xacro:c16 link_prefix="" joint_prefix="" position="${device_id}" robot_hardware="${robot_hardware}"/>
+      <xacro:c16_gazebo robot_ns="" position="${device_id}"/>
 
-      <joint name="lidar_c16_joint_${mp['lidar']['c16']['location']}" type="fixed">
+
+      <!-- Fixed transform for Lidar 1 -->
+      <joint name="lidar_${type1}_1_joint_${device_id}" type="fixed">
         <parent link="robot_base_link"/>
-        <child link="laser_link_${mp['lidar']['c16']['location']}_static"/>
-        <!-- <origin xyz="0.615 0.145 0.427" rpy="0 0 3.15"/> --><!-- When mounted low, on the left of the robot head -->
-        <origin xyz="${mp['lidar']['c16']['px']} ${mp['lidar']['c16']['py']} ${mp['lidar']['c16']['pz']}" rpy="${mp['lidar']['c16']['r']} ${mp['lidar']['c16']['p']} ${mp['lidar']['c16']['y']}"/> 
+        <child link="lidar_${device_id}_link"/>
+        <origin
+          xyz="${lidar1['px']} ${lidar1['py']} ${lidar1['pz']}"
+          rpy="${lidar1['r']} ${lidar1['p']} ${lidar1['y']}"/>
       </joint>
     </xacro:if>
 
-    <!-- Leishen C16 rear lidar -->
-    <xacro:if value="${'c16_2' in lidar_list}">
-      <xacro:include filename="$(find antobot_description)/urdf/c16.urdf.xacro"/>
-      <xacro:property name="location" value="${mp['lidar']['c16_2']['location']}" />
-      <xacro:c16 link_prefix='' joint_prefix='' position='${location}'/>
-      <xacro:c16_gazebo robot_ns='' position='${location}'/>
 
-      <joint name="c16_lidar_joint_${mp['lidar']['c16_2']['location']}" type="fixed">
+    <!-- Lidar 2 -->
+    <xacro:if value="${2 in lidars}">
+      <xacro:property name="lidar2" value="${lidars[2]}"/>
+      <xacro:property name="type2" value="${lidar2['type']}"/>
+      <xacro:property name="device_id"  value="${lidar2['device_id']}"/>
+
+
+      <xacro:include filename="$(find antobot_description)/urdf/c16.urdf.xacro"/>
+       <xacro:c16 link_prefix="" joint_prefix="" position="${device_id}" robot_hardware="${robot_hardware}"/>
+      <xacro:c16_gazebo robot_ns="" position="${device_id}"/>
+
+
+      <joint name="lidar_${type2}_2_joint_${device_id}" type="fixed">
         <parent link="robot_base_link"/>
-        <child link="laser_link_${mp['lidar']['c16_2']['location']}_static"/>
-        <origin xyz="${mp['lidar']['c16_2']['px']} ${mp['lidar']['c16_2']['py']} ${mp['lidar']['c16_2']['pz']}" rpy="${mp['lidar']['c16_2']['r']} ${mp['lidar']['c16_2']['p']} ${mp['lidar']['c16_2']['y']}"/> 
+        <child link="lidar_${device_id}_link"/>
+        <origin
+          xyz="${lidar2['px']} ${lidar2['py']} ${lidar2['pz']}"
+          rpy="${lidar2['r']} ${lidar2['p']} ${lidar2['y']}"/>
       </joint>
     </xacro:if>
+
 
     <!-- GPS -->
     <joint name="gps_joint" type="fixed">
@@ -141,25 +192,27 @@
       </inertial>	
     </link>
 
-    <gazebo>
-      <plugin name="gazebo_ros_gps" filename="libhector_gazebo_ros_gps.so" >
-        <updateRate>4.0</updateRate>
-        <bodyName>robot_base_link</bodyName> <!-- GPS plugin in simulation is publishing gps topic in base_link position - affecting EKF -->
-        <frameId>robot_base_link</frameId>
-        <topicName>/antobot_gps</topicName>
-        <velocityTopicName>/am_gps_vel</velocityTopicName>
-        <referenceLatitude>${referenceLatitude}</referenceLatitude>
-        <referenceLongitude>${referenceLongitude}</referenceLongitude>
-        <referenceHeading>${referenceHeading}</referenceHeading>
-        <referenceAltitude>10</referenceAltitude>
-        <offset>0 0 0</offset>
-        <drift>0.0 0.0 0.0</drift>
-        <gaussianNoise>0.01 0.01 0.01</gaussianNoise>
-        <velocityDrift>0 0 0</velocityDrift>
-        <velocityGaussianNoise>0.5 0.5 0.5</velocityGaussianNoise>
-      </plugin>
+    <gazebo reference="gps_frame">
+      <sensor name="gps_sensor" type="gps">
+        <pose>0 0 1 0 0 0</pose> <!-- adjust height as needed -->
+        <gps>
+          <horizontal_position_accuracy>1.0</horizontal_position_accuracy>
+          <vertical_position_accuracy>1.5</vertical_position_accuracy>
+          <position_sensing>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.5</stddev>
+            </noise>
+          </position_sensing>
+        </gps>
+        <plugin name="ignition::gazebo::systems::NavSat"
+                filename="ignition-gazebo-navsat-system">
+          <topic>/gps/fix</topic>
+          <frame_id>gps_frame</frame_id>
+        </plugin>
+      </sensor>
     </gazebo>
-    
+
   
 
     <!-- imu -->
@@ -171,22 +224,30 @@
 
     <link name="imu_frame">
       <inertial>
-        <mass value="0.270" />
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <inertia ixx="2.632e-4" ixy="0" ixz="0" iyy="2.632e-4" iyz="0" izz="1.62e-4" />
+        <mass value="0.270" />
+        <inertia ixx="0.0002632" ixy="0.0" ixz="0.0" iyy="0.0002632" iyz="0.0" izz="0.000162" />
       </inertial>
-    </link> 
-    <gazebo>
-      <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
-        <alwaysOn>true</alwaysOn>
-        <bodyName>imu_frame</bodyName>
-        <topicName>/imu/data</topicName>
-        <serviceName>imu_service</serviceName>
-        <gaussianNoise>0.0</gaussianNoise>
-        <updateRate>20.0</updateRate>
-      </plugin>
+    </link>
+
+    <gazebo reference="imu_frame">
+      <sensor type="imu" name="imu_sensor">
+        <always_on>true</always_on>
+        <update_rate>100.0</update_rate>
+        <visualize>true</visualize>
+        <imu>
+          <topic>/imu/data</topic>
+          <orientation_reference_frame>ENU</orientation_reference_frame>
+        </imu>
+        <plugin name="ignition::gazebo::systems::Imu"
+                filename="ignition-gazebo-imu-system">
+          <topic>/imu/data</topic>
+          <frame_id>imu_frame</frame_id>
+        </plugin>
+      </sensor>
     </gazebo>
 
+   
     <!-- Ultrasonics-->
 
     <!-- Actual sensors output on combined topic /antobridge/uss_dist -->

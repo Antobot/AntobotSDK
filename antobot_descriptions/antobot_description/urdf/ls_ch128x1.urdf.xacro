@@ -89,6 +89,7 @@
             <resolution>0.01</resolution>
           </range>
         </ray>
+        <!--
         <plugin name="plugin_1" filename="libgazebo_ros_velodyne_laser.so">
             <gaussianNoise>0.00</gaussianNoise>
             <alwaysOn>true</alwaysOn>
@@ -96,6 +97,7 @@
             <topicName>/c16_${position}/lslidar_point_cloud</topicName>
             <frameName>laser_link_ch128_imu_${position}</frameName>
         </plugin>
+        -->
       </sensor>
     </gazebo>
 
