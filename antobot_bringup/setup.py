@@ -18,7 +18,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'softwareManager = antobot_manager_software.softwareManager:main'
+            'softwareManager = antobot_bringup.softwareManager:main'
         ],
     },
 

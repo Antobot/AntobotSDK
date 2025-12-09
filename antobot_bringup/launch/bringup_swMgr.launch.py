@@ -17,7 +17,7 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
-import antobot_manager_software.nodeInfo as nodeInfo
+import antobot_bringup.nodeInfo as nodeInfo
 
 class bringupSWMgr():
 

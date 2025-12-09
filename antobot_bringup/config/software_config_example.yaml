@@ -1,0 +1,18 @@
+## Master Device
+device_type: "robot"   # Could be robot, tower, or scout
+master_device: True
+
+jobSoftware: True
+
+## uRCU
+jtop_ext: False
+
+## Logging
+anto_supervisor: True
+
+## Interfaces
+opcua_launch: False
+webui_launch: False
+hmi_hardware: False
+
+auto_launch: True

@@ -11,22 +11,19 @@
 # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 ## High-level configuration
-mileage_path: "/home/danielfreer/Documents/mileage/"
-log_path: "/home/danielfreer/Documents/data/antobot_manager_supervisor/logs"
+mileage_path: "/home/antobot/Documents/mileage/"
+log_path: "/home/antobot/Documents/data/logs"
 
 robot_hardware: False
 robot_platform: "ant"   # Could be "ant" or "dog"
 robot_version: 4
 robot_role: "UV"
 location: "uk"
-pathFollower: True
-wallFollower: False
+
 aRCU_enable: False
 isolated_cpu: False
 lio_enable: False
 dualMid360: False
-
-#imu_compensated_frame: False # set this value to False if the imu in URCU is faulty and showing imu drift
 
 
 ## Sensor information
@@ -45,35 +42,6 @@ lidar:   # please refer to lidar_config_example.yaml in the same directory for l
 
     device_ip: 192.168.1.200 
     device_id: 200 
-
-camera:
-  zed:
-    # need to be updated
-    px: 0.683
-    py: 0.0
-    pz: 1.1
-    r: 0
-    p: 0
-    y: 2.35
-
-    mode: "recording"
-    location: "left"
-
-    device_ip: 192.168.1.103
-
-  RP:
-    # need to be updated
-    px: 0.683
-    py: 0.0
-    pz: 1.1
-    r: 0
-    p: 0
-    y: 2.35
-
-    mode: "recording"
-    location: "left"
-
-    device_ip: 192.168.1.105
 
 gps:
   urcu:  #or f9p_usb or movingbase or urcu
@@ -99,15 +67,6 @@ imu:
     y: 0
     mode: "navigation"
     switch: True
-  xsens:
-    px: 0
-    py: 0
-    pz: 0
-    r: 0
-    p: 0
-    y: 0
-    mode: "record"
-    switch: False
   icm:
     px: -0.1146
     py: -0.01941
@@ -117,20 +76,6 @@ imu:
     y: 0
     mode: "record"
     switch: False
-  ahrs:
-    px: -0.1146
-    py: -0.01941
-    pz: 0.1832
-    r: 0
-    p: 0
-    y: 0
-    mode: "record"
-    switch: False
-    
-uvpanel: 
-  model: "cleanlight"
-  quantity: 8
-  power_each: 20
   
 teleop:  
   joystick: "LogitechF710"   # "LogitechF710", "Microzone6CMINI", "Pocket"

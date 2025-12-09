@@ -5,7 +5,7 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# # # Code Description:     Reads in a configuration from antobot_manager_software/config/software_config.yaml, then returns
+# # # Code Description:     Reads in a configuration from antobot_bringup/config/software_config.yaml, then returns
 #                           the appropriate scripts to launch and their information to softwareManager.
 
 # Contacts: daniel.freer@antobot.ai
@@ -29,13 +29,9 @@ import os
 rospack = rospkg.RosPack()
 
 # # # Configuration folders and files
-parent_folder = get_package_share_directory('antobot_manager_software')
+parent_folder = get_package_share_directory('antobot_bringup')
 
 software_config_path = str(parent_folder) + "/config/software_config.yaml"
-
-
-# headingPackagePath=rospack.get_path('antobot_heading')
-# heading_config = headingPackagePath + "/config/heading_node.yaml"
 
 
 # Initial values
@@ -84,7 +80,6 @@ if device_type == "robot":
         robot_platform = data['robot_platform']
         robot_version = data['robot_version']
         robot_role = data['robot_role']
-        pathFollower = data['pathFollower']
         prefix_isolated_cpu = []
         aRCU_cfg = data.get('aRCU', {})
         
@@ -182,27 +177,16 @@ launchDict=dict()
 
 
 if auto_launch:
-    nodeDict['softwareManager'] = AntobotSWNode("swMgr_node", "antobot_manager_software", "softwareManager", "SW000", "/", [], "system")
+    nodeDict['softwareManager'] = AntobotSWNode("swMgr_node", "antobot_bringup", "softwareManager", "SW000", "/", [], "system")
     if not robot_hardware: # gazebo topic remap node - needed for simulation EKF
         nodeDict['remapSimNode']=AntobotSWNode("remap_gazebo_wheel_odom", 'antobot_ekf', 'remap_gazebo_wheel_odom', "SW100", "/", [], "system")
 
     if device_type == "robot" and robot_hardware:
         nodeDict['controlNode'] = AntobotSWNode("ant_control_node", "antobot_control", "ant_control_node", "SW100", "/", [], "system", param_files=control_parameter, param_dict = {'use_sim_time': not robot_hardware}, prefix=prefix_isolated_cpu)
-
-    if anto_supervisor:     # Only if master device
-        nodeDict['antoSupervisor']=AntobotSWNode("antoSupervisor","antobot_manager_supervisor","antoSupervisor","SW210","/",[],"supervisor")
-        nodeDict['netMonitor']=AntobotSWNode("netMonitor","antobot_manager_supervisor","netMonitor","SW213","/",[],"supervisor")
  
-        if device_type == "robot":
-            nodeDict['moveMonitor']=AntobotSWNode("moveMonitor","antobot_manager_supervisor","moveMonitor","SW211","/",[],"supervisor")
- 
-        if urcu_hardware:
-            nodeDict['urcuMonitor']=AntobotSWNode("urcuMonitor","antobot_urcu","urcuMonitor","SW212","/",[],"system")
-            nodeDict['shutdownSrv']=AntobotSWNode("shutdownSrv","antobot_urcu","softshutdown","SW214","/",[],"system")
- 
-    if hmi_hardware and robot_platform != "dog":
-        nodeDict['antoHMI']=AntobotSWNode("antoHMIorin","antobot_devices_hmi","anto_HMIOrin","SW250","/",[],"system")
-        nodeDict['antoHMI']=AntobotSWNode("antoHMIbridge","antobot_devices_hmi","anto_HMIbridge","SW250","/",[],"system")
+    if urcu_hardware:
+        nodeDict['urcuMonitor']=AntobotSWNode("urcuMonitor","antobot_urcu","urcuMonitor","SW212","/",[],"system")
+        nodeDict['shutdownSrv']=AntobotSWNode("shutdownSrv","antobot_urcu","softshutdown","SW214","/",[],"system")
  
     if lidar_hardware:
         nodeDict['lidarManager']=AntobotSWNode("lidarManager","antobot_devices_lidar","lidar_manager.py","SW232","/",[],"sensor", ssh=aRCU_ssh_list)
