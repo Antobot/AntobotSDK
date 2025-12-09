@@ -100,33 +100,7 @@
 
     </gazebo>
 
-
-
     <xacro:property name="role" value="${mp['robot_role']}" />
-    
-    <xacro:if value="${role == 'UV'}">
-      <!-- UV Frame link -->
-      <link name="uvFrame">
-        <visual>
-          <geometry>
-            <mesh filename="package://antobot_description/meshes/uvFrame.dae" scale="1 1 1"/>
-          </geometry>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-        </visual>
-        <collision>
-        <geometry>
-            <mesh filename="package://antobot_description/meshes/uvFrame.dae" scale="1 1 1"/>
-          </geometry>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-        </collision>
-      </link>
-      
-      <joint name="uvFrame_joint" type="fixed">
-        <origin xyz="0 0 0.01" rpy="0 0 0" />
-        <parent link="robot_base_link"/>
-        <child link="uvFrame" />
-      </joint>
-    </xacro:if>
  
   
     <!-- ROS2 Humble doesn't support xacro:for yet - use if statements instead -->

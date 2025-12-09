@@ -215,8 +215,6 @@ if auto_launch:
                 nodeDict['antoBridge']=AntobotSWNode("antoBridge","anto_bridge","anto_bridge_node","SW000","/",[],"system", prefix=prefix_isolated_cpu)
         else:
             launchDict['simLaunch']=Launchfile("simLaunch", 'antobot_sim_bringup', 'antobot_sim.launch.py')
-
-        nodeDict['sensorManager']=AntobotSWNode("sensorManager","antobot_device_manager","sensor_manager.py","SW2300","/",[],"system")
  
         # Robot Control
         nodeDict['amSafety']=AntobotSWNode("antSafety","antobot_safety","safety_node","SW101","/",[],"system")

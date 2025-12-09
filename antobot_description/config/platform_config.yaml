@@ -22,18 +22,15 @@ location: "uk"
 
 aRCU_enable: False
 isolated_cpu: False
-lio_enable: False
-dualMid360: False
-
 
 ## Sensor information
 
 lidar:   # please refer to lidar_config_example.yaml in the same directory for lidar configuration examples.
   1:
-    type: mid360
+    type: cx
     px: 0.683
-    py: 0.0
-    pz: 1.1
+    py: 0.088
+    pz: 0.75
     r: 0
     p: 0
     y: 2.35
@@ -46,15 +43,15 @@ lidar:   # please refer to lidar_config_example.yaml in the same directory for l
 gps:
   urcu:  #or f9p_usb or movingbase or urcu
     px: 0.683
-    py: 0.0
-    pz: 1.41
+    py: 0.08
+    pz: 0.75
     r: 0
     p: 0
     y: 0
     mode: "navigation"
 
     device_port: "/dev/ttyTHS1"  #or /dev/ttyUSB* for basestation *new for urcu1.5: sudo busybox devmem 0x02430068 w 0x004
-    rtk_type: "ntrip"   #ppp or ntrip or ant_mqtt
+    rtk_type: "ant_mqtt"   #ppp or ntrip or ant_mqtt
 
 
 imu:
@@ -79,4 +76,4 @@ imu:
   
 teleop:  
   joystick: "LogitechF710"   # "LogitechF710", "Microzone6CMINI", "Pocket"
-  keyboard: False
+  keyboard: True
