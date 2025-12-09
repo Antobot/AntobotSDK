@@ -4,3 +4,6 @@
 [submodule "AntobotPlatform"]
 	path = AntobotPlatform
 	url = https://github.com/Antobot/AntobotPlatform.git
+[submodule "AntoSim"]
+	path = AntoSim
+	url = https://github.com/Antobot/AntoSim.git

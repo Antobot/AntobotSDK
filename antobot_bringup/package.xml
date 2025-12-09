@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>antobot_bringup</name>
   <version>0.0.0</version>
-  <description>The antobot_bringup package</description>
-
+  <description>The package to bringup all necessary robot software</description>
   <maintainer email="daniel.freer@antobot.ai">Daniel Freer</maintainer>
+  <license>BSD 2-clause</license>
 
-  <license>BSD</license>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>rospy</exec_depend>
-
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
 </package>

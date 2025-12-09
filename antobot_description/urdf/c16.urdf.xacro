@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+  <xacro:macro name="c16" 
+               params="link_prefix:=''
+                       joint_prefix:=''
+                       position:='front'
+                       robot_hardware:='False'">
+
+    <!-- Lidar Center (Emission point) -->
+    <link name="lidar_${position}_link">
+    </link>
+
+    <joint name="c16_lidar_${position}_frame_joint" type="fixed">
+        <parent link="lidar_${position}_link"/>
+        <child link="lidar_${position}_frame"/>
+        <xacro:if value="${robot_hardware}">
+          <origin xyz="0 0 -0.046093" rpy="0 0 0"/>
+        </xacro:if>
+        <xacro:unless value="${robot_hardware}">
+            <origin xyz="0 0 -0.046093" rpy="0 0 3.14"/> <!-- The gpu_lidar sensor's lidar frame has to be 180 deg rotated  -->
+        </xacro:unless>
+
+        <!--origin xyz="0 0 -0.046093" rpy="0 0 3.14"/-->  <!-- The gpu_lidar sensor's lidar frame has to be 180 deg rotated  -->
+    </joint>
+
+    <!-- The lidar frame position - for visualisation -->
+    <link name="lidar_${position}_frame">
+      <inertial>
+        <mass value="1.0"/>
+        <origin xyz="0 0 0"/>
+        <inertia
+          ixx="0.0003947" ixy="0.0" ixz="3.3365e-8"
+          iyy="2.417e-5" iyz="0.0"
+          izz="0.0003973"/>
+      </inertial>
+      <visual>
+        <geometry>
+            <mesh filename="package://antobot_description/meshes/c16.dae" scale="1 1 1" />      
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+            <mesh filename="package://antobot_description/meshes/c16.dae" scale="1 1 1" />      
+        </geometry>
+      </collision>
+    </link>
+
+  </xacro:macro>
+
+  <xacro:macro name="c16_gazebo"
+               params="robot_ns:=''
+               position='front'">
+
+    <xacro:property name="link_prefix" value=""/>
+    <xacro:if value="${robot_ns != '' and robot_ns != '/'}">
+      <xacro:property name="link_prefix" value="${robot_ns}/"/>
+    </xacro:if>
+
+    <gazebo reference="lidar_${position}_link">
+
+
+      <sensor name='lidar_${position}' type='gpu_lidar'>"
+          <pose relative_to='lidar_${position}_frame'>0 0 0 0 0 0</pose>
+          <ignition_frame_id>lidar_${position}_frame</ignition_frame_id>
+          <topic>/lidar_${position}/scan</topic>
+          <update_rate>10</update_rate>
+          <ray>
+              <scan>
+                  <horizontal>
+                      <samples>640</samples>
+                      <resolution>1</resolution>
+                      <min_angle>-3.15</min_angle>
+                      <max_angle>3.15</max_angle>
+                  </horizontal>
+                  <vertical>
+                      <samples>100</samples>
+                      <resolution>1</resolution>
+                      <min_angle>-0.25</min_angle>
+                      <max_angle>0.25</max_angle>
+                  </vertical>
+              </scan>
+              <range>
+                  <min>0.1</min>
+                  <max>20.0</max>
+                  <resolution>0.01</resolution>
+              </range>
+          </ray>
+          <always_on>1</always_on>
+          <visualize>true</visualize>
+      </sensor>
+
+
+
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
+
+
+
+<!--
+<plugin name="plugin_1" filename="libgazebo_ros_velodyne_laser.so">
+    <gaussianNoise>0.00</gaussianNoise>
+    <alwaysOn>true</alwaysOn>
+    <updateRate>5</updateRate>
+    <topicName>/lidar_${position}/lslidar_point_cloud</topicName>
+    <frameName>laser_link_${position}</frameName>
+</plugin>
+-->
+      
