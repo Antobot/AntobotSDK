@@ -41,7 +41,8 @@ class gpsCorrections():
         self.gga_interval=10
         self.latest_gga = None
         self.sub_gga = rospy.Subscriber("/antobot_gps/gga",String,self.gga_callback)
-        self.time_offset = rospy.Subscriber("/antobot_gps/quality",gpsQual, self.time_offset_callback)
+        self.time_offset = 0 #rospy.Subscriber("/antobot_gps/quality",gpsQual, self.time_offset_callback)
+        
         self.count = 0
         self.running = True
         self.sent_time = rospy.Time.now()
@@ -50,7 +51,7 @@ class gpsCorrections():
         packagePath=rospack.get_path('antobot_description')
         path = packagePath + "/config/platform_config.yaml"
         GPIO = importlib.import_module("Jetson.GPIO") 
-        #dev_port = "/dev/ttyTHS0"
+        dev_port = "/dev/ttyTHS0"
         baud = 460800
         self.serial_port = serial.Serial(port=dev_port, baudrate=baud)  #38400
 

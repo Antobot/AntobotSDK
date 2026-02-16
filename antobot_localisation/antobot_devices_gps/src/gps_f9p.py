@@ -30,7 +30,7 @@ import serial
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import TwistWithCovarianceStamped
 from std_msgs.msg import UInt8, Float32, String
-from antobot_devices_msgs.msg import gpsQual
+#from antobot_devices_msgs.msg import gpsQual
 from antobot_devices_gps.ublox_gps import UbloxGps
 
 class F9P_GPS:
@@ -81,7 +81,7 @@ class F9P_GPS:
         self.gps_hz = 0
 
         self.gps_pub = rospy.Publisher(pub_name, NavSatFix, queue_size=10)
-        self.gps_qual_pub = rospy.Publisher(pub_name_qual, gpsQual, queue_size=10)
+        #self.gps_qual_pub = rospy.Publisher(pub_name_qual, gpsQual, queue_size=10)
         self.gga_msg_pub=rospy.Publisher("/antobot_gps/gga", String, queue_size=10)
 
         return
@@ -121,7 +121,7 @@ class F9P_GPS:
                 self.create_gps_msg()
                 self.get_gps_freq()
 
-                self.create_quality_msg()   
+                #self.create_quality_msg()   
                 if self.hAcc < 5000:
                     self.gps_pub.publish(self.gpsfix)
 
