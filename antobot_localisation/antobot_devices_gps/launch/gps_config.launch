@@ -1,0 +1,24 @@
+<!--
+# Copyright (c) 2023, ANTOBOT LTD.
+# All rights reserved.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # Code Description:   
+# Contact: soyoung.kim@antobot.ai
+# # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+-->
+
+<launch>
+  <arg name="exec_name" default="gps_ppp.py" />
+  <arg name="node_name" default="gps_ppp" />
+  <arg name="dual_gps" default="false" />
+
+  <param name="gps_node_name" value="$(arg node_name)" />
+
+  <node pkg="antobot_devices_gps" type="$(arg exec_name)" name="$(arg node_name)" output="screen">
+  </node>
+
+  <node if="$(arg dual_gps)" pkg="antobot_devices_gps" type="movingbase_enu_conversion.py" name="MovingBaseConversion" output="screen">
+  </node>
+
+</launch>

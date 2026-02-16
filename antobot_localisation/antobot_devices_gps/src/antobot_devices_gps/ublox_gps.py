@@ -46,6 +46,7 @@
 import struct
 import serial
 import spidev
+import datetime
 
 from . import sparkfun_predefines as sp
 from . import core
@@ -72,12 +73,13 @@ class UbloxGps(object):
 
     def __init__(self, hard_port = None):
         if hard_port is None:
-            self.hard_port = serial.Serial("/dev/serial0/", 38400, timeout=1)
+            self.hard_port = serial.Serial("/dev/ttyUSB0/", 38700, timeout=1)
         elif type(hard_port) == spidev.SpiDev:
             sfeSpi = sfeSpiWrapper(hard_port)
             self.hard_port = sfeSpi
         else:
             self.hard_port = hard_port
+        #print("self.hard_port in ublox_gps.py is:",self.hard_port)
 
         # Class message values
         self.ack_ms= {
@@ -273,10 +275,11 @@ class UbloxGps(object):
         :return: The payload of the NAV Class and PVT Message ID
         :rtype: namedtuple
         """
-        self.send_message(sp.NAV_CLS, self.nav_ms.get('PVT'))
+        self.send_message(sp.NAV_CLS, self.nav_ms.get('PVT')) # change this
         parse_tool = core.Parser([sp.NAV_CLS])
         cls_name, msg_name, payload = parse_tool.receive_from(self.hard_port)
         s_payload = self.scale_NAV_PVT(payload)
+        #print("PAyload of PVT",s_payload)
         return s_payload
 
     def hp_geo_coords(self):
@@ -324,6 +327,7 @@ class UbloxGps(object):
         parse_tool = core.Parser([sp.NAV_CLS])
         cls_name, msg_name, payload = parse_tool.receive_from(self.hard_port)
         s_payload = self.scale_NAV_PVT(payload)
+        print(s_payload)
         return s_payload
 
     def satellites(self):
@@ -338,8 +342,11 @@ class UbloxGps(object):
         self.send_message(sp.NAV_CLS, self.nav_ms.get('SAT'))
         parse_tool = core.Parser([sp.NAV_CLS])
         cls_name, msg_name, payload = parse_tool.receive_from(self.hard_port)
-        s_payload = self.scale_NAV_SAT(payload)
-        return s_payload
+        #print("Payload of satellite",payload)
+        #s_payload = self.scale_NAV_SAT(payload)
+        #print("Scaled payload",s_payload)
+        #return s_payload
+        return payload
 
     def veh_attitude(self):
         """
@@ -356,7 +363,7 @@ class UbloxGps(object):
         s_payload = self.scale_NAV_ATT(payload)
         return s_payload
 
-    def stream_nmea(self):
+    def stream_nmea(self,buff):
         """
         Reads directly from the module's data stream, by default this is NMEA
         data.
@@ -364,7 +371,110 @@ class UbloxGps(object):
         :return: Returns NMEA data.
         :rtype: string
         """
-        return self.hard_port.readline().decode('utf-8')
+        #return self.hard_port.read()
+        #print("type of hard port:",self.hard_port)
+        if isinstance(self.hard_port, sfeSpiWrapper):
+            sentence=self.hard_port.readbuffer(buff)
+        else:
+            #sentence=self.hard_port.readline().decode('utf-8')
+            sentence=self.readbuffer(buff)
+
+        return sentence
+        
+        
+    def readbuffer(self, buff):
+        """
+        Reads a byte or bytes of data from the SPI port. The bytes are
+        converted to a bytes object before being returned.
+
+        :return: The requested bytes
+        :rtype: bytes
+        
+        buffer = bytearray()
+        start_pattern=b"$"
+        end_pattern = b"\r\n"
+        count=0
+        #print("in serial readbuffer function")
+        #print("time before while",datetime.datetime.now())
+        while (count<buff):
+            data = self.hard_port.read(1)
+            
+            #
+            buffer.extend(data)
+            
+            if (data == b"\n"):
+                count =count+1
+                #print(buffer)
+        #print("time after while",datetime.datetime.now())
+        #print("print buffer:")
+        #print(buffer) 
+        #print("end print")       
+        start_idx = buffer.rfind(start_pattern)
+        #print("start_idx:",start_idx)
+        if start_idx != -1:  # Start pattern found
+            end_idx = buffer.find(end_pattern, start_idx)
+            if end_idx != -1:  # End pattern found
+                sentence = buffer[start_idx:end_idx + len(end_pattern)]
+                buffer = buffer[end_idx + len(end_pattern):]
+                #print( "sentence:", sentence)
+                #print("time sentence",datetime.datetime.now())
+                #print("buffer:",buffer)
+                
+                return sentence.decode('utf-8')  # Decode the bytes into a string
+                
+        """
+        count=0
+        buff=1
+        no_gps_count=0
+        buffer = bytearray()
+        start_pattern=b"$"
+        GGA_pattern = b"$GNGGA"
+        end_pattern = b"\r\n"
+
+        #print("UART read buffer function")
+        #print("time before while",datetime.datetime.now())
+        while (count<1):
+            data = self.hard_port.read(1)
+            #print("1 byte read from buffer:", data)       
+            #print("While loop")
+            '''
+            if (data == b"\n" ):
+                
+                if count>0:
+                    print("has poll all the data in buffer")
+                    break
+                else:
+                    no_gps_count=no_gps_count+1
+                    if no_gps_count>8:
+                        print("no gps data from buffer")
+                        return
+            else:
+                buffer.extend(data) 
+                if (data == [10]):
+                    count =count+1
+'''
+            buffer.extend(data)
+            
+            if (data == b"\n"):
+                count =count+1
+                #print(buffer)
+                    #print("count in while loop:",count)
+        #print("time after while",datetime.datetime.now())
+        #print("print buffer:",buffer)
+        if buff>1:
+            start_idx = buffer.rfind(GGA_pattern)
+        else:
+            start_idx = buffer.rfind(start_pattern)
+        #print("start_idx:",start_idx)
+        if start_idx != -1:  # Start pattern found
+            end_idx = buffer.find(end_pattern, start_idx)
+            if end_idx != -1:  # End pattern found
+                sentence = buffer[start_idx:end_idx + len(end_pattern)]
+                buffer = buffer[end_idx + len(end_pattern):]
+                #print( "sentence:", sentence)
+                #print("time sentence",datetime.datetime.now())
+                #print("buffer:",buffer)
+                return sentence.decode('utf-8')  # Decode the bytes into a string   
         
     def imu_alignment(self):
         """
@@ -839,14 +949,12 @@ class sfeSpiWrapper(object):
         #print("SPI PORT",self.spi_port)
         # For URCU
         self.spi_port.open(2,0) 
-        self.spi_port.max_speed_hz = 1000000 #Hz
-        
-        
+        self.spi_port.max_speed_hz =10000000 #7500000  #1000000 #Hz 7500000
         
         #self.spi_port.open(0,0) # This needs to be
         #self.spi_port.max_speed_hz = 5500 #Hz
         self.spi_port.mode = 0b00
-
+    
     def read(self, read_data = 1):
         """
         Reads a byte or bytes of data from the SPI port. The bytes are
@@ -857,10 +965,82 @@ class sfeSpiWrapper(object):
         """
 
         data = self.spi_port.readbytes(read_data)
+
         byte_data = bytes([])
         for d in data:
             byte_data = byte_data + bytes([d])
         return byte_data
+        #return data
+        
+    def readbuffer(self, buff):
+        """
+        Reads a byte or bytes of data from the SPI port. The bytes are
+        converted to a bytes object before being returned.
+
+        :return: The requested bytes
+        :rtype: bytes
+        """
+        count=0
+        no_gps_count=0
+        buffer = bytearray()
+        start_pattern=b"$"
+        GGA_pattern = b"$GNGGA"
+        end_pattern = b"\r\n"
+        """
+        while True:
+          data = self.spi_port.readbytes(read_data)
+          buffer.extend(data)
+          print(buffer)
+          start_idx = buffer.find(start_pattern)
+          print("start_idx:",start_idx)
+          if start_idx != -1:  # Start pattern found
+            end_idx = buffer.find(end_pattern, start_idx)
+            if end_idx != -1:  # End pattern found
+              sentence = buffer[start_idx:end_idx + len(end_pattern)]
+              buffer = buffer[end_idx + len(end_pattern):]
+              
+              return sentence.decode('utf-8')  # Decode the bytes into a string
+             """
+        #print("SPI read buffer function")
+        #print("time before while",datetime.datetime.now())
+        while (count<buff):
+            data = self.spi_port.readbytes(1)
+            #print("1 byte read from buffer:", data)       
+            #print("While loop")
+            if (data == [255] ):
+                
+                if count>0:
+                    #print("has poll all the data in buffer")
+                    break
+                else:
+                    no_gps_count=no_gps_count+1
+                    if no_gps_count>8:
+                        #print("no gps data from buffer")
+                        return
+            else:
+                buffer.extend(data) 
+                if (data == [10]):
+                    count =count+1
+
+            
+                    #print("count in while loop:",count)
+        #print("time after while",datetime.datetime.now())
+        #print("print buffer:",buffer)
+        if buff>1:
+            start_idx = buffer.rfind(GGA_pattern)
+        else:
+            start_idx = buffer.rfind(start_pattern)
+        #print("start_idx:",start_idx)
+        if start_idx != -1:  # Start pattern found
+            end_idx = buffer.find(end_pattern, start_idx)
+            if end_idx != -1:  # End pattern found
+                sentence = buffer[start_idx:end_idx + len(end_pattern)]
+                buffer = buffer[end_idx + len(end_pattern):]
+                #print( "sentence:", sentence)
+                #print("time sentence",datetime.datetime.now())
+                #print("buffer:",buffer)
+                return sentence.decode('utf-8')  # Decode the bytes into a string      
+
 
     def write(self, data):
         """

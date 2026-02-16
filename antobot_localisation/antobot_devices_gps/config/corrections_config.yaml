@@ -1,0 +1,26 @@
+### YAML file for the MQTT configuration
+
+ant_mqtt:
+  robot_ID: 'xxx'
+  baseStation_ID: 'xxx' #
+
+  mqtt_Broker: 'xxx'  
+  mqtt_Port: 0000
+  mqtt_keepalive: 60 
+  mqtt_UserName: 'xxx'
+  mqtt_PassWord: 'xxx'
+
+ntrip:
+  address: "ppntrip.services.u-blox.com"
+  port: 2101
+  username: "7z2EFM4VDWwO"
+  password: "CC2DnyWJyvhY"
+  mountpoint: "NEAR-SPARTN"
+  
+ppp:
+  device_ID: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' # Example - not a valid code
+
+
+
+
+
