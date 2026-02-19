@@ -17,14 +17,14 @@
 import os
 import time
 import yaml
-import paho.mqtt.client as mqtt
+#import paho.mqtt.client as mqtt
 import rospy, rospkg
 import importlib
 import serial
 import socket
 import base64
 from std_msgs.msg import  String
-from antobot_devices_msgs.msg import gpsQual
+#from antobot_devices_msgs.msg import gpsQual
 import threading
 
 
@@ -46,14 +46,21 @@ class gpsCorrections():
         self.count = 0
         self.running = True
         self.sent_time = rospy.Time.now()
+        GPIO = importlib.import_module("Jetson.GPIO") 
+        self.gpio01 = 29
+        self.GPIO = GPIO
+        self.GPIO.setmode(GPIO.BOARD)
+        self.GPIO.setup(self.gpio01, GPIO.OUT)
+        self.GPIO.output(self.gpio01, GPIO.HIGH)
         # Reading configuration file
         rospack = rospkg.RosPack()
         packagePath=rospack.get_path('antobot_description')
         path = packagePath + "/config/platform_config.yaml"
-        GPIO = importlib.import_module("Jetson.GPIO") 
+        
         dev_port = "/dev/ttyTHS0"
         baud = 460800
         self.serial_port = serial.Serial(port=dev_port, baudrate=baud)  #38400
+        print("done")
 
 
 
@@ -73,10 +80,7 @@ class gpsCorrections():
         # If the uRCU is being used, the appropriate GPIO pin must be set to "high" to enable corrections from Xavier 
         #if "urcu" in dev_type:
             # Set the GPIO pin of the URCU high
-        self.gpio01 = 29
-        self.GPIO = GPIO
-        self.GPIO.setmode(GPIO.BOARD)
-        self.GPIO.setup(self.gpio01, GPIO.OUT)
+        
         #self.GPIO.output(self.gpio01, GPIO.HIGH) # if need 20240424
 
 

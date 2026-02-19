@@ -531,20 +531,20 @@ def configure_f9p():
 
 
     rospack = rospkg.RosPack()
-    packagePath=rospack.get_path('antobot_description')
-    path = packagePath + "/config/platform_config.yaml"
+    #packagePath=rospack.get_path('antobot_description')
+    #path = packagePath + "/config/platform_config.yaml"
 
-    with open(path, 'r') as yamlfile:
-        data = yaml.safe_load(yamlfile)
-        dev_type = data['gps'].keys()
-
+    #with open(path, 'r') as yamlfile:
+    #    data = yaml.safe_load(yamlfile)
+    #    dev_type = data['gps'].keys()
+    dev_type = "urcu"
     # Base GPS configuration on platform configuration
     if "urcu" in dev_type :
         device = "spi"
     elif "f9p_usb" in dev_type:
         device = "uart"
 
-    moving_base = "movingbase" in dev_type      # Is dual-GPS being used?
+    moving_base = False #"movingbase" in dev_type      # Is dual-GPS being used?
     scout_box = False
 
     desired_messages = ['GST', 'VTG']
