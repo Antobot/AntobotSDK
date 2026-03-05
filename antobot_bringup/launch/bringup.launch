@@ -38,7 +38,7 @@
 
 	<!-- Camera Manager -->
 	<node if="false" pkg="antobot_datamanager" type="antobot_cam_mgr.py" name="antobot_cam_mgr" output="log"/>
-	<include if="true" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
+	<include if="false" file="$(find antobot_datamanager)/launch/cam_manager.launch" />
 
 	<!-- Move base -->
 	<include if="true" file="$(find antobot_navigation)/launch/move_base.launch" />

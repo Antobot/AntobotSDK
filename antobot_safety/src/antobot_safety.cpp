@@ -530,10 +530,11 @@ float AntobotSafety::calcVelScale()
     /*  Calculates the magnitude by which to scale the velocity of the robot based on which ultrasonic sensor
         has detected an obstacle, and how far away that obstacle is. */
     //  Returns: vel_scale <float> the scale (between 0 and 1) by which the velocity will be scaled
-    
-    float vel_scale = 0;
+    //Turn off scale for Lboro
+    float vel_scale = 1;
     
     // Scale movement based on distance to obstacle
+    /*
     if (force_stop_type > 0)
     {
         int uss_data = uss_dist_filt.data[force_stop_type - 1];
@@ -544,8 +545,9 @@ float AntobotSafety::calcVelScale()
             vel_scale = log10((uss_data-45)/6);
         if (vel_scale < 0)
             vel_scale = 0;
-
+    
     }
+    */
     return vel_scale;
 }
 

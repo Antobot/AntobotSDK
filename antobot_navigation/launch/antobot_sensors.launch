@@ -16,6 +16,6 @@
     <node if="true" pkg="antobot_devices_gps" type="gps_corrections.py" name="gps_correction" />
 
     <!-- BOSCH IMU launch -->
-    <include if="false" file="$(find imu_bno055)/launch/imu.launch" />
+    <include if="true" file="$(find imu_bno055)/launch/imu.launch" />
 
 </launch>
