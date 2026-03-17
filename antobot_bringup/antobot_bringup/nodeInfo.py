@@ -210,7 +210,7 @@ if auto_launch:
     nodeDict['amHeading']=AntobotSWNode("amHeading","antobot_heading","heading_node","SW106","/",[],"sensor", param_dict = {'use_sim_time': not robot_hardware})   ##comment out for sensor test Aug15
 
     if device_type == "robot":
-        launchDict['rosbridge_server']=Launchfile("rosbridgeServer","rosbridge_server","rosbridge_websocket_launch.xml")
+        #launchDict['rosbridge_server']=Launchfile("rosbridgeServer","rosbridge_server","rosbridge_websocket_launch.xml")
 
         if robot_hardware: # Software which relies on having robot hardware
             launchDict['statePublisherLaunch']=Launchfile("statePublisherLaunch", 'antobot_description', 'ant_v4_state_publisher.launch.py') # TODO: use robot_version (currently only ant v4)

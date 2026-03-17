@@ -14,11 +14,10 @@
 mileage_path: "/home/antobot/Documents/mileage/"
 log_path: "/home/antobot/Documents/data/logs"
 
-robot_hardware: False
+robot_hardware: True
 robot_platform: "ant"   # Could be "ant" or "dog"
 robot_version: 4
 robot_role: "UV"
-location: "uk"
 
 aRCU_enable: False
 isolated_cpu: False
@@ -27,22 +26,33 @@ isolated_cpu: False
 
 lidar:   # please refer to lidar_config_example.yaml in the same directory for lidar configuration examples.
   1:
-    type: cx
+    type: mid360
     px: 0.683
-    py: 0.088
-    pz: 0.75
+    py: 0.0
+    pz: 1.1
     r: 0
     p: 0
-    y: 2.35
+    y: 0
     mode: "navigation"
-    location: "front"
 
     device_ip: 192.168.1.200 
     device_id: 200 
+  2:
+    type: mid360
+    px: -0.683
+    py: 0.0
+    pz: 1.1
+    r: 0
+    p: 0
+    y: 0
+    mode: "navigation"
+
+    device_ip: 192.168.1.201 
+    device_id: 201
 
 gps:
   urcu:  #or f9p_usb or movingbase or urcu
-    px: 0.683
+    px: -0.683
     py: 0.08
     pz: 0.75
     r: 0
@@ -51,7 +61,14 @@ gps:
     mode: "navigation"
 
     device_port: "/dev/ttyTHS1"  #or /dev/ttyUSB* for basestation *new for urcu1.5: sudo busybox devmem 0x02430068 w 0x004
-    rtk_type: "ant_mqtt"   #ppp or ntrip or ant_mqtt
+    rtk_type: "ntrip"   #ppp or ntrip or ant_mqtt
+    
+  f9p_2:  # f9p_2
+    px: 0.683
+    py: 0.0
+    pz: 1.41
+
+    device_port: "/dev/anto_gps"
 
 
 imu:
@@ -75,5 +92,8 @@ imu:
     switch: False
   
 teleop:  
-  joystick: "LogitechF710"   # "LogitechF710", "Microzone6CMINI", "Pocket"
-  keyboard: True
+  joystick: "MicrozoneC7MINI"   # "LogitechF710", "MicrozoneC7MINI", "Pocket"
+  keyboard: False
+  
+router:
+  model: "RS800" # "RS800"
