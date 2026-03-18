@@ -89,7 +89,7 @@ imu:
     p: 0
     y: 0
     mode: "record"
-    switch: False
+    switch: True
   
 teleop:  
   joystick: "MicrozoneC7MINI"   # "LogitechF710", "MicrozoneC7MINI", "Pocket"

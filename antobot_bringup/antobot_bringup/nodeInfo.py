@@ -192,19 +192,19 @@ if auto_launch:
         nodeDict['antoHMI']=Node("antoHMI","antobot_hmi","anto_HMI","SW250","/",[],"system")
 
     if lidar_hardware:
-        nodeDict['lidarManager']=AntobotSWNode("lidarManager","antobot_devices_lidar","lidar_manager.py","SW232","/",[],"sensor", ssh=aRCU_ssh_list)
+        launchDict['dualMid360']=Launchfile("dualMid360Node","antobot_devices_lidar","mid360_common_launch.py")
 
     # Adding costmap launch script - need to update lidarManager (in ROS1, costmap was launched inside the lidarManager)
-    launchDict['costmapNode']=Launchfile("costmapNode", 'antobot_nav2_costmap', 'costmap_launch.py', ssh=aRCU_ssh_list) 
+    launchDict['costmapNode']=Launchfile("costmapNode", 'antobot_nav2_costmap', 'costmap_launch.py') 
 
     if sensor_hardware:
         launchDict['imuManager']=Launchfile("imuManager", 'antobot_devices_imu', 'imu.launch.py') 
         launchDict['gpsManager']=Launchfile("gpsManager","antobot_devices_gps","gps_f9p.launch.py")
-        
+        nodeDict['gpsCorrections']=AntobotSWNode("gpsCorrections", 'antobot_devices_gps', 'gps_corrections', "","sensor",[],"auto")
         if dual_gps:
             nodeDict['gpsMovingbase']=AntobotSWNode("gpsMovingbase", 'antobot_devices_gps', 'gps_movingbase', "","sensor",[],"auto", param_dict = {'use_sim_time': not robot_hardware, 'port_movingrover': port_movingrover, 'antenna_baseline': antenna_baseline})
-        else:
-            nodeDict['gpsCorrections']=AntobotSWNode("gpsCorrections", 'antobot_devices_gps', 'gps_corrections', "","sensor",[],"auto")
+        
+            
 
     #if device_type == "robot" or device_type == "tower":  ##comment out for sensor test Aug15
     nodeDict['amHeading']=AntobotSWNode("amHeading","antobot_heading","heading_node","SW106","/",[],"sensor", param_dict = {'use_sim_time': not robot_hardware})   ##comment out for sensor test Aug15
