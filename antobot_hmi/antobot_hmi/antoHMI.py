@@ -29,6 +29,7 @@ import serial
 import rclpy
 from rclpy.node import Node
 import time
+import threading
 import serial.tools.list_ports as ports
 from std_msgs.msg import Bool, UInt8,String,Float32, Int32
 from sensor_msgs.msg import NavSatFix
@@ -89,7 +90,7 @@ class HMIBridge(Node):
         #serial communication init
         self._primary_port_path = '/dev/anto_hmi_1'
         self._secondary_port_path = '/dev/anto_hmi_2'
-        self._enable_secondary_hmi = self.robot_role[:1].lower() != 's'
+        self._enable_secondary_hmi = True
         self.AdPort = self._open_serial(self._primary_port_path, "primary")
         self.AdPort2 = None
         if self._enable_secondary_hmi:
@@ -137,7 +138,7 @@ class HMIBridge(Node):
             return b''    
 
 
-def A2X_read(self): #read request
+    def A2X_read(self): #read request
         Ad_dataHead =b'3859'
         
         #while self.AdPort.in_waiting:
@@ -149,7 +150,7 @@ def A2X_read(self): #read request
                         A2X_data = self.AdPort.readline()
         #A2X_data = self._readline_if_available(self.AdPort, timeout=0.005)
                         if A2X_data:
-                            #print("port 1 data read:", A2X_data)
+                            print("port 1 data read:", A2X_data)
                             if A2X_data[0:4] == Ad_dataHead: # and len(A2X_data)==12):
                                 #print("Entering the OCR reception mode:")
                                 A2X_data = A2X_data.decode('utf-8')
@@ -269,7 +270,7 @@ def A2X_read(self): #read request
 
 
 
-     def A2X_checkCs(self,data):
+    def A2X_checkCs(self,data):
         """function to check if checksum is satisfied or not
         Args:
         data: data received from Arduino
@@ -366,6 +367,7 @@ def A2X_read(self): #read request
 
 
     def X2A_write(self): #send feedback, write
+        
         payload_parts = [
               f'{self.X2A_Header[0]:02x}',
               f'{self.X2A_Header[1]:02x}',
@@ -377,13 +379,13 @@ def A2X_read(self): #read request
         payload_prefix = ''.join(payload_parts)
         checksum_hex = self._x2a_ascii_lrc(payload_prefix)
         payload_hex = payload_prefix + checksum_hex + '\n'
-        #print("data write:",payload_hex)
+        print("data write:",payload_hex)
         payload_bytes = payload_hex.encode('utf-8')
         self._write_serial_async(payload_bytes)
         
 
 
-     def checksum(self, data: str) -> str:
+    def checksum(self, data: str) -> str:
         """ASCII-LRC: sum(payload ASCII) & 0xFF plus CS must equal 0xAA."""
         payload = data.strip()
         if len(payload) < 3:
@@ -511,7 +513,7 @@ def A2X_read(self): #read request
       #        value = float(linear_a) + decimal / 100.0
       #        return -value if is_negative else value
 
-     def loop(self,event=None):
+    def loop(self,event=None):
 
         #print("main loop")        
         self.ButtonPress()
