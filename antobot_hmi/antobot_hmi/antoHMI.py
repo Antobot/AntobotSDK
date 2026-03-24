@@ -34,6 +34,7 @@ import serial.tools.list_ports as ports
 from std_msgs.msg import Bool, UInt8,String,Float32, Int32
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
+from antobot_devices_msgs.msg import GpsQual
 
 
 class HMIBridge(Node):
@@ -64,12 +65,12 @@ class HMIBridge(Node):
         self.X2A_bPower = 0
         self.X2A_Header=[56,89] #int
         self.X2A_uBat = 100 #SoC
-        self.X2A_uPage = 0 #int
+        self.X2A_uPage = 2 #int
         #self.X2A_uSoc = 0 #int
         self.X2A_LinearA = 0 #int
         self.X2A_LinearB = 0 #int
-        self.X2A_uGPS = 0 #int
-        self.A2X_uPage = 0
+        self.X2A_uGPS = 3 #int
+        self.A2X_uPage = 2
         self.A2X_cs = 0
         self.data_decoded = []
         self.cs_status = False
@@ -103,7 +104,8 @@ class HMIBridge(Node):
         
         #ROS subscriber 
 
-        self.sub_GPS = self.create_subscription(NavSatFix, "/antobot_gps", self.gps_callback, 10)
+        #self.sub_GPS = self.create_subscription(NavSatFix, "/antobot_gps", self.gps_callback, 10)
+        self.sub_GPS_quality = self.create_subscription(GpsQual,"/antobot_gps/quality", self.gps_quality_callback,10)
         self.sub_cmd_vel = self.create_subscription(Twist,"/antobot/robot/cmd_vel",self.vel_callback,10)
         self.sub_soft_shutdown_button = self.create_subscription(Bool, '/antobridge/soft_shutdown_button', self.soft_shutdown_callback, 10)
         
@@ -425,13 +427,17 @@ class HMIBridge(Node):
                     
                     case self.poweroff1:
                         if self.button_sum ==100:   #yes
-                            self.pub_soft_shutdown_button.publish(1)
+                            msg = Bool()
+                            msg.data = True
+                            self.pub_soft_shutdown_button.publish(msg)
                             self.current_page = self.poweroff2
                         elif self.button_sum==1:
                             self.current_page = self.inoperation
             else:
                 if self.X2A_bPower == 1:
                     self.current_page=self.poweroff2
+                    
+        self.X2A_uPage = self.current_page
                 
         return
 
@@ -481,13 +487,18 @@ class HMIBridge(Node):
 
 
 
-    def gps_callback(self,data):
-        if data.status.status==1:
+    
+        
+    def gps_quality_callback(self,data):
+        if data.gps_qual_val==2:
           self.X2A_uGPS = 2
-        elif data.status.status==3:
+        elif data.gps_qual_val == 5:
           self.X2A_uGPS = 1
-        else:
+        elif data.gps_qual_val == 4:
           self.X2A_uGPS = 0
+        else:
+          self.X2A_uGPS = 3
+        print(" self.X2A_uGPS:", self.X2A_uGPS)
        
 
     def vel_callback(self,data):
